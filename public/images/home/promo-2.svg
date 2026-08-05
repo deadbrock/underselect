@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" fill="none">
+  <rect width="1200" height="600" fill="#F5F5F5"/>
+  <rect x="600" y="0" width="600" height="600" fill="#EBEBEB"/>
+  <rect x="100" y="250" width="400" height="100" fill="none" stroke="#B88A72" stroke-width="1"/>
+  <text x="300" y="310" text-anchor="middle" fill="#444444" font-family="system-ui,sans-serif" font-size="14" letter-spacing="0.25em">FRETE EXPRESSO</text>
+</svg>

@@ -1,0 +1,17 @@
+// =============================================================================
+// Prisma Schema — Underselect E-commerce Premium
+// Apenas configuração de infraestrutura. Modelos de negócio serão adicionados
+// futuramente na camada de domínio e refletidos aqui via migrations.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos de domínio serão adicionados via migrations conforme
+// funcionalidades forem implementadas na camada de domínio.

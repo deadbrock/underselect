@@ -1,0 +1,171 @@
+import {
+  MOCK_COUPONS,
+  DEFAULT_INSTALLMENT_COUNT,
+} from '@shared/constants/cart.constants';
+import type {
+  AppliedCoupon,
+  CartLineItem,
+  CartTotals,
+  CouponFeedback,
+  ShippingQuote,
+} from '@shared/types/cart.types';
+
+import { normalizeCep } from './cart.helpers';
+
+export function calculateCatalogDiscount(items: CartLineItem[]): number {
+  return items.reduce((acc, item) => {
+    if (!item.compareAtPrice || item.compareAtPrice <= item.price) return acc;
+    return acc + (item.compareAtPrice - item.price) * item.quantity;
+  }, 0);
+}
+
+export function calculateSubtotal(items: CartLineItem[]): number {
+  return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+}
+
+export function calculateItemCount(items: CartLineItem[]): number {
+  return items.reduce((acc, item) => acc + item.quantity, 0);
+}
+
+export function calculateCouponDiscount(
+  items: CartLineItem[],
+  subtotal: number,
+  coupon: AppliedCoupon | null,
+): number {
+  if (!coupon || subtotal <= 0) return 0;
+
+  switch (coupon.type) {
+    case 'percent':
+    case 'first-purchase':
+    case 'influencer':
+      return (subtotal * coupon.value) / 100;
+    case 'fixed':
+      return Math.min(subtotal, coupon.value);
+    case 'category': {
+      const categorySubtotal = items
+        .filter((item) => item.category === coupon.category)
+        .reduce((acc, item) => acc + item.price * item.quantity, 0);
+      return (categorySubtotal * coupon.value) / 100;
+    }
+    case 'free-shipping':
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+export function calculateShippingCost(
+  quote: ShippingQuote | null,
+  coupon: AppliedCoupon | null,
+): number {
+  if (!quote) return 0;
+  if (coupon?.type === 'free-shipping') return 0;
+  const selected = quote.options.find(
+    (option) => option.id === quote.selectedOptionId,
+  );
+  return selected?.price ?? 0;
+}
+
+export function calculateCartTotals(
+  items: CartLineItem[],
+  coupon: AppliedCoupon | null,
+  shippingQuote: ShippingQuote | null,
+): CartTotals {
+  const subtotal = calculateSubtotal(items);
+  const catalogDiscount = calculateCatalogDiscount(items);
+  const couponDiscount = calculateCouponDiscount(items, subtotal, coupon);
+  const shipping = calculateShippingCost(shippingQuote, coupon);
+  const total = Math.max(0, subtotal - couponDiscount + shipping);
+  const installmentCount =
+    items.reduce((max, item) => Math.max(max, item.installmentCount), 0) ||
+    DEFAULT_INSTALLMENT_COUNT;
+
+  return {
+    itemCount: calculateItemCount(items),
+    subtotal,
+    catalogDiscount,
+    couponDiscount,
+    shipping,
+    total,
+    installmentCount,
+    installmentValue: total / installmentCount,
+  };
+}
+
+export function resolveCoupon(code: string): {
+  coupon: AppliedCoupon | null;
+  feedback: CouponFeedback | null;
+} {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) {
+    return {
+      coupon: null,
+      feedback: { type: 'invalid', message: 'Informe um cupom válido.' },
+    };
+  }
+
+  const mock = MOCK_COUPONS[normalized];
+  if (!mock) {
+    return {
+      coupon: null,
+      feedback: { type: 'invalid', message: 'Cupom inválido ou inexistente.' },
+    };
+  }
+
+  if (mock.expired) {
+    return {
+      coupon: null,
+      feedback: { type: 'expired', message: 'Este cupom está expirado.' },
+    };
+  }
+
+  return {
+    coupon: {
+      code: mock.code,
+      type: mock.type,
+      value: mock.value,
+      label: mock.label,
+      category: mock.category,
+    },
+    feedback: {
+      type: 'success',
+      message: `Cupom ${mock.code} aplicado — ${mock.label}.`,
+    },
+  };
+}
+
+export function mockShippingQuote(cep: string): ShippingQuote | null {
+  const normalized = normalizeCep(cep);
+  if (normalized.length !== 8) return null;
+
+  return {
+    cep: normalized,
+    options: [
+      {
+        id: 'pac',
+        label: 'PAC',
+        days: '8 a 12 dias úteis',
+        price: 19.9,
+      },
+      {
+        id: 'sedex',
+        label: 'SEDEX',
+        days: '3 a 5 dias úteis',
+        price: 39.9,
+      },
+      {
+        id: 'express',
+        label: 'Expressa',
+        days: '1 a 2 dias úteis',
+        price: 59.9,
+      },
+      {
+        id: 'pickup',
+        label: 'Retirada',
+        days: 'Retire em loja parceira',
+        price: 0,
+      },
+    ],
+    selectedOptionId: 'pac',
+  };
+}

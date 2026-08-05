@@ -1,0 +1,84 @@
+/**
+ * UNDER SELECT — Design Tokens
+ * Moda Premium · Luxo Discreto · Minimalismo
+ */
+
+:root {
+  /* Brand palette */
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+  --brand-bronze: #b88a72;
+  --brand-bronze-light: #c9a088;
+  --brand-bronze-dark: #9a735f;
+  --brand-gray-900: #1e1e1e;
+  --brand-gray-600: #444444;
+  --brand-gray-400: #888888;
+  --brand-gray-100: #f5f5f5;
+
+  /* Semantic tokens — Light */
+  --background: var(--brand-white);
+  --foreground: var(--brand-black);
+  --card: var(--brand-white);
+  --card-foreground: var(--brand-black);
+  --popover: var(--brand-white);
+  --popover-foreground: var(--brand-black);
+  --primary: var(--brand-black);
+  --primary-foreground: var(--brand-white);
+  --secondary: var(--brand-gray-100);
+  --secondary-foreground: var(--brand-gray-900);
+  --muted: var(--brand-gray-100);
+  --muted-foreground: var(--brand-gray-600);
+  --accent: var(--brand-bronze);
+  --accent-foreground: var(--brand-white);
+  --destructive: #9b2c2c;
+  --destructive-foreground: var(--brand-white);
+  --border: #e8e8e8;
+  --input: #e8e8e8;
+  --ring: var(--brand-bronze);
+
+  /* Layout */
+  --radius: 0.125rem;
+  --header-height: 4rem;
+  --sidebar-width: 16rem;
+  --sidebar-width-collapsed: 4.5rem;
+  --bottom-nav-height: 4rem;
+
+  /* Typography */
+  --font-display: var(--font-geist-sans), system-ui, sans-serif;
+  --font-body: var(--font-geist-sans), system-ui, sans-serif;
+  --tracking-luxury: 0.2em;
+  --tracking-wide: 0.1em;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-luxury: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Shadows — sutis, discretas */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 4%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 6%);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+.dark {
+  --background: var(--brand-black);
+  --foreground: var(--brand-white);
+  --card: var(--brand-gray-900);
+  --card-foreground: var(--brand-white);
+  --popover: var(--brand-gray-900);
+  --popover-foreground: var(--brand-white);
+  --primary: var(--brand-white);
+  --primary-foreground: var(--brand-black);
+  --secondary: var(--brand-gray-900);
+  --secondary-foreground: var(--brand-white);
+  --muted: var(--brand-gray-900);
+  --muted-foreground: #aaaaaa;
+  --accent: var(--brand-bronze);
+  --accent-foreground: var(--brand-white);
+  --destructive: #c53030;
+  --destructive-foreground: var(--brand-white);
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 12%);
+  --ring: var(--brand-bronze);
+}

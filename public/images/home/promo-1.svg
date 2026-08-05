@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" fill="none">
+  <rect width="1200" height="600" fill="#1E1E1E"/>
+  <rect x="0" y="0" width="600" height="600" fill="#2A2420"/>
+  <text x="900" y="280" text-anchor="middle" fill="#B88A72" font-family="system-ui,sans-serif" font-size="48" font-weight="300">30%</text>
+  <text x="900" y="340" text-anchor="middle" fill="#888888" font-family="system-ui,sans-serif" font-size="12" letter-spacing="0.2em">SELE��O CURADA</text>
+</svg>

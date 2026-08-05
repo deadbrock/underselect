@@ -1,0 +1,99 @@
+import Link from 'next/link';
+import type { Route } from 'next';
+
+import { Separator } from '@presentation/components/ui';
+import { Container } from '@presentation/components/layout';
+import { NewsletterForm } from '@presentation/components/store/newsletter-form';
+import {
+  FOOTER_ACCOUNT,
+  FOOTER_INSTITUTIONAL,
+  FOOTER_POLICIES,
+  FOOTER_SUPPORT,
+  SOCIAL_LINKS,
+  STORE_NAME,
+} from '@shared/constants/store-navigation';
+
+interface FooterColumnProps {
+  title: string;
+  links: { label: string; href: Route | string }[];
+}
+
+function FooterColumn({ title, links }: FooterColumnProps) {
+  return (
+    <div>
+      <h3 className="text-label text-muted-foreground mb-4">{title}</h3>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.label}>
+            <Link
+              href={link.href as Route}
+              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function PublicFooter() {
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className="border-border bg-brand-gray-100 dark:bg-brand-gray-900 mt-auto border-t">
+      <Container className="py-12 md:py-16">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-3">
+            <Link
+              href="/"
+              className="text-foreground inline-block text-sm font-medium tracking-[0.25em] uppercase"
+            >
+              {STORE_NAME}
+            </Link>
+            <p className="text-muted-foreground mt-4 max-w-xs text-sm leading-relaxed">
+              Moda premium com elegância discreta. Peças atemporais para quem
+              valoriza qualidade e minimalismo.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-4">
+              {SOCIAL_LINKS.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-label text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {social.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-6">
+            <FooterColumn title="Institucional" links={FOOTER_INSTITUTIONAL} />
+            <FooterColumn title="Políticas" links={FOOTER_POLICIES} />
+            <FooterColumn title="Ajuda" links={FOOTER_SUPPORT} />
+            <FooterColumn title="Conta" links={FOOTER_ACCOUNT} />
+          </div>
+
+          <div className="lg:col-span-3">
+            <NewsletterForm />
+          </div>
+        </div>
+
+        <Separator className="my-8" />
+
+        <div className="text-muted-foreground flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            &copy; {year} {STORE_NAME}. Todos os direitos reservados.
+          </p>
+          <p className="tracking-wider uppercase">
+            CNPJ 00.000.000/0001-00 · São Paulo, Brasil
+          </p>
+        </div>
+      </Container>
+    </footer>
+  );
+}
