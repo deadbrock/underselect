@@ -19,7 +19,7 @@ export const STORE_LOGO = {
 } as const;
 
 export const PROMO_BAR = {
-  enabled: true,
+  enabled: false,
   message:
     'Frete grátis em compras acima de R$ 599 · Parcele em até 6x sem juros',
   href: '/promocoes' as Route,
@@ -79,13 +79,6 @@ export const MAIN_NAV: NavCategory[] = [
   },
 ];
 
-export const FOOTER_INSTITUTIONAL: NavLink[] = [
-  { label: 'Sobre a marca', href: '/contato' },
-  { label: 'Nossas lojas', href: '/contato' },
-  { label: 'Autenticidade', href: '/contato' },
-  { label: 'Trabalhe conosco', href: '/contato' },
-];
-
 export const FOOTER_POLICIES: NavLink[] = [
   { label: 'Política de privacidade', href: '/politica' },
   { label: 'Termos de uso', href: '/politica' },
@@ -103,14 +96,10 @@ export const FOOTER_ACCOUNT: NavLink[] = [
   { label: 'Minha conta', href: '/minha-conta' },
   { label: 'Meus pedidos', href: '/pedidos' },
   { label: 'Favoritos', href: '/favoritos' },
-  { label: 'Rastrear pedido', href: '/pedidos' },
 ];
 
 export const SOCIAL_LINKS = [
   { label: 'Instagram', href: 'https://instagram.com' },
-  { label: 'Pinterest', href: 'https://pinterest.com' },
-  { label: 'YouTube', href: 'https://youtube.com' },
-  { label: 'LinkedIn', href: 'https://linkedin.com' },
 ] as const;
 
 export const HEADER_ACTIONS = {

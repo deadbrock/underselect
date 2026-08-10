@@ -55,15 +55,6 @@ export interface HomeBenefitData {
   description: string;
 }
 
-export interface HomeInstitutionalData {
-  eyebrow: string;
-  title: string;
-  description: string;
-  cta: { label: string; href: Route | string };
-  imageUrl: string;
-  imageAlt: string;
-}
-
 export const HOME_HERO: HomeHeroData = {
   eyebrow: 'Temporada 2024/25',
   title: 'Vista a camisa do seu time',
@@ -320,22 +311,7 @@ export const HOME_PROMOTIONS: HomePromotionData[] = [
   },
 ];
 
-export const HOME_INSTITUTIONAL: HomeInstitutionalData = {
-  eyebrow: 'UNDER SELECT',
-  title: 'Paixão com autenticidade',
-  description:
-    'Somos especialistas em camisas de times e seleções. Curamos peças licenciadas, com tecido de alta performance e acabamento superior — para quem leva o manto a sério, dentro e fora do estádio.',
-  cta: { label: 'Explorar catálogo', href: '/categoria' },
-  imageUrl: '/images/home/logo-underselect.jpg',
-  imageAlt: 'Logo UNDER SELECT',
-};
-
 export const HOME_BENEFITS: HomeBenefitData[] = [
-  {
-    id: 'shipping',
-    title: 'Entrega rastreada',
-    description: 'Envio seguro para todo o Brasil com embalagem protegida.',
-  },
   {
     id: 'returns',
     title: 'Troca de tamanho',
@@ -344,11 +320,6 @@ export const HOME_BENEFITS: HomeBenefitData[] = [
   {
     id: 'payment',
     title: 'Parcelamento',
-    description: 'Até 6x sem juros nos cartões participantes.',
-  },
-  {
-    id: 'service',
-    title: 'Atendimento especializado',
-    description: 'Suporte para dúvidas sobre modelos, tamanhos e times.',
+    description: 'Até 2x sem juros.',
   },
 ];

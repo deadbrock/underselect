@@ -4,6 +4,5 @@ export { HomeHero } from './home-hero';
 export { HomeCategories } from './home-categories';
 export { HomeProductSection } from './home-product-section';
 export { HomePromotions } from './home-promotions';
-export { HomeInstitutionalBanner } from './home-institutional-banner';
 export { HomeBenefits } from './home-benefits';
 export { HomeNewsletter } from './home-newsletter';

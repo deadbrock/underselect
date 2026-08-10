@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: '%s | UNDER SELECT',
   },
   description:
-    'UNDER SELECT — Moda premium com elegância discreta e minimalismo sofisticado.',
+    'UNDER SELECT — Camisas esportivas de primeira linha. Clubes, seleções e edições premium.',
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   robots: { index: true, follow: true },
 };

@@ -3,7 +3,6 @@ import {
   HomeCategories,
   HomeProductSection,
   HomePromotions,
-  HomeInstitutionalBanner,
   HomeBenefits,
   HomeNewsletter,
 } from '@presentation/components/home';
@@ -59,8 +58,6 @@ export default function HomePage() {
       />
 
       <HomePromotions />
-
-      <HomeInstitutionalBanner />
 
       <HomeBenefits />
 

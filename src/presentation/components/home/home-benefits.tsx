@@ -1,4 +1,4 @@
-import { CreditCard, Headphones, RefreshCw, Truck } from 'lucide-react';
+import { CreditCard, RefreshCw } from 'lucide-react';
 
 import { Container } from '@presentation/components/layout';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
@@ -6,10 +6,8 @@ import { HomeSectionHeader } from '@presentation/components/home/home-section-he
 import { HOME_BENEFITS } from '@shared/mocks/home.data';
 
 const benefitIcons = {
-  shipping: Truck,
   returns: RefreshCw,
   payment: CreditCard,
-  service: Headphones,
 } as const;
 
 export function HomeBenefits() {
@@ -24,10 +22,11 @@ export function HomeBenefits() {
           />
         </MotionReveal>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2">
           {HOME_BENEFITS.map((benefit, index) => {
             const Icon =
-              benefitIcons[benefit.id as keyof typeof benefitIcons] ?? Truck;
+              benefitIcons[benefit.id as keyof typeof benefitIcons] ??
+              RefreshCw;
 
             return (
               <MotionReveal key={benefit.id} delay={index * 0.08}>

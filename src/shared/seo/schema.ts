@@ -11,11 +11,7 @@ export function createOrganizationSchema(): JsonLdObject {
     name: STORE_NAME,
     url: env.NEXT_PUBLIC_APP_URL,
     logo: `${env.NEXT_PUBLIC_APP_URL}/og-default.svg`,
-    sameAs: [
-      'https://instagram.com',
-      'https://pinterest.com',
-      'https://youtube.com',
-    ],
+    sameAs: ['https://instagram.com'],
   };
 }
 

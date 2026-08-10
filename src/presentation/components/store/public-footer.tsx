@@ -6,7 +6,6 @@ import { Container } from '@presentation/components/layout';
 import { NewsletterForm } from '@presentation/components/store/newsletter-form';
 import {
   FOOTER_ACCOUNT,
-  FOOTER_INSTITUTIONAL,
   FOOTER_POLICIES,
   FOOTER_SUPPORT,
   SOCIAL_LINKS,
@@ -53,8 +52,8 @@ export function PublicFooter() {
               {STORE_NAME}
             </Link>
             <p className="text-muted-foreground mt-4 max-w-xs text-sm leading-relaxed">
-              Moda premium com elegância discreta. Peças atemporais para quem
-              valoriza qualidade e minimalismo.
+              Camisas esportivas de primeira linha. Clubes, seleções e edições
+              especiais com acabamento premium para quem leva a paixão a sério.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               {SOCIAL_LINKS.map((social) => (
@@ -71,8 +70,7 @@ export function PublicFooter() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-6">
-            <FooterColumn title="Institucional" links={FOOTER_INSTITUTIONAL} />
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-6">
             <FooterColumn title="Políticas" links={FOOTER_POLICIES} />
             <FooterColumn title="Ajuda" links={FOOTER_SUPPORT} />
             <FooterColumn title="Conta" links={FOOTER_ACCOUNT} />
