@@ -1,13 +1,5 @@
-import {
-  AdminModulePage,
-  createAdminModuleMetadata,
-} from '@presentation/components/admin/admin-module-page';
-import { createPrivatePageMetadata } from '@shared/seo';
+import { redirect } from 'next/navigation';
 
-export const metadata = createPrivatePageMetadata(
-  createAdminModuleMetadata('influenciadores'),
-);
-
-export default function InfluenciadoresAdminPage() {
-  return <AdminModulePage moduleId="influenciadores" />;
+export default function InfluenciadoresRedirectPage() {
+  redirect('/admin/marketing/influenciadores');
 }

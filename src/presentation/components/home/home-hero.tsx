@@ -1,27 +1,21 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 
 import { Container } from '@presentation/components/layout';
 import { Button } from '@presentation/components/ui';
+import { HomeHeroCrests } from '@presentation/components/home/home-hero-crests';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
-import { HOME_HERO } from '@shared/mocks/home.data';
+import { HOME_HERO, HOME_HERO_CRESTS } from '@shared/mocks/home.data';
 
 export function HomeHero() {
   const hero = HOME_HERO;
 
   return (
     <section aria-label="Destaque principal" className="border-border border-b">
-      <div className="relative aspect-[4/5] w-full md:aspect-[21/9]">
-        <Image
-          src={hero.imageUrl}
-          alt={hero.imageAlt}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-black md:aspect-[21/9]">
+        <HomeHeroCrests crests={HOME_HERO_CRESTS} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black from-35% via-black/55 to-black/20" />
+        <div className="absolute inset-0 max-w-2xl bg-gradient-to-r from-black/90 via-black/45 to-transparent" />
 
         <Container className="absolute inset-0 flex flex-col justify-end pb-10 md:pb-16">
           <MotionReveal className="max-w-xl space-y-5">

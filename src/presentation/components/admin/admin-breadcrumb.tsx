@@ -5,6 +5,8 @@ import { memo, useMemo } from 'react';
 
 import { Breadcrumb, type BreadcrumbItem } from '@presentation/components/ui';
 import { ADMIN_MODULE_META } from '@shared/constants/admin.constants';
+import { CUSTOMER_NAV_ITEMS } from '@shared/constants/customer-admin.constants';
+import { MARKETING_NAV_ITEMS } from '@shared/constants/marketing-admin.constants';
 import { ORDER_NAV_ITEMS } from '@shared/constants/order-admin.constants';
 import { STOCK_NAV_ITEMS } from '@shared/constants/stock.constants';
 
@@ -86,6 +88,69 @@ export const AdminBreadcrumb = memo(function AdminBreadcrumb({
         const segments = pathname.split('/');
         const last = segments[segments.length - 1];
         if (last && last !== 'pedidos' && last !== 'lista') {
+          crumbs.push({ label: 'Detalhes' });
+        }
+      }
+      return crumbs;
+    }
+
+    const customersMeta = ADMIN_MODULE_META.clientes;
+    const isCustomersSection =
+      pathname === customersMeta.path ||
+      pathname.startsWith(`${customersMeta.path}/`);
+
+    if (isCustomersSection) {
+      crumbs.push({ label: 'Clientes', href: customersMeta.path });
+      const sub = CUSTOMER_NAV_ITEMS.find(
+        (item) =>
+          pathname === item.href ||
+          (item.href !== customersMeta.path && pathname.startsWith(item.href)),
+      );
+      if (sub && sub.href !== customersMeta.path) {
+        crumbs.push({ label: sub.label });
+      } else if (
+        pathname !== customersMeta.path &&
+        pathname !== `${customersMeta.path}/lista` &&
+        !pathname.endsWith('/lista')
+      ) {
+        const segments = pathname.split('/');
+        const last = segments[segments.length - 1];
+        if (last && last !== 'clientes' && last !== 'lista') {
+          crumbs.push({ label: 'Perfil' });
+        }
+      }
+      return crumbs;
+    }
+
+    const isMarketingSection =
+      pathname === '/admin/marketing' ||
+      pathname.startsWith('/admin/marketing/');
+
+    if (isMarketingSection) {
+      crumbs.push({ label: 'Marketing', href: '/admin/marketing' });
+      const sub = MARKETING_NAV_ITEMS.find(
+        (item) =>
+          pathname === item.href ||
+          (item.href !== '/admin/marketing' && pathname.startsWith(item.href)),
+      );
+      if (sub && sub.href !== '/admin/marketing') {
+        crumbs.push({ label: sub.label });
+      } else if (pathname.includes('/novo') || pathname.includes('/editar')) {
+        crumbs.push({
+          label: pathname.includes('/novo') ? 'Novo' : 'Editar',
+        });
+      } else if (
+        pathname !== '/admin/marketing' &&
+        !pathname.includes('/relatorios')
+      ) {
+        const segments = pathname.split('/');
+        const last = segments[segments.length - 1];
+        if (
+          last &&
+          !['marketing', 'influenciadores', 'campanhas', 'cupons'].includes(
+            last,
+          )
+        ) {
           crumbs.push({ label: 'Detalhes' });
         }
       }

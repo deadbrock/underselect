@@ -17,13 +17,13 @@ export function HomeInstitutionalBanner() {
     >
       <Container className="py-12 md:py-20">
         <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
-          <MotionReveal className="relative aspect-[4/5] overflow-hidden md:aspect-[3/4]">
+          <MotionReveal className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-black md:aspect-[3/4]">
             <Image
               src={data.imageUrl}
               alt={data.imageAlt}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className="object-contain p-8 md:p-12"
             />
           </MotionReveal>
 

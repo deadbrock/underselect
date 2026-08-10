@@ -1,13 +1,5 @@
-import {
-  AdminModulePage,
-  createAdminModuleMetadata,
-} from '@presentation/components/admin/admin-module-page';
-import { createPrivatePageMetadata } from '@shared/seo';
+import { redirect } from 'next/navigation';
 
-export const metadata = createPrivatePageMetadata(
-  createAdminModuleMetadata('cupons'),
-);
-
-export default function CuponsAdminPage() {
-  return <AdminModulePage moduleId="cupons" />;
+export default function CuponsRedirectPage() {
+  redirect('/admin/marketing/cupons');
 }

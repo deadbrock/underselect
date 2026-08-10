@@ -17,8 +17,8 @@ export function HomeNewsletter() {
                 Fique por dentro
               </h2>
               <p className="text-background/70 text-sm leading-relaxed">
-                Lançamentos exclusivos, convites para eventos privados e
-                editorial de moda direto no seu e-mail.
+                Lançamentos de camisas, promoções de clubes e novidades de
+                seleções direto no seu e-mail.
               </p>
             </div>
             <NewsletterForm className="[&_input]:border-background/20 [&_input]:bg-background/10 [&_input]:text-background [&_input]:placeholder:text-background/50 text-left" />

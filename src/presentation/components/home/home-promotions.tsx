@@ -5,8 +5,10 @@ import type { Route } from 'next';
 import { Container } from '@presentation/components/layout';
 import { Badge, Button } from '@presentation/components/ui';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
+import { HomePromotionFlags } from '@presentation/components/home/home-promotion-flags';
 import { HomeSectionHeader } from '@presentation/components/home/home-section-header';
 import { HOME_PROMOTIONS } from '@shared/mocks/home.data';
+import { cn } from '@shared/utils/cn';
 
 export function HomePromotions() {
   return (
@@ -15,9 +17,9 @@ export function HomePromotions() {
         <MotionReveal>
           <HomeSectionHeader
             eyebrow="Promoções"
-            title="Ofertas selecionadas"
-            description="Benefícios exclusivos por tempo limitado."
-            href="/categoria"
+            title="Destaques do catálogo"
+            description="Clubes brasileiros e seleções em evidência."
+            href="/promocoes"
             linkLabel="Ver promoções"
           />
         </MotionReveal>
@@ -30,13 +32,29 @@ export function HomePromotions() {
                 className="group border-border relative block overflow-hidden border"
               >
                 <div className="relative aspect-[16/9] md:aspect-[2/1]">
-                  <Image
-                    src={promo.imageUrl}
-                    alt={promo.imageAlt}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+                  {promo.flags ? (
+                    <div className="bg-brand-gray-900 absolute inset-0">
+                      <div
+                        className={cn(
+                          'absolute inset-0 bg-gradient-to-br',
+                          promo.highlightGradient ??
+                            'from-black/60 via-black/70 to-black/60',
+                        )}
+                      />
+                      <HomePromotionFlags
+                        flags={promo.flags}
+                        display={promo.flagDisplay ?? 'banner'}
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src={promo.imageUrl}
+                      alt={promo.imageAlt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/40 transition-colors group-hover:bg-black/50" />
                   <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
                     {promo.badge ? (

@@ -11,6 +11,13 @@ export interface NavCategory extends NavLink {
 
 export const STORE_NAME = 'UNDER SELECT';
 
+export const STORE_LOGO = {
+  src: '/images/home/logo-underselect.jpg',
+  alt: 'UNDER SELECT',
+  width: 400,
+  height: 172,
+} as const;
+
 export const PROMO_BAR = {
   enabled: true,
   message:

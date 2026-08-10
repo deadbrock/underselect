@@ -59,7 +59,6 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     children: [
       { label: 'Pedidos', href: '/admin/pedidos', moduleId: 'pedidos' },
       { label: 'Clientes', href: '/admin/clientes', moduleId: 'clientes' },
-      { label: 'Cupons', href: '/admin/cupons', moduleId: 'cupons' },
     ],
   },
   {
@@ -76,15 +75,31 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
     label: 'Marketing',
     children: [
+      { label: 'Resumo', href: '/admin/marketing', moduleId: 'cupons' },
       {
         label: 'Influenciadores',
-        href: '/admin/influenciadores',
+        href: '/admin/marketing/influenciadores',
         moduleId: 'influenciadores',
       },
       {
         label: 'Campanhas',
-        href: '/admin/campanhas',
+        href: '/admin/marketing/campanhas',
         moduleId: 'campanhas',
+      },
+      {
+        label: 'Cupons',
+        href: '/admin/marketing/cupons',
+        moduleId: 'cupons',
+      },
+      {
+        label: 'Rel. Cupons',
+        href: '/admin/marketing/relatorios/cupons',
+        moduleId: 'cupons',
+      },
+      {
+        label: 'Rel. Influenciadores',
+        href: '/admin/marketing/relatorios/influenciadores',
+        moduleId: 'influenciadores',
       },
       { label: 'Banners', href: '/admin/banners', moduleId: 'banners' },
     ],
@@ -171,21 +186,21 @@ export const ADMIN_MODULE_META: Record<AdminModuleId, AdminModuleMeta> = {
     id: 'cupons',
     title: 'Cupons',
     description: 'Crie e gerencie cupons de desconto.',
-    path: '/admin/cupons',
+    path: '/admin/marketing/cupons',
     singularLabel: 'cupom',
   },
   influenciadores: {
     id: 'influenciadores',
     title: 'Influenciadores',
     description: 'Gerencie parcerias e comissões.',
-    path: '/admin/influenciadores',
+    path: '/admin/marketing/influenciadores',
     singularLabel: 'influenciador',
   },
   campanhas: {
     id: 'campanhas',
     title: 'Campanhas',
     description: 'Campanhas de marketing e promoções.',
-    path: '/admin/campanhas',
+    path: '/admin/marketing/campanhas',
     singularLabel: 'campanha',
   },
   banners: {

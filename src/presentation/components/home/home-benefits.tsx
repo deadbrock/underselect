@@ -19,8 +19,8 @@ export function HomeBenefits() {
         <MotionReveal>
           <HomeSectionHeader
             eyebrow="Benefícios"
-            title="Experiência premium"
-            description="Cuidado em cada etapa da sua jornada conosco."
+            title="Compre com confiança"
+            description="Tudo pensado para quem compra camisa de time."
           />
         </MotionReveal>
 

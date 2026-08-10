@@ -21,7 +21,7 @@ import {
 export const metadata = createPageMetadata({
   title: 'Início',
   description:
-    'UNDER SELECT — Moda premium com elegância discreta. Descubra peças atemporais de alta qualidade.',
+    'UNDER SELECT — Camisas oficiais de clubes brasileiros, seleções nacionais, retrô e casual esportiva.',
   path: '/',
 });
 
@@ -33,7 +33,8 @@ export default function HomePage() {
           createWebSiteSchema(),
           createWebPageSchema({
             name: 'Início',
-            description: 'UNDER SELECT — Moda premium com elegância discreta.',
+            description:
+              'UNDER SELECT — Conforto, estilo e qualidade para você.',
             path: '/',
           }),
         ]}
@@ -45,15 +46,15 @@ export default function HomePage() {
 
       <HomeProductSection
         eyebrow="Destaques"
-        title="Seleção curada"
-        description="Peças essenciais escolhidas pela nossa equipe de estilo."
+        title="Mais vendidas"
+        description="Camisas de clubes e seleções que lideram os acessos."
         products={HOME_FEATURED_PRODUCTS}
       />
 
       <HomeProductSection
         eyebrow="Novidades"
         title="Lançamentos da temporada"
-        description="As últimas adições à coleção UNDER SELECT."
+        description="Novos modelos de times e seleções recém-chegados."
         products={HOME_NEW_ARRIVALS}
       />
 

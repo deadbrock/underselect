@@ -1,5 +1,6 @@
 export { PromoBar, type PromoBarProps } from './promo-bar';
 export { PublicHeader } from './public-header';
+export { StoreLogo } from './store-logo';
 export { PublicFooter } from './public-footer';
 export { MobileNavDrawer } from './mobile-nav-drawer';
 export { CategoryDropdown } from './category-dropdown';

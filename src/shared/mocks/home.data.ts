@@ -1,6 +1,8 @@
 import type { Route } from 'next';
 
 import type { ProductCardData } from '@presentation/components/product';
+import type { CatalogProduct } from './catalog.types';
+import { CATALOG_PRODUCTS } from './catalog.utils';
 
 export interface HomeHeroData {
   eyebrow: string;
@@ -8,6 +10,11 @@ export interface HomeHeroData {
   subtitle: string;
   ctaPrimary: { label: string; href: Route | string };
   ctaSecondary: { label: string; href: Route | string };
+}
+
+export interface HomeHeroCrest {
+  id: string;
+  label: string;
   imageUrl: string;
   imageAlt: string;
 }
@@ -29,6 +36,17 @@ export interface HomePromotionData {
   href: Route | string;
   imageUrl: string;
   imageAlt: string;
+  flags?: HomePromotionFlag[];
+  flagDisplay?: 'banner' | 'crest';
+  highlightGradient?: string;
+}
+
+export interface HomePromotionFlag {
+  id: string;
+  label: string;
+  imageUrl: string;
+  imageAlt: string;
+  featured?: boolean;
 }
 
 export interface HomeBenefitData {
@@ -47,168 +65,281 @@ export interface HomeInstitutionalData {
 }
 
 export const HOME_HERO: HomeHeroData = {
-  eyebrow: 'Coleção Outono · Inverno 2026',
-  title: 'Elegância em cada detalhe',
+  eyebrow: 'Temporada 2024/25',
+  title: 'Vista a camisa do seu time',
   subtitle:
-    'Peças atemporais com corte impecável e materiais selecionados. Luxo discreto para o guarda-roupa contemporâneo.',
-  ctaPrimary: { label: 'Explorar coleção', href: '/categoria' },
-  ctaSecondary: { label: 'Novidades', href: '/categoria' },
-  imageUrl: '/images/home/hero.svg',
-  imageAlt: 'Modelo usando look premium UNDER SELECT',
+    'Camisas oficiais de clubes brasileiros, seleções nacionais e edições retrô. Acabamento premium, tecido de performance e identidade de torcedor.',
+  ctaPrimary: {
+    label: 'Ver clubes brasileiros',
+    href: '/categoria/clubes-brasileiros',
+  },
+  ctaSecondary: { label: 'Seleções', href: '/categoria/selecoes' },
 };
+
+export const HOME_HERO_CRESTS: HomeHeroCrest[] = [
+  {
+    id: 'palmeiras',
+    label: 'Palmeiras',
+    imageUrl: '/images/clubs/palmeiras.svg',
+    imageAlt: 'Escudo do Palmeiras',
+  },
+  {
+    id: 'corinthians',
+    label: 'Sport Club Corinthians Paulista',
+    imageUrl: '/images/clubs/corinthians.svg',
+    imageAlt: 'Escudo do Sport Club Corinthians Paulista',
+  },
+  {
+    id: 'flamengo',
+    label: 'Clube de Regatas do Flamengo',
+    imageUrl: '/images/clubs/flamengo.svg',
+    imageAlt: 'Escudo do Clube de Regatas do Flamengo',
+  },
+  {
+    id: 'vasco',
+    label: 'Vasco da Gama',
+    imageUrl: '/images/clubs/vasco.svg',
+    imageAlt: 'Escudo do Vasco da Gama',
+  },
+  {
+    id: 'cruzeiro',
+    label: 'Cruzeiro',
+    imageUrl: '/images/clubs/cruzeiro.svg',
+    imageAlt: 'Escudo do Cruzeiro',
+  },
+  {
+    id: 'real-madrid',
+    label: 'Real Madrid',
+    imageUrl: '/images/clubs/real-madrid.svg',
+    imageAlt: 'Escudo do Real Madrid',
+  },
+  {
+    id: 'barcelona',
+    label: 'Barcelona',
+    imageUrl: '/images/clubs/barcelona.svg',
+    imageAlt: 'Escudo do Barcelona',
+  },
+  {
+    id: 'arsenal',
+    label: 'Arsenal',
+    imageUrl: '/images/clubs/arsenal.svg',
+    imageAlt: 'Escudo do Arsenal',
+  },
+  {
+    id: 'chelsea',
+    label: 'Chelsea',
+    imageUrl: '/images/clubs/chelsea.svg',
+    imageAlt: 'Escudo do Chelsea',
+  },
+  {
+    id: 'brasil',
+    label: 'Brasil',
+    imageUrl: '/images/nations/brasil.svg',
+    imageAlt: 'Escudo da Seleção Brasileira',
+  },
+  {
+    id: 'argentina',
+    label: 'Argentina',
+    imageUrl: '/images/nations/argentina.svg',
+    imageAlt: 'Escudo da Seleção Argentina',
+  },
+  {
+    id: 'estados-unidos',
+    label: 'Estados Unidos',
+    imageUrl: '/images/nations/estados-unidos.svg',
+    imageAlt: 'Escudo da Seleção dos Estados Unidos',
+  },
+  {
+    id: 'portugal',
+    label: 'Portugal',
+    imageUrl: '/images/nations/portugal.svg',
+    imageAlt: 'Escudo da Seleção Portuguesa',
+  },
+  {
+    id: 'espanha',
+    label: 'Espanha',
+    imageUrl: '/images/nations/espanha.svg',
+    imageAlt: 'Escudo da Seleção Espanhola',
+  },
+  {
+    id: 'inglaterra',
+    label: 'Inglaterra',
+    imageUrl: '/images/nations/inglaterra.svg',
+    imageAlt: 'Escudo da Seleção Inglesa',
+  },
+  {
+    id: 'italia',
+    label: 'Itália',
+    imageUrl: '/images/nations/italia.svg',
+    imageAlt: 'Escudo da Seleção Italiana',
+  },
+  {
+    id: 'alemanha',
+    label: 'Alemanha',
+    imageUrl: '/images/nations/alemanha.svg',
+    imageAlt: 'Escudo da Seleção Alemã',
+  },
+  {
+    id: 'franca',
+    label: 'França',
+    imageUrl: '/images/nations/franca.svg',
+    imageAlt: 'Escudo da Seleção Francesa',
+  },
+];
 
 export const HOME_CATEGORIES: HomeCategoryData[] = [
   {
-    id: 'feminino',
-    name: 'Feminino',
-    description: 'Silhuetas refinadas',
-    href: '/categoria',
-    imageUrl: '/images/home/category-feminino.svg',
-    imageAlt: 'Categoria Feminino',
+    id: 'clubes-brasileiros',
+    name: 'Clubes Brasileiros',
+    description: 'Flamengo, Palmeiras, Corinthians e mais',
+    href: '/categoria/clubes-brasileiros',
+    imageUrl: '/images/catalog/product-1.svg',
+    imageAlt: 'Camisas de clubes brasileiros',
   },
   {
-    id: 'masculino',
-    name: 'Masculino',
-    description: 'Essencialismo moderno',
-    href: '/categoria',
-    imageUrl: '/images/home/category-masculino.svg',
-    imageAlt: 'Categoria Masculino',
+    id: 'selecoes',
+    name: 'Seleções',
+    description: 'Brasil, Argentina, Portugal e outras',
+    href: '/categoria/selecoes',
+    imageUrl: '/images/catalog/product-2.svg',
+    imageAlt: 'Camisas de seleções nacionais',
   },
   {
-    id: 'acessorios',
-    name: 'Acessórios',
-    description: 'Detalhes que definem',
-    href: '/categoria',
-    imageUrl: '/images/home/category-acessorios.svg',
-    imageAlt: 'Categoria Acessórios',
+    id: 'retro',
+    name: 'Retrô',
+    description: 'Clássicos que marcaram gerações',
+    href: '/categoria/retro',
+    imageUrl: '/images/catalog/product-3.svg',
+    imageAlt: 'Camisas retrô',
   },
   {
-    id: 'novidades',
-    name: 'Novidades',
-    description: 'Lançamentos exclusivos',
-    href: '/categoria',
-    imageUrl: '/images/home/category-novidades.svg',
-    imageAlt: 'Categoria Novidades',
+    id: 'casual-esportiva',
+    name: 'Casual Esportiva',
+    description: 'Estilo lifestyle com identidade esportiva',
+    href: '/categoria/casual-esportiva',
+    imageUrl: '/images/catalog/product-4.svg',
+    imageAlt: 'Casual esportiva',
   },
 ];
 
-export const HOME_FEATURED_PRODUCTS: ProductCardData[] = [
-  {
-    id: 'f1',
-    name: 'Blazer Estruturado Lã',
-    slug: 'blazer-estruturado-la',
-    price: 1890,
-    imageUrl: '/images/home/product-1.svg',
-    imageAlt: 'Blazer Estruturado Lã',
-    badge: 'Destaque',
-  },
-  {
-    id: 'f2',
-    name: 'Vestido Midi Seda',
-    slug: 'vestido-midi-seda',
-    price: 2490,
-    compareAtPrice: 2790,
-    imageUrl: '/images/home/product-2.svg',
-    imageAlt: 'Vestido Midi Seda',
-  },
-  {
-    id: 'f3',
-    name: 'Camisa Algodão Egípcio',
-    slug: 'camisa-algodao-egipcio',
-    price: 690,
-    imageUrl: '/images/home/product-3.svg',
-    imageAlt: 'Camisa Algodão Egípcio',
-  },
-  {
-    id: 'f4',
-    name: 'Casaco Cashmere',
-    slug: 'casaco-cashmere',
-    price: 3290,
-    imageUrl: '/images/home/product-4.svg',
-    imageAlt: 'Casaco Cashmere',
-    badge: 'Exclusivo',
-  },
-];
+const SHIRT_TYPES = new Set([
+  'camisa-clube',
+  'camisa-selecao',
+  'camisa-retro',
+  'casual-esportiva',
+]);
 
-export const HOME_NEW_ARRIVALS: ProductCardData[] = [
-  {
-    id: 'n1',
-    name: 'Calça Wide Leg Linho',
-    slug: 'calca-wide-leg-linho',
-    price: 890,
-    imageUrl: '/images/home/product-5.svg',
-    imageAlt: 'Calça Wide Leg Linho',
-    isNew: true,
-  },
-  {
-    id: 'n2',
-    name: 'Bolsa Couro Italiano',
-    slug: 'bolsa-couro-italiano',
-    price: 2190,
-    imageUrl: '/images/home/product-6.svg',
-    imageAlt: 'Bolsa Couro Italiano',
-    isNew: true,
-  },
-  {
-    id: 'n3',
-    name: 'Trench Coat Clássico',
-    slug: 'trench-coat-classico',
-    price: 2790,
-    imageUrl: '/images/home/product-7.svg',
-    imageAlt: 'Trench Coat Clássico',
-    isNew: true,
-  },
-  {
-    id: 'n4',
-    name: 'Óculos Acetato',
-    slug: 'oculos-acetato',
-    price: 990,
-    imageUrl: '/images/home/product-8.svg',
-    imageAlt: 'Óculos Acetato',
-    isNew: true,
-  },
-];
+function toProductCard(product: CatalogProduct): ProductCardData {
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    imageUrl: product.imageUrl,
+    imageAlt: product.imageAlt,
+    badge: product.badge,
+    isNew: product.isNew,
+  };
+}
+
+export const HOME_FEATURED_PRODUCTS: ProductCardData[] =
+  CATALOG_PRODUCTS.filter((p) => p.isBestSeller && SHIRT_TYPES.has(p.type))
+    .slice(0, 4)
+    .map(toProductCard);
+
+export const HOME_NEW_ARRIVALS: ProductCardData[] = CATALOG_PRODUCTS.filter(
+  (p) => p.isNew && SHIRT_TYPES.has(p.type),
+)
+  .slice(0, 4)
+  .map(toProductCard);
 
 export const HOME_PROMOTIONS: HomePromotionData[] = [
   {
     id: 'promo-1',
-    title: 'Até 30% off',
-    subtitle: 'Seleção curada de peças da temporada anterior',
-    badge: 'Promoção',
-    href: '/categoria',
-    imageUrl: '/images/home/promo-1.svg',
-    imageAlt: 'Promoção seleção curada',
+    title: 'Clubes brasileiros',
+    subtitle: 'Flamengo, Corinthians, Palmeiras e os maiores do Brasil',
+    badge: 'Destaque',
+    href: '/categoria/clubes-brasileiros',
+    imageUrl: '/images/catalog/product-5.svg',
+    imageAlt: 'Promoção camisas de clubes brasileiros',
+    flagDisplay: 'crest',
+    highlightGradient: 'from-red-900/50 via-black/70 to-green-900/45',
+    flags: [
+      {
+        id: 'flamengo',
+        label: 'Flamengo',
+        imageUrl: '/images/clubs/flamengo.svg',
+        imageAlt: 'Escudo do Flamengo',
+      },
+      {
+        id: 'corinthians',
+        label: 'Corinthians',
+        imageUrl: '/images/clubs/corinthians.svg',
+        imageAlt: 'Escudo do Corinthians',
+        featured: true,
+      },
+      {
+        id: 'palmeiras',
+        label: 'Palmeiras',
+        imageUrl: '/images/clubs/palmeiras.svg',
+        imageAlt: 'Escudo do Palmeiras',
+      },
+    ],
   },
   {
     id: 'promo-2',
-    title: 'Frete expresso grátis',
-    subtitle: 'Em compras acima de R$ 599 para todo o Brasil',
-    href: '/categoria',
-    imageUrl: '/images/home/promo-2.svg',
-    imageAlt: 'Frete expresso grátis',
+    title: 'Seleções nacionais',
+    subtitle: 'Brasil, Argentina, Portugal e edições limitadas',
+    href: '/categoria/selecoes',
+    imageUrl: '/images/catalog/product-6.svg',
+    imageAlt: 'Camisas de seleções nacionais',
+    flagDisplay: 'banner',
+    highlightGradient: 'from-[#002776]/40 via-black/60 to-[#006600]/30',
+    flags: [
+      {
+        id: 'argentina',
+        label: 'Argentina',
+        imageUrl: '/images/flags/argentina.svg',
+        imageAlt: 'Bandeira da Argentina',
+      },
+      {
+        id: 'brasil',
+        label: 'Brasil',
+        imageUrl: '/images/flags/brasil.svg',
+        imageAlt: 'Bandeira do Brasil',
+        featured: true,
+      },
+      {
+        id: 'portugal',
+        label: 'Portugal',
+        imageUrl: '/images/flags/portugal.svg',
+        imageAlt: 'Bandeira de Portugal',
+      },
+    ],
   },
 ];
 
 export const HOME_INSTITUTIONAL: HomeInstitutionalData = {
-  eyebrow: 'A marca',
-  title: 'Crafted with intention',
+  eyebrow: 'UNDER SELECT',
+  title: 'Paixão com autenticidade',
   description:
-    'Na UNDER SELECT, cada peça nasce de um processo cuidadoso de curadoria. Trabalhamos com ateliês selecionados, materiais nobres e design atemporal — porque luxo verdadeiro não precisa gritar.',
-  cta: { label: 'Conheça nossa história', href: '/contato' },
-  imageUrl: '/images/home/institutional.svg',
-  imageAlt: 'Atelier UNDER SELECT',
+    'Somos especialistas em camisas de times e seleções. Curamos peças licenciadas, com tecido de alta performance e acabamento superior — para quem leva o manto a sério, dentro e fora do estádio.',
+  cta: { label: 'Explorar catálogo', href: '/categoria' },
+  imageUrl: '/images/home/logo-underselect.jpg',
+  imageAlt: 'Logo UNDER SELECT',
 };
 
 export const HOME_BENEFITS: HomeBenefitData[] = [
   {
     id: 'shipping',
-    title: 'Frete premium',
-    description: 'Entrega rastreada com embalagem exclusiva.',
+    title: 'Entrega rastreada',
+    description: 'Envio seguro para todo o Brasil com embalagem protegida.',
   },
   {
     id: 'returns',
-    title: 'Trocas facilitadas',
-    description: '30 dias para trocas e devoluções sem burocracia.',
+    title: 'Troca de tamanho',
+    description: 'Facilidade para trocar camisas que não serviram.',
   },
   {
     id: 'payment',
@@ -217,7 +348,7 @@ export const HOME_BENEFITS: HomeBenefitData[] = [
   },
   {
     id: 'service',
-    title: 'Atendimento VIP',
-    description: 'Consultoria de estilo personalizada online.',
+    title: 'Atendimento especializado',
+    description: 'Suporte para dúvidas sobre modelos, tamanhos e times.',
   },
 ];

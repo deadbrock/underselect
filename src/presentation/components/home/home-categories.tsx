@@ -14,8 +14,8 @@ export function HomeCategories() {
         <MotionReveal>
           <HomeSectionHeader
             eyebrow="Categorias"
-            title="Explore por estilo"
-            description="Curadoria premium para cada ocasião."
+            title="Explore por time e seleção"
+            description="Clubes brasileiros, seleções, retrô e casual esportiva."
             href="/categoria"
           />
         </MotionReveal>

@@ -1,13 +1,42 @@
+import dynamic from 'next/dynamic';
 import {
-  AdminModulePage,
-  createAdminModuleMetadata,
-} from '@presentation/components/admin/admin-module-page';
-import { createPrivatePageMetadata } from '@shared/seo';
+  JsonLd,
+  createPrivatePageMetadata,
+  createWebPageSchema,
+  createBreadcrumbSchema,
+} from '@shared/seo';
 
-export const metadata = createPrivatePageMetadata(
-  createAdminModuleMetadata('clientes'),
+const CustomerDashboard = dynamic(
+  () =>
+    import('@presentation/components/admin/customer').then(
+      (m) => m.CustomerDashboard,
+    ),
+  { loading: () => null },
 );
 
-export default function ClientesAdminPage() {
-  return <AdminModulePage moduleId="clientes" />;
+export const metadata = createPrivatePageMetadata({
+  title: 'Clientes — Resumo',
+  description: 'Dashboard CRM UNDER SELECT.',
+  path: '/admin/clientes',
+});
+
+export default function ClientesDashboardPage() {
+  return (
+    <>
+      <JsonLd
+        data={[
+          createWebPageSchema({
+            name: 'Resumo de Clientes',
+            description: 'Dashboard CRM UNDER SELECT.',
+            path: '/admin/clientes',
+          }),
+          createBreadcrumbSchema([
+            { name: 'Admin', path: '/admin/dashboard' },
+            { name: 'Clientes', path: '/admin/clientes' },
+          ]),
+        ]}
+      />
+      <CustomerDashboard />
+    </>
+  );
 }
