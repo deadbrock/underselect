@@ -6,15 +6,26 @@ import {
   listCategories,
 } from '@infrastructure/database/repositories/category.repository';
 import { toApiErrorResponse, toApiResponse } from '@shared/utils';
+import { slugify } from '@shared/utils/slugify';
 
-const createCategorySchema = z.object({
-  slug: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9-]+$/, 'Slug inválido'),
-  label: z.string().trim().min(2),
-  description: z.string().trim().optional(),
-});
+const createCategorySchema = z
+  .object({
+    label: z.string().trim().min(2),
+    description: z.string().trim().optional(),
+    slug: z
+      .string()
+      .trim()
+      .regex(/^[a-z0-9-]+$/, 'Slug inválido')
+      .optional(),
+  })
+  .transform((data) => ({
+    ...data,
+    slug: data.slug?.trim() || slugify(data.label),
+  }))
+  .refine((data) => data.slug.length > 0, {
+    message: 'Não foi possível gerar slug a partir do nome da categoria',
+    path: ['label'],
+  });
 
 export async function GET() {
   try {

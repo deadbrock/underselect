@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Bell, Moon, Plus, Search, Sun } from 'lucide-react';
+import { Bell, LogOut, Moon, Plus, Search, Sun } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
 import {
@@ -18,17 +19,23 @@ import {
   DropdownMenuTrigger,
   Input,
 } from '@presentation/components/ui';
-import { useAdminStore } from '@presentation/stores/admin';
-import { MOCK_ADMIN_PROFILE, searchAdmin } from '@shared/data/admin.data';
+import { useAdminStore, useSettingsStore } from '@presentation/stores/admin';
+import { adminLogoutApi } from '@presentation/stores/admin/auth';
+import { toast } from '@presentation/hooks';
+import { searchAdmin } from '@shared/data/admin.data';
 
 import { AdminBreadcrumb } from './admin-breadcrumb';
 import { AdminNotificationsPanel } from './admin-notifications-panel';
 
 export const AdminHeader = memo(function AdminHeader() {
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const notifications = useAdminStore((s) => s.notifications);
   const setGlobalSearchQuery = useAdminStore((s) => s.setGlobalSearchQuery);
+  const profile = useSettingsStore((s) => s.profile);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const profileFirstName = profile.name.split(' ')[0] || profile.name;
+  const profileEmailLabel = profile.email || 'E-mail não informado';
 
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -46,6 +53,18 @@ export const AdminHeader = memo(function AdminHeader() {
   const toggleTheme = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await adminLogoutApi();
+      router.replace('/admin/login' as Route);
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Não foi possível sair.',
+      );
+    }
+  }, [router]);
 
   return (
     <header className="border-border bg-background/95 sticky top-0 z-40 border-b backdrop-blur">
@@ -149,19 +168,19 @@ export const AdminHeader = memo(function AdminHeader() {
               >
                 <Avatar className="size-8">
                   <AvatarFallback className="text-xs">
-                    {MOCK_ADMIN_PROFILE.avatarInitials}
+                    {profile.avatarInitials}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden text-sm lg:inline">
-                  {MOCK_ADMIN_PROFILE.name.split(' ')[0]}
+                  {profileFirstName}
                 </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                <p className="font-medium">{MOCK_ADMIN_PROFILE.name}</p>
+                <p className="font-medium">{profile.name}</p>
                 <p className="text-muted-foreground text-xs font-normal">
-                  {MOCK_ADMIN_PROFILE.email}
+                  {profileEmailLabel}
                 </p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -172,8 +191,9 @@ export const AdminHeader = memo(function AdminHeader() {
                 <Link href="/admin/configuracoes">Configurações</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>
-                Sair (integração futura)
+              <DropdownMenuItem onClick={() => void handleLogout()}>
+                <LogOut className="mr-2 size-4" />
+                Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

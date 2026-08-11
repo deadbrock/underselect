@@ -20,6 +20,7 @@ import {
   Textarea,
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
+import { toast } from '@presentation/hooks';
 import { useStockStore } from '@presentation/stores/admin/stock';
 import {
   stockExitSchema,
@@ -33,7 +34,7 @@ export const StockExitForm = memo(function StockExitForm() {
   const router = useRouter();
   const stockItems = useStockStore((s) => s.stockItems);
   const registerExit = useStockStore((s) => s.registerExit);
-  const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useAppForm<StockExitSchema>(stockExitSchema, {
     defaultValues: {
@@ -45,24 +46,32 @@ export const StockExitForm = memo(function StockExitForm() {
     },
   });
 
-  const onSubmit = form.handleSubmit((values) => {
-    registerExit(values);
-    setSuccess(true);
-    form.reset({
-      stockItemId: '',
-      quantity: 1,
-      reason: STOCK_EXIT_REASONS[0],
-      notes: '',
-      destination: '',
-    });
-    setTimeout(() => setSuccess(false), 3000);
+  const onSubmit = form.handleSubmit(async (values) => {
+    setIsSubmitting(true);
+    try {
+      await registerExit(values);
+      toast.success('Saída registrada com sucesso.');
+      form.reset({
+        stockItemId: '',
+        quantity: 1,
+        reason: STOCK_EXIT_REASONS[0],
+        notes: '',
+        destination: '',
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao registrar saída.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Saída de Estoque"
-        description="Registre vendas, perdas ou transferências — baixa automática no saldo."
+        description="Registre vendas, perdas ou baixas — atualiza o saldo no banco de dados."
       />
 
       <Form form={form} onSubmit={onSubmit} className="max-w-xl">
@@ -97,7 +106,7 @@ export const StockExitForm = memo(function StockExitForm() {
           <FormInput
             name="destination"
             label="Destino"
-            placeholder="Preparado para integração futura"
+            placeholder="Opcional"
           />
           <FormField
             name="notes"
@@ -109,8 +118,12 @@ export const StockExitForm = memo(function StockExitForm() {
         </FormSection>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="submit" className="min-h-10 flex-1">
-            Registrar saída
+          <Button
+            type="submit"
+            className="min-h-10 flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Salvando...' : 'Registrar saída'}
           </Button>
           <Button
             type="button"
@@ -121,12 +134,6 @@ export const StockExitForm = memo(function StockExitForm() {
             Ver histórico
           </Button>
         </div>
-
-        {success && (
-          <p className="text-brand-bronze text-sm" role="status">
-            Saída registrada com sucesso.
-          </p>
-        )}
       </Form>
     </div>
   );

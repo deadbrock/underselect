@@ -4,6 +4,7 @@ import { memo } from 'react';
 
 import { Button } from '@presentation/components/ui';
 import { Price } from '@presentation/components/data-display';
+import { useCartStore } from '@presentation/stores/cart';
 import type { CartTotals } from '@shared/types/cart.types';
 import { cn } from '@shared/utils/cn';
 
@@ -20,6 +21,11 @@ export const CheckoutMobileBar = memo(function CheckoutMobileBar({
   onSubmit,
   className,
 }: CheckoutMobileBarProps) {
+  const shippingQuote = useCartStore((state) => state.shippingQuote);
+  const displayTotal = shippingQuote
+    ? totals.total
+    : totals.totalBeforeShipping;
+
   return (
     <div
       className={cn(
@@ -31,7 +37,12 @@ export const CheckoutMobileBar = memo(function CheckoutMobileBar({
     >
       <div className="mx-auto flex max-w-lg items-center gap-4">
         <div className="min-w-0 flex-1">
-          <Price value={totals.total} size="sm" />
+          <Price value={displayTotal} size="sm" />
+          {!shippingQuote ? (
+            <p className="text-muted-foreground text-xs">
+              + frete após calcular CEP
+            </p>
+          ) : null}
         </div>
         <Button
           variant="bronze"

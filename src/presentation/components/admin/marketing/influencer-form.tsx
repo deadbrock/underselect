@@ -64,21 +64,29 @@ export const InfluencerFormPage = memo(function InfluencerFormPage({
   });
 
   const onSubmit = useCallback(
-    (values: InfluencerFormValues) => {
+    async (values: InfluencerFormValues) => {
       const input = {
         ...values,
         identifierCode: values.identifierCode.toUpperCase(),
       };
-      if (mode === 'create') {
-        const created = createInfluencer(input);
-        toast.success('Influenciador cadastrado.');
-        router.push(`/admin/marketing/influenciadores/${created.id}`);
-        return;
-      }
-      if (influencerId) {
-        updateInfluencer(influencerId, input);
-        toast.success('Influenciador atualizado.');
-        router.push(`/admin/marketing/influenciadores/${influencerId}`);
+      try {
+        if (mode === 'create') {
+          const created = await createInfluencer(input);
+          toast.success('Influenciador cadastrado.');
+          router.push(`/admin/marketing/influenciadores/${created.id}`);
+          return;
+        }
+        if (influencerId) {
+          await updateInfluencer(influencerId, input);
+          toast.success('Influenciador atualizado.');
+          router.push(`/admin/marketing/influenciadores/${influencerId}`);
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Falha ao salvar influenciador.',
+        );
       }
     },
     [mode, createInfluencer, updateInfluencer, influencerId, router],

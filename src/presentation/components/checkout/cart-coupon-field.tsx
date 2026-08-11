@@ -78,7 +78,7 @@ const CartCouponField = memo(function CartCouponField({
       )}
 
       <p className="text-muted-foreground text-xs">
-        Teste: UNDER10, ECONOMIZE50, BEMVINDO, FRETEGRATIS, FLAMENGO15
+        O cupom é validado no servidor com as regras configuradas no painel.
       </p>
     </div>
   );

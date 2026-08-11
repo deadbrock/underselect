@@ -15,7 +15,6 @@ import { toast } from '@presentation/hooks';
 import {
   adminProductFormSchema,
   createEmptyProductFormDefaults,
-  prepareProductFormValues,
   productToFormValues,
   type AdminProductFormSchema,
 } from '@presentation/stores/admin/product';
@@ -79,8 +78,6 @@ export const AdminProductForm = memo(function AdminProductForm({
 
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const prepared = prepareProductFormValues(form.getValues());
-    form.reset(prepared, { keepDirtyValues: false });
     void form.handleSubmit(handleSubmit, handleInvalid)();
   };
 
@@ -96,53 +93,25 @@ export const AdminProductForm = memo(function AdminProductForm({
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="flags">Status</TabsTrigger>
         </TabsList>
-        <TabsContent
-          value="basic"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="basic">
           <AdminProductFormBasic />
         </TabsContent>
-        <TabsContent
-          value="classification"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="classification">
           <AdminProductFormClassification />
         </TabsContent>
-        <TabsContent
-          value="pricing"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="pricing">
           <AdminProductFormPricing />
         </TabsContent>
-        <TabsContent
-          value="variations"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="variations">
           <AdminProductFormVariations />
         </TabsContent>
-        <TabsContent
-          value="gallery"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="gallery">
           <AdminProductFormGallery />
         </TabsContent>
-        <TabsContent
-          value="seo"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="seo">
           <AdminProductFormSeo />
         </TabsContent>
-        <TabsContent
-          value="flags"
-          forceMount
-          className="data-[state=inactive]:hidden"
-        >
+        <TabsContent value="flags">
           <AdminProductFormFlags />
         </TabsContent>
       </Tabs>

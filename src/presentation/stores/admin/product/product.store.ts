@@ -22,7 +22,7 @@ interface ProductState {
 }
 
 interface ProductActions {
-  loadProducts: () => Promise<void>;
+  loadProducts: (force?: boolean) => Promise<void>;
   getProductById: (id: string) => AdminProduct | undefined;
   getProductBySlug: (slug: string) => AdminProduct | undefined;
   fetchProductById: (id: string) => Promise<AdminProduct | undefined>;
@@ -34,6 +34,14 @@ interface ProductActions {
   duplicateProduct: (id: string) => Promise<AdminProduct | undefined>;
   archiveProduct: (id: string) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  patchProductStock: (
+    productId: string,
+    input: {
+      variationId?: string;
+      stock?: number;
+      minStock?: number;
+    },
+  ) => Promise<AdminProduct>;
 }
 
 export type ProductStore = ProductState & ProductActions;
@@ -68,7 +76,12 @@ export const useProductStore = create<ProductStore>()((set, get) => ({
   isHydrated: false,
   error: null,
 
-  loadProducts: async () => {
+  loadProducts: async (force = false) => {
+    const state = get();
+    if (!force && state.isHydrated && state.products.length > 0) {
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const response = await fetch('/api/admin/products', {
@@ -192,6 +205,21 @@ export const useProductStore = create<ProductStore>()((set, get) => ({
     set((state) => ({
       products: state.products.filter((product) => product.id !== id),
     }));
+  },
+
+  patchProductStock: async (productId, input) => {
+    const response = await fetch(`/api/admin/products/${productId}/stock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const product = await parseApiResponse<AdminProduct>(response);
+    set((state) => ({
+      products: state.products.map((item) =>
+        item.id === productId ? product : item,
+      ),
+    }));
+    return product;
   },
 }));
 

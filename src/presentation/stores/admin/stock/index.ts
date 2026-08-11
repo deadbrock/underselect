@@ -17,4 +17,5 @@ export {
   getTopMovedProducts,
   getUniqueCategories,
   generateAlerts,
+  getStaleStockItems,
 } from './stock.utils';

@@ -1,17 +1,23 @@
 import { env } from '@infrastructure/config';
 
-import { SOCIAL_LINKS, STORE_NAME } from '../constants/store-navigation';
+import { STORE_NAME } from '../constants/store-navigation';
 
 export type JsonLdObject = Record<string, unknown>;
 
-export function createOrganizationSchema(): JsonLdObject {
+export function createOrganizationSchema(options?: {
+  name?: string;
+  instagramUrl?: string;
+}): JsonLdObject {
+  const name = options?.name ?? 'UNDER SELECT';
+  const sameAs = options?.instagramUrl ? [options.instagramUrl] : [];
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: STORE_NAME,
+    name,
     url: env.NEXT_PUBLIC_APP_URL,
     logo: `${env.NEXT_PUBLIC_APP_URL}/og-default.svg`,
-    sameAs: SOCIAL_LINKS.map((link) => link.href),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
   };
 }
 

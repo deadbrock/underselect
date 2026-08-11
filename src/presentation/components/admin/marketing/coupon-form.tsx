@@ -79,7 +79,7 @@ export const CouponFormPage = memo(function CouponFormPage({
   });
 
   const onSubmit = useCallback(
-    (values: CouponFormValues) => {
+    async (values: CouponFormValues) => {
       const input: CouponFormInput = {
         ...values,
         code: values.code.toUpperCase(),
@@ -89,16 +89,22 @@ export const CouponFormPage = memo(function CouponFormPage({
         usageLimitPerCustomer: values.usageLimitPerCustomer || undefined,
         rules,
       };
-      if (mode === 'create') {
-        const created = createCoupon(input);
-        toast.success('Cupom criado.');
-        router.push(`/admin/marketing/cupons/${created.id}`);
-        return;
-      }
-      if (couponId) {
-        updateCoupon(couponId, input);
-        toast.success('Cupom atualizado.');
-        router.push(`/admin/marketing/cupons/${couponId}`);
+      try {
+        if (mode === 'create') {
+          const created = await createCoupon(input);
+          toast.success('Cupom criado.');
+          router.push(`/admin/marketing/cupons/${created.id}`);
+          return;
+        }
+        if (couponId) {
+          await updateCoupon(couponId, input);
+          toast.success('Cupom atualizado.');
+          router.push(`/admin/marketing/cupons/${couponId}`);
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Falha ao salvar cupom.',
+        );
       }
     },
     [mode, createCoupon, updateCoupon, couponId, router, rules],

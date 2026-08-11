@@ -99,10 +99,10 @@ export const CheckoutOrderSummary = memo(function CheckoutOrderSummary({
           subtotal={totals.subtotal}
           shipping={shippingQuote ? totals.shipping : undefined}
           discount={totalDiscount > 0 ? totalDiscount : undefined}
-          total={totals.total}
+          total={shippingQuote ? totals.total : totals.totalBeforeShipping}
         />
 
-        {totals.total > 0 && (
+        {(shippingQuote ? totals.total : totals.totalBeforeShipping) > 0 && (
           <p className="text-muted-foreground text-sm">
             ou {totals.installmentCount}x de{' '}
             <span className="text-foreground font-medium">
@@ -114,6 +114,12 @@ export const CheckoutOrderSummary = memo(function CheckoutOrderSummary({
             sem juros
           </p>
         )}
+
+        {!shippingQuote ? (
+          <p className="text-muted-foreground text-xs">
+            O frete será calculado após informar e consultar o CEP.
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

@@ -1,9 +1,13 @@
+'use client';
+
 import { CreditCard, RefreshCw } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { Container } from '@presentation/components/layout';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
 import { HomeSectionHeader } from '@presentation/components/home/home-section-header';
-import { HOME_BENEFITS } from '@shared/constants/home.constants';
+import { useStoreSettings } from '@presentation/contexts/store-settings-context';
+import { buildHomeBenefits } from '@shared/utils/store-settings';
 
 const benefitIcons = {
   returns: RefreshCw,
@@ -11,6 +15,9 @@ const benefitIcons = {
 } as const;
 
 export function HomeBenefits() {
+  const settings = useStoreSettings();
+  const benefits = useMemo(() => buildHomeBenefits(settings), [settings]);
+
   return (
     <section aria-labelledby="home-benefits-title" className="py-12 md:py-16">
       <Container>
@@ -23,7 +30,7 @@ export function HomeBenefits() {
         </MotionReveal>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          {HOME_BENEFITS.map((benefit, index) => {
+          {benefits.map((benefit, index) => {
             const Icon =
               benefitIcons[benefit.id as keyof typeof benefitIcons] ??
               RefreshCw;

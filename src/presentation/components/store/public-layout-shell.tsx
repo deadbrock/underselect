@@ -1,13 +1,22 @@
+'use client';
+
 import { Suspense } from 'react';
 
-import { PublicFooter } from '@presentation/components/store/public-footer';
-import { PublicHeader } from '@presentation/components/store/public-header';
 import { CartDrawerHost } from '@presentation/components/checkout';
 import { Spinner } from '@presentation/components/feedback';
+import { MaintenancePage } from '@presentation/components/store/maintenance-page';
+import { PublicFooter } from '@presentation/components/store/public-footer';
+import { PublicHeader } from '@presentation/components/store/public-header';
+import {
+  StoreSettingsProvider,
+  useStoreSettings,
+} from '@presentation/contexts/store-settings-context';
 import { JsonLd, createOrganizationSchema } from '@shared/seo';
+import type { AdminStoreSettings } from '@shared/types/admin-settings.types';
 
 interface PublicLayoutShellProps {
   children: React.ReactNode;
+  settings: AdminStoreSettings;
 }
 
 function HeaderFallback() {
@@ -16,10 +25,33 @@ function HeaderFallback() {
   );
 }
 
-export function PublicLayoutShell({ children }: PublicLayoutShellProps) {
+function PublicLayoutContent({ children }: { children: React.ReactNode }) {
+  const settings = useStoreSettings();
+
+  if (settings.maintenanceMode) {
+    return (
+      <>
+        <JsonLd
+          data={createOrganizationSchema({
+            name: settings.storeName,
+            instagramUrl: settings.instagramUrl,
+          })}
+        />
+        <div className="flex min-h-screen flex-col">
+          <MaintenancePage />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <JsonLd data={createOrganizationSchema()} />
+      <JsonLd
+        data={createOrganizationSchema({
+          name: settings.storeName,
+          instagramUrl: settings.instagramUrl,
+        })}
+      />
       <div className="flex min-h-screen flex-col">
         <Suspense fallback={<HeaderFallback />}>
           <PublicHeader />
@@ -29,6 +61,17 @@ export function PublicLayoutShell({ children }: PublicLayoutShellProps) {
         <PublicFooter />
       </div>
     </>
+  );
+}
+
+export function PublicLayoutShell({
+  children,
+  settings,
+}: PublicLayoutShellProps) {
+  return (
+    <StoreSettingsProvider settings={settings}>
+      <PublicLayoutContent>{children}</PublicLayoutContent>
+    </StoreSettingsProvider>
   );
 }
 

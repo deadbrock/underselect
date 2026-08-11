@@ -12,6 +12,11 @@ import type {
   ProductSpecification,
   ProductSizeChartRow,
 } from '@shared/types/product-detail.types';
+import {
+  deriveProductStockFromVariations,
+  deriveSizesFromVariations,
+  deriveUnavailableSizes,
+} from '@shared/utils/product-variation.utils';
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{
   include: {
@@ -79,8 +84,22 @@ function defaultFaq(): ProductFaqItem[] {
   ];
 }
 
+function mapVariations(product: Pick<ProductWithRelations, 'variations'>) {
+  return product.variations.map((variation) => ({
+    id: variation.id,
+    size: variation.size ?? undefined,
+    color: variation.color ?? undefined,
+    model: variation.model ?? undefined,
+    sku: variation.sku,
+    price: Number(variation.price),
+    stock: variation.stock,
+    minStock: variation.minStock ?? 5,
+    imageUrl: variation.imageUrl ?? undefined,
+  }));
+}
+
 export function toCatalogProduct(
-  product: ProductWithRelations,
+  product: ProductAdminPayload | ProductWithRelations,
 ): CatalogProduct {
   const price = Number(product.price);
   const compareAtPrice = decimal(product.compareAtPrice);
@@ -113,10 +132,19 @@ export function toCatalogProduct(
   };
 }
 
-export function toAdminProduct(product: ProductWithRelations): AdminProduct {
+export type ProductAdminPayload = Prisma.ProductGetPayload<{
+  include: typeof adminProductListInclude;
+}> & {
+  gallery?: ProductWithRelations['gallery'];
+  models?: ProductWithRelations['models'];
+};
+
+export function toAdminProduct(product: ProductAdminPayload): AdminProduct {
   const catalog = toCatalogProduct(product);
   const price = Number(product.price);
   const compareAtPrice = decimal(product.compareAtPrice);
+  const gallery = product.gallery ?? [];
+  const models = product.models ?? [];
 
   return {
     ...catalog,
@@ -129,6 +157,7 @@ export function toAdminProduct(product: ProductWithRelations): AdminProduct {
     shortDescription: product.shortDescription,
     fullDescription: product.fullDescription,
     collection: product.collection?.name ?? '',
+    model: models[0]?.label ?? '',
     tags: product.tags,
     cost: decimal(product.cost),
     weight: decimal(product.weight),
@@ -137,17 +166,9 @@ export function toAdminProduct(product: ProductWithRelations): AdminProduct {
     length: decimal(product.length),
     status: product.status as AdminProduct['status'],
     stockQuantity: product.stockQuantity,
-    variations: product.variations.map((variation) => ({
-      id: variation.id,
-      size: variation.size ?? undefined,
-      color: variation.color ?? undefined,
-      model: variation.model ?? undefined,
-      sku: variation.sku,
-      price: Number(variation.price),
-      stock: variation.stock,
-      imageUrl: variation.imageUrl ?? undefined,
-    })),
-    gallery: product.gallery.map((image) => ({
+    minStock: product.minStock ?? 5,
+    variations: mapVariations(product),
+    gallery: gallery.map((image) => ({
       id: image.id,
       url: image.url,
       alt: image.alt ?? undefined,
@@ -205,14 +226,34 @@ export function toProductDetail(product: ProductWithRelations): ProductDetail {
     product.reviewsComments,
   );
 
+  const variations = mapVariations(product);
+  const sizes =
+    product.sizes.length > 0
+      ? product.sizes
+      : deriveSizesFromVariations(variations);
+  const unavailableSizes =
+    variations.length > 0
+      ? deriveUnavailableSizes(sizes, variations)
+      : product.unavailableSizes;
+  const stockSummary =
+    variations.length > 0
+      ? deriveProductStockFromVariations(variations)
+      : {
+          stockQuantity: product.stockQuantity,
+          inStock: product.inStock,
+        };
+
   return {
     ...catalog,
+    sizes,
+    inStock: stockSummary.inStock,
     sku: product.sku,
     collection: product.collection?.name ?? '',
     images,
     colors,
     models,
-    unavailableSizes: product.unavailableSizes,
+    variations,
+    unavailableSizes,
     description:
       product.description ??
       product.fullDescription ??
@@ -242,11 +283,64 @@ export function toProductDetail(product: ProductWithRelations): ProductDetail {
   };
 }
 
+function resolveProductModelLabel(input: AdminProductInput): string {
+  return input.model?.trim() || 'Padrão';
+}
+
+function buildVariationPersistence(input: AdminProductInput) {
+  const productModel = resolveProductModelLabel(input);
+  const variations = input.variations.map((variation) => ({
+    size: variation.size?.trim() || null,
+    color: variation.color?.trim() || 'Principal',
+    model: variation.model?.trim() || productModel,
+    sku: variation.sku,
+    price: variation.price,
+    stock: variation.stock,
+    minStock: variation.minStock ?? input.minStock ?? 5,
+    imageUrl: variation.imageUrl ?? null,
+  }));
+
+  const variationOptions = variations.map((variation, index) => ({
+    id: `temp-${index}`,
+    size: variation.size ?? undefined,
+    color: variation.color ?? undefined,
+    model: variation.model ?? undefined,
+    sku: variation.sku,
+    price: Number(variation.price),
+    stock: variation.stock,
+  }));
+
+  const sizes =
+    input.sizes.length > 0
+      ? input.sizes
+      : deriveSizesFromVariations(variations);
+
+  const stockSummary =
+    variationOptions.length > 0
+      ? deriveProductStockFromVariations(variationOptions)
+      : {
+          stockQuantity: input.stockQuantity,
+          inStock: input.inStock,
+        };
+
+  const unavailableSizes = deriveUnavailableSizes(sizes, variationOptions);
+
+  return {
+    variations,
+    sizes,
+    stockSummary,
+    unavailableSizes,
+  };
+}
+
 export function buildProductCreateData(
   input: AdminProductInput,
   categoryId: string,
   collectionId: string | null,
 ) {
+  const { variations, sizes, stockSummary, unavailableSizes } =
+    buildVariationPersistence(input);
+
   return {
     name: input.name,
     slug: input.slug,
@@ -273,9 +367,10 @@ export function buildProductCreateData(
     onSale: input.onSale,
     isBestSeller: input.isBestSeller,
     status: input.status,
-    inStock: input.inStock,
-    stockQuantity: input.stockQuantity,
-    sizes: input.sizes,
+    inStock: stockSummary.inStock,
+    stockQuantity: stockSummary.stockQuantity,
+    minStock: input.minStock ?? 5,
+    sizes,
     installmentCount: input.installmentCount,
     imageUrl: input.imageUrl,
     imageAlt: input.imageAlt ?? null,
@@ -288,17 +383,9 @@ export function buildProductCreateData(
     ogDescription: input.seo.ogDescription ?? null,
     ogImage: input.seo.ogImage ?? null,
     description: input.fullDescription,
-    unavailableSizes: [],
+    unavailableSizes,
     variations: {
-      create: input.variations.map((variation) => ({
-        size: variation.size ?? null,
-        color: variation.color ?? null,
-        model: variation.model ?? null,
-        sku: variation.sku,
-        price: variation.price,
-        stock: variation.stock,
-        imageUrl: variation.imageUrl ?? null,
-      })),
+      create: variations,
     },
     gallery: {
       create: input.gallery.map((image) => ({
@@ -312,7 +399,7 @@ export function buildProductCreateData(
       create: [{ label: 'Principal', hex: '#1a1a1a' }],
     },
     models: {
-      create: [{ label: 'Padrão' }],
+      create: [{ label: resolveProductModelLabel(input) }],
     },
   };
 }
@@ -322,6 +409,9 @@ export function buildProductUpdateData(
   categoryId: string,
   collectionId: string | null,
 ) {
+  const { variations, sizes, stockSummary, unavailableSizes } =
+    buildVariationPersistence(input);
+
   return {
     name: input.name,
     slug: input.slug,
@@ -348,9 +438,10 @@ export function buildProductUpdateData(
     onSale: input.onSale,
     isBestSeller: input.isBestSeller,
     status: input.status,
-    inStock: input.inStock,
-    stockQuantity: input.stockQuantity,
-    sizes: input.sizes,
+    inStock: stockSummary.inStock,
+    stockQuantity: stockSummary.stockQuantity,
+    minStock: input.minStock ?? 5,
+    sizes,
     installmentCount: input.installmentCount,
     imageUrl: input.imageUrl,
     imageAlt: input.imageAlt ?? null,
@@ -363,17 +454,10 @@ export function buildProductUpdateData(
     ogDescription: input.seo.ogDescription ?? null,
     ogImage: input.seo.ogImage ?? null,
     description: input.fullDescription,
+    unavailableSizes,
     variations: {
       deleteMany: {},
-      create: input.variations.map((variation) => ({
-        size: variation.size ?? null,
-        color: variation.color ?? null,
-        model: variation.model ?? null,
-        sku: variation.sku,
-        price: variation.price,
-        stock: variation.stock,
-        imageUrl: variation.imageUrl ?? null,
-      })),
+      create: variations,
     },
     gallery: {
       deleteMany: {},
@@ -384,8 +468,18 @@ export function buildProductUpdateData(
         sortOrder: image.order,
       })),
     },
+    models: {
+      deleteMany: {},
+      create: [{ label: resolveProductModelLabel(input) }],
+    },
   };
 }
+
+export const adminProductListInclude = {
+  category: true,
+  collection: true,
+  variations: true,
+} satisfies Prisma.ProductInclude;
 
 export const productInclude = {
   category: true,

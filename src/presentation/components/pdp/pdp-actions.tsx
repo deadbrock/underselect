@@ -38,7 +38,7 @@ const PdpActions = memo(function PdpActions({
     await navigator.clipboard?.writeText(window.location.href);
   }, []);
 
-  const disabled = !inStock || !canPurchase;
+  const unavailable = !inStock || !canPurchase;
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -46,8 +46,8 @@ const PdpActions = memo(function PdpActions({
         <Button
           variant="bronze"
           size="lg"
-          className="w-full"
-          disabled={disabled}
+          className={cn('w-full', unavailable && 'opacity-70')}
+          aria-disabled={unavailable}
           onClick={onBuyNow}
           aria-label="Comprar agora"
         >
@@ -56,7 +56,7 @@ const PdpActions = memo(function PdpActions({
         </Button>
         <AddToCartButton
           label="Adicionar ao carrinho"
-          disabled={disabled}
+          className={unavailable ? 'opacity-70' : undefined}
           onClick={onAddToCart}
         />
       </div>

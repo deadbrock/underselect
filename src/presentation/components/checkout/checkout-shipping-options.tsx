@@ -14,16 +14,7 @@ export const CheckoutShippingOptions = memo(function CheckoutShippingOptions() {
   );
 
   if (!shippingQuote) {
-    return (
-      <FormSection
-        title="Método de entrega"
-        description="Consulte o CEP para exibir as opções de frete."
-      >
-        <p className="text-muted-foreground border-border bg-muted/30 border border-dashed p-4 text-sm">
-          Informe e consulte o CEP na seção Entrega para calcular o frete.
-        </p>
-      </FormSection>
-    );
+    return null;
   }
 
   return (

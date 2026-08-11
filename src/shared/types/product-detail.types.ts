@@ -1,4 +1,5 @@
 import type { CatalogProduct } from '@shared/types/catalog.types';
+import type { ProductVariationOption } from '@shared/utils/product-variation.utils';
 
 export interface ProductImage {
   url: string;
@@ -57,6 +58,7 @@ export interface ProductDetail extends CatalogProduct {
   images: ProductImage[];
   colors: ProductColorOption[];
   models: ProductModelOption[];
+  variations: ProductVariationOption[];
   unavailableSizes: string[];
   description: string;
   specifications: ProductSpecification[];

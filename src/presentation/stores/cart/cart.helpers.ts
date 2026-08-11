@@ -1,6 +1,8 @@
 import type { CatalogProduct } from '@shared/types/catalog.types';
 import type { ProductDetail } from '@shared/types/product-detail.types';
+import type { ProductVariationOption } from '@shared/utils/product-variation.utils';
 import type { AddCartItemInput, CartLineItem } from '@shared/types/cart.types';
+import { resolveVariationPricing } from '@shared/utils/product-variation.utils';
 
 export function buildCartLineId(
   productId: string,
@@ -37,16 +39,25 @@ export function catalogProductToCartInput(
 
 export function productDetailToCartInput(
   product: ProductDetail,
-  selections: { size: string; colorId: string; modelId: string },
+  selections: {
+    size: string;
+    colorId: string;
+    modelId: string;
+    variation?: ProductVariationOption;
+  },
 ): AddCartItemInput {
   const color = product.colors.find((c) => c.id === selections.colorId);
   const model = product.models.find((m) => m.id === selections.modelId);
+  const pricing = resolveVariationPricing(product, selections.variation);
 
   return {
     productId: product.id,
     slug: product.slug,
     name: product.name,
-    imageUrl: product.images[0]?.url ?? product.imageUrl,
+    imageUrl:
+      selections.variation?.imageUrl ??
+      product.images[0]?.url ??
+      product.imageUrl,
     categoryLabel: product.categoryLabel,
     category: product.category,
     team: product.team,
@@ -56,8 +67,8 @@ export function productDetailToCartInput(
     colorLabel: color?.label ?? selections.colorId,
     modelId: selections.modelId,
     modelLabel: model?.label ?? selections.modelId,
-    price: product.price,
-    compareAtPrice: product.compareAtPrice,
+    price: pricing.price,
+    compareAtPrice: pricing.compareAtPrice,
     installmentCount: product.installmentCount,
     quantity: 1,
   };

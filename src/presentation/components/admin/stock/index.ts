@@ -15,5 +15,4 @@ export { StockAdjustmentForm } from './stock-adjustment-form';
 export { StockInventory } from './stock-inventory';
 export { StockAlertsPanel } from './stock-alerts-panel';
 export { StockReports } from './stock-reports';
-export { StockTransfers } from './stock-transfers';
 export { useStockListState } from './use-stock-list-state';

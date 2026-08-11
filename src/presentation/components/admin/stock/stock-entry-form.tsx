@@ -20,6 +20,7 @@ import {
   Textarea,
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
+import { toast } from '@presentation/hooks';
 import { useStockStore } from '@presentation/stores/admin/stock';
 import {
   stockEntrySchema,
@@ -33,7 +34,7 @@ export const StockEntryForm = memo(function StockEntryForm() {
   const router = useRouter();
   const stockItems = useStockStore((s) => s.stockItems);
   const registerEntry = useStockStore((s) => s.registerEntry);
-  const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useAppForm<StockEntrySchema>(stockEntrySchema, {
     defaultValues: {
@@ -46,25 +47,33 @@ export const StockEntryForm = memo(function StockEntryForm() {
     },
   });
 
-  const onSubmit = form.handleSubmit((values) => {
-    registerEntry(values);
-    setSuccess(true);
-    form.reset({
-      stockItemId: '',
-      quantity: 1,
-      reason: STOCK_ENTRY_REASONS[0],
-      notes: '',
-      supplier: '',
-      date: new Date().toISOString().slice(0, 10),
-    });
-    setTimeout(() => setSuccess(false), 3000);
+  const onSubmit = form.handleSubmit(async (values) => {
+    setIsSubmitting(true);
+    try {
+      await registerEntry(values);
+      toast.success('Entrada registrada com sucesso.');
+      form.reset({
+        stockItemId: '',
+        quantity: 1,
+        reason: STOCK_ENTRY_REASONS[0],
+        notes: '',
+        supplier: '',
+        date: new Date().toISOString().slice(0, 10),
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao registrar entrada.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Entrada de Estoque"
-        description="Registre recebimentos e reposições — gera histórico automático."
+        description="Registre recebimentos e reposições — atualiza o saldo no banco de dados."
       />
 
       <Form form={form} onSubmit={onSubmit} className="max-w-xl">
@@ -99,7 +108,7 @@ export const StockEntryForm = memo(function StockEntryForm() {
           <FormInput
             name="supplier"
             label="Fornecedor"
-            placeholder="Preparado para integração futura"
+            placeholder="Opcional"
           />
           <FormInput name="date" label="Data" type="date" />
           <FormField
@@ -112,8 +121,12 @@ export const StockEntryForm = memo(function StockEntryForm() {
         </FormSection>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="submit" className="min-h-10 flex-1">
-            Registrar entrada
+          <Button
+            type="submit"
+            className="min-h-10 flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Salvando...' : 'Registrar entrada'}
           </Button>
           <Button
             type="button"
@@ -124,12 +137,6 @@ export const StockEntryForm = memo(function StockEntryForm() {
             Ver histórico
           </Button>
         </div>
-
-        {success && (
-          <p className="text-brand-bronze text-sm" role="status">
-            Entrada registrada com sucesso.
-          </p>
-        )}
       </Form>
     </div>
   );

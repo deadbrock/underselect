@@ -1,7 +1,6 @@
-import {
-  AdminModulePage,
-  createAdminModuleMetadata,
-} from '@presentation/components/admin/admin-module-page';
+import { redirect } from 'next/navigation';
+
+import { createAdminModuleMetadata } from '@presentation/components/admin/admin-module-page';
 import { createPrivatePageMetadata } from '@shared/seo';
 
 export const metadata = createPrivatePageMetadata(
@@ -9,5 +8,5 @@ export const metadata = createPrivatePageMetadata(
 );
 
 export default function RelatoriosAdminPage() {
-  return <AdminModulePage moduleId="relatorios" />;
+  redirect('/admin/estoque/relatorios');
 }

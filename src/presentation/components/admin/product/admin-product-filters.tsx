@@ -12,13 +12,8 @@ import {
   SelectValue,
   Switch,
 } from '@presentation/components/ui';
-import {
-  CATALOG_BRANDS,
-  CATALOG_CATEGORIES,
-  CATALOG_SELECTIONS,
-  CATALOG_TEAMS,
-} from '@shared/constants/catalog.constants';
-import { ADMIN_PRODUCT_COLLECTIONS } from '@shared/constants/product-admin.constants';
+import { useClassificationOptions } from '@presentation/hooks/use-classification-options';
+import { CATALOG_BRANDS } from '@shared/constants/catalog.constants';
 import type { AdminProductFilters } from '@shared/types/product-admin.types';
 import { cn } from '@shared/utils/cn';
 
@@ -38,6 +33,9 @@ export const AdminProductFiltersPanel = memo(function AdminProductFiltersPanel({
   onReset,
   className,
 }: AdminProductFiltersPanelProps) {
+  const { categories, collections, teams, selections } =
+    useClassificationOptions();
+
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
@@ -58,7 +56,7 @@ export const AdminProductFiltersPanel = memo(function AdminProductFiltersPanel({
           onChange={(v) => onChange('category', v)}
           options={[
             { value: 'all', label: 'Todas' },
-            ...CATALOG_CATEGORIES.map((c) => ({
+            ...categories.map((c) => ({
               value: c.slug,
               label: c.label,
             })),
@@ -70,7 +68,7 @@ export const AdminProductFiltersPanel = memo(function AdminProductFiltersPanel({
           onChange={(v) => onChange('collection', v)}
           options={[
             { value: 'all', label: 'Todas' },
-            ...ADMIN_PRODUCT_COLLECTIONS.map((c) => ({ value: c, label: c })),
+            ...collections.map((c) => ({ value: c, label: c })),
           ]}
         />
         <FilterSelect
@@ -79,7 +77,7 @@ export const AdminProductFiltersPanel = memo(function AdminProductFiltersPanel({
           onChange={(v) => onChange('team', v)}
           options={[
             { value: 'all', label: 'Todos' },
-            ...CATALOG_TEAMS.map((t) => ({ value: t, label: t })),
+            ...teams.map((t) => ({ value: t, label: t })),
           ]}
         />
         <FilterSelect
@@ -88,7 +86,7 @@ export const AdminProductFiltersPanel = memo(function AdminProductFiltersPanel({
           onChange={(v) => onChange('selection', v)}
           options={[
             { value: 'all', label: 'Todas' },
-            ...CATALOG_SELECTIONS.map((s) => ({ value: s, label: s })),
+            ...selections.map((s) => ({ value: s, label: s })),
           ]}
         />
         <FilterSelect

@@ -1,5 +1,4 @@
-export type StockMovementType =
-  'entry' | 'exit' | 'adjustment' | 'transfer' | 'inventory';
+export type StockMovementType = 'entry' | 'exit' | 'adjustment' | 'inventory';
 
 export type StockMovementStatus = 'completed' | 'pending' | 'cancelled';
 

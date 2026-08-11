@@ -3,7 +3,11 @@
 import { memo, useState } from 'react';
 
 import { Button, Input, Label } from '@presentation/components/ui';
-import { formatCep, normalizeCep } from '@presentation/stores/cart';
+import {
+  formatCep,
+  normalizeCep,
+  useCartStore,
+} from '@presentation/stores/cart';
 import type { ShippingQuote } from '@shared/types/cart.types';
 import { cn } from '@shared/utils/cn';
 
@@ -11,7 +15,7 @@ export interface CartShippingFormProps {
   cep: string;
   quote: ShippingQuote | null;
   onCepChange: (cep: string) => void;
-  onCalculate: (cep: string) => void;
+  onCalculate: (cep: string) => Promise<void>;
   onSelectOption: (optionId: string) => void;
   className?: string;
 }
@@ -25,16 +29,27 @@ const CartShippingForm = memo(function CartShippingForm({
   className,
 }: CartShippingFormProps) {
   const [error, setError] = useState<string | null>(null);
+  const shippingLoading = useCartStore((state) => state.shippingLoading);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalized = normalizeCep(cep);
     if (normalized.length !== 8) {
       setError('Informe um CEP válido com 8 dígitos.');
       return;
     }
+
     setError(null);
-    onCalculate(normalized);
+
+    try {
+      await onCalculate(normalized);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível calcular o frete.',
+      );
+    }
   };
 
   return (
@@ -49,8 +64,8 @@ const CartShippingForm = memo(function CartShippingForm({
           placeholder="00000-000"
           aria-describedby={error ? 'shipping-error' : undefined}
         />
-        <Button type="submit" variant="outline">
-          Calcular
+        <Button type="submit" variant="outline" disabled={shippingLoading}>
+          {shippingLoading ? 'Calculando...' : 'Calcular'}
         </Button>
       </form>
 
@@ -67,6 +82,11 @@ const CartShippingForm = memo(function CartShippingForm({
       {quote && (
         <fieldset className="space-y-2">
           <legend className="text-label mb-2">Opções de entrega</legend>
+          {quote.originCity && quote.originState ? (
+            <p className="text-muted-foreground mb-2 text-xs">
+              Envio de {quote.originCity}/{quote.originState}
+            </p>
+          ) : null}
           {quote.options.map((option) => (
             <label
               key={option.id}
@@ -94,20 +114,22 @@ const CartShippingForm = memo(function CartShippingForm({
                 </span>
               </span>
               <span className="text-sm tabular-nums">
-                {new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(option.price)}
+                {option.price === 0
+                  ? 'Grátis'
+                  : new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(option.price)}
               </span>
             </label>
           ))}
         </fieldset>
       )}
 
-      {!quote && (
+      {!quote && !shippingLoading && (
         <p className="text-muted-foreground text-xs">
-          Calcule o frete informando seu CEP. A cotação será exibida após
-          integração com a transportadora.
+          Informe seu CEP para ver prazos e valores de entrega a partir do
+          endereço de origem da loja.
         </p>
       )}
     </div>

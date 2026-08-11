@@ -15,6 +15,7 @@ import {
 } from '@shared/constants/admin.constants';
 import { cn } from '@shared/utils/cn';
 
+import { AdminAuthHydrator } from './admin-auth-hydrator';
 import { AdminFooter } from './admin-footer';
 import { AdminGlobalLoader } from './admin-global-loader';
 import { AdminHeader } from './admin-header';
@@ -43,6 +44,10 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
 }: AdminLayoutShellProps) {
   const pathname = usePathname();
 
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   const bottomNavItems = ADMIN_BOTTOM_NAV.map((item) => ({
     label: item.label,
     href: item.href,
@@ -62,6 +67,7 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
 
   return (
     <div className="flex min-h-screen flex-col pb-[var(--bottom-nav-height)] md:pb-0">
+      <AdminAuthHydrator />
       <AdminGlobalLoader />
 
       <div className="border-border flex items-center gap-3 border-b px-4 py-3 md:hidden">

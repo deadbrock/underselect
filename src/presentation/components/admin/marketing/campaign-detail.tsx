@@ -30,15 +30,34 @@ export interface CampaignDetailProps {
 export const CampaignDetail = memo(function CampaignDetail({
   campaignId,
 }: CampaignDetailProps) {
-  const campaign = useMarketingStore((s) => s.getCampaignById(campaignId));
-  const influencer = useMarketingStore((s) =>
-    campaign ? s.getInfluencerById(campaign.influencerId) : undefined,
-  );
-  const coupons = useMarketingStore((s) => s.getCouponsByCampaign(campaignId));
-  const attributions = useMarketingStore((s) =>
-    s.getAttributionsByCampaign(campaignId),
-  );
+  const campaigns = useMarketingStore((s) => s.campaigns);
+  const influencers = useMarketingStore((s) => s.influencers);
+  const allCoupons = useMarketingStore((s) => s.coupons);
+  const allAttributions = useMarketingStore((s) => s.attributions);
   const toggleStatus = useMarketingStore((s) => s.toggleCampaignStatus);
+
+  const campaign = useMemo(
+    () => campaigns.find((c) => c.id === campaignId),
+    [campaigns, campaignId],
+  );
+
+  const influencer = useMemo(
+    () =>
+      campaign
+        ? influencers.find((i) => i.id === campaign.influencerId)
+        : undefined,
+    [campaign, influencers],
+  );
+
+  const coupons = useMemo(
+    () => allCoupons.filter((c) => c.campaignId === campaignId),
+    [allCoupons, campaignId],
+  );
+
+  const attributions = useMemo(
+    () => allAttributions.filter((a) => a.campaignId === campaignId),
+    [allAttributions, campaignId],
+  );
 
   const stats = useMemo(() => {
     const revenue = attributions.reduce((s, a) => s + a.attributedRevenue, 0);

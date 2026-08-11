@@ -73,7 +73,7 @@ export const CampaignFormPage = memo(function CampaignFormPage({
   });
 
   const onSubmit = useCallback(
-    (values: CampaignFormValues) => {
+    async (values: CampaignFormValues) => {
       const input: CampaignFormInput = {
         ...values,
         categorySlug: values.categorySlug
@@ -82,16 +82,22 @@ export const CampaignFormPage = memo(function CampaignFormPage({
         salesGoal: values.salesGoal || undefined,
         ordersGoal: values.ordersGoal || undefined,
       };
-      if (mode === 'create') {
-        const created = createCampaign(input);
-        toast.success('Campanha criada.');
-        router.push(`/admin/marketing/campanhas/${created.id}`);
-        return;
-      }
-      if (campaignId) {
-        updateCampaign(campaignId, input);
-        toast.success('Campanha atualizada.');
-        router.push(`/admin/marketing/campanhas/${campaignId}`);
+      try {
+        if (mode === 'create') {
+          const created = await createCampaign(input);
+          toast.success('Campanha criada.');
+          router.push(`/admin/marketing/campanhas/${created.id}`);
+          return;
+        }
+        if (campaignId) {
+          await updateCampaign(campaignId, input);
+          toast.success('Campanha atualizada.');
+          router.push(`/admin/marketing/campanhas/${campaignId}`);
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Falha ao salvar campanha.',
+        );
       }
     },
     [mode, createCampaign, updateCampaign, campaignId, router],

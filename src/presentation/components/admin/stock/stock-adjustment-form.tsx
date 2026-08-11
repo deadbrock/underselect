@@ -20,6 +20,7 @@ import {
   Textarea,
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
+import { toast } from '@presentation/hooks';
 import { useStockStore } from '@presentation/stores/admin/stock';
 import {
   stockAdjustmentSchema,
@@ -39,7 +40,7 @@ export const StockAdjustmentForm = memo(function StockAdjustmentForm() {
   const router = useRouter();
   const stockItems = useStockStore((s) => s.stockItems);
   const registerAdjustment = useStockStore((s) => s.registerAdjustment);
-  const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useAppForm<StockAdjustmentSchema>(stockAdjustmentSchema, {
     defaultValues: {
@@ -54,24 +55,32 @@ export const StockAdjustmentForm = memo(function StockAdjustmentForm() {
   const selectedId = form.watch('stockItemId');
   const selectedItem = stockItems.find((i) => i.id === selectedId);
 
-  const onSubmit = form.handleSubmit((values) => {
-    registerAdjustment(values);
-    setSuccess(true);
-    form.reset({
-      stockItemId: '',
-      mode: 'add',
-      quantity: 1,
-      reason: STOCK_ADJUSTMENT_REASONS[0],
-      notes: '',
-    });
-    setTimeout(() => setSuccess(false), 3000);
+  const onSubmit = form.handleSubmit(async (values) => {
+    setIsSubmitting(true);
+    try {
+      await registerAdjustment(values);
+      toast.success('Ajuste registrado com sucesso.');
+      form.reset({
+        stockItemId: '',
+        mode: 'add',
+        quantity: 1,
+        reason: STOCK_ADJUSTMENT_REASONS[0],
+        notes: '',
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao aplicar ajuste.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Ajuste de Estoque"
-        description="Adicione, remova ou corrija quantidades — registrado automaticamente no histórico."
+        description="Adicione, remova ou corrija quantidades — persiste no banco e registra no histórico."
       />
 
       <Form form={form} onSubmit={onSubmit} className="max-w-xl">
@@ -139,8 +148,12 @@ export const StockAdjustmentForm = memo(function StockAdjustmentForm() {
         </FormSection>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="submit" className="min-h-10 flex-1">
-            Aplicar ajuste
+          <Button
+            type="submit"
+            className="min-h-10 flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Salvando...' : 'Aplicar ajuste'}
           </Button>
           <Button
             type="button"
@@ -151,12 +164,6 @@ export const StockAdjustmentForm = memo(function StockAdjustmentForm() {
             Ver histórico
           </Button>
         </div>
-
-        {success && (
-          <p className="text-brand-bronze text-sm" role="status">
-            Ajuste registrado com sucesso.
-          </p>
-        )}
       </Form>
     </div>
   );

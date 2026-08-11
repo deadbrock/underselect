@@ -2,6 +2,7 @@ import { prisma } from '@infrastructure/database';
 import {
   buildProductCreateData,
   buildProductUpdateData,
+  adminProductListInclude,
   productInclude,
   toAdminProduct,
   toCatalogProduct,
@@ -9,6 +10,7 @@ import {
 } from '@infrastructure/database/mappers/product.mapper';
 import type { AdminProductInput } from '@shared/types/product-admin.types';
 import type { Prisma } from '@prisma/client';
+import { deriveProductStockFromVariations } from '@shared/utils/product-variation.utils';
 
 async function resolveCategoryId(categorySlug: string) {
   const category = await prisma.category.findUnique({
@@ -43,11 +45,90 @@ export async function listPublicProducts(where?: Prisma.ProductWhereInput) {
 
 export async function listAdminProducts() {
   const products = await prisma.product.findMany({
-    include: productInclude,
+    include: adminProductListInclude,
     orderBy: { createdAt: 'desc' },
   });
 
   return products.map(toAdminProduct);
+}
+
+export async function patchProductStock(
+  productId: string,
+  input: {
+    variationId?: string;
+    stock?: number;
+    minStock?: number;
+  },
+) {
+  if (input.variationId) {
+    const variation = await prisma.productVariation.findFirst({
+      where: { id: input.variationId, productId },
+    });
+    if (!variation) {
+      throw new Error('Variação não encontrada.');
+    }
+
+    await prisma.productVariation.update({
+      where: { id: input.variationId },
+      data: {
+        stock: input.stock,
+        minStock: input.minStock,
+      },
+    });
+  } else {
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        stockQuantity: input.stock,
+        minStock: input.minStock,
+      },
+    });
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: productInclude,
+  });
+
+  if (!product) {
+    throw new Error('Produto não encontrado.');
+  }
+
+  const variations = await prisma.productVariation.findMany({
+    where: { productId },
+  });
+
+  if (variations.length > 0) {
+    const stockSummary = deriveProductStockFromVariations(
+      variations.map((variation) => ({
+        id: variation.id,
+        size: variation.size ?? undefined,
+        sku: variation.sku,
+        price: Number(variation.price),
+        stock: variation.stock,
+      })),
+    );
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        stockQuantity: stockSummary.stockQuantity,
+        inStock: stockSummary.inStock,
+      },
+    });
+  } else if (input.stock !== undefined) {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { inStock: input.stock > 0 },
+    });
+  }
+
+  const updated = await prisma.product.findUnique({
+    where: { id: productId },
+    include: adminProductListInclude,
+  });
+
+  return updated ? toAdminProduct(updated) : undefined;
 }
 
 export async function getProductDetailBySlug(slug: string) {

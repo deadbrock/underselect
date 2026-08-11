@@ -28,13 +28,6 @@ export function useStockListState(items: StockItem[]) {
   const [filters, setFilters] = useState<StockFilters>(DEFAULT);
   const [sort, setSort] = useState<StockSortOption>('updated-desc');
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-    const t = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(t);
-  }, [filters, sort, page]);
 
   useEffect(() => setPage(1), [filters, sort]);
 
@@ -62,7 +55,6 @@ export function useStockListState(items: StockItem[]) {
     filters,
     sort,
     page,
-    isLoading,
     filtered,
     paginated,
     totalPages,

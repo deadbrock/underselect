@@ -14,12 +14,14 @@ export default function TimesSelecoesAdminPage() {
         description="Cadastre os times disponíveis na classificação de produtos."
         endpoint="/api/admin/teams"
         nameLabel="Time"
+        showDescriptionField={false}
       />
       <AdminTaxonomyList
         title="Seleções"
         description="Cadastre as seleções disponíveis na classificação de produtos."
         endpoint="/api/admin/selections"
         nameLabel="Seleção"
+        showDescriptionField={false}
         showPageHeader={false}
       />
     </div>

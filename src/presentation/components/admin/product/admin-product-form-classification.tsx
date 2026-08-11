@@ -29,13 +29,22 @@ export const AdminProductFormClassification = memo(
     const { categories, collections, teams, selections, isLoading } =
       useClassificationOptions();
 
+    const emptyCategoryMessage =
+      categories.length === 0
+        ? 'Cadastre categorias em Admin → Categorias.'
+        : 'Selecione uma categoria';
+    const emptyCollectionMessage =
+      collections.length === 0
+        ? 'Cadastre coleções em Admin → Coleções.'
+        : 'Selecione uma coleção';
+
     return (
       <FormSection title="Classificação">
         {isLoading && (
-          <p className="text-muted-foreground flex items-center gap-2 text-xs">
+          <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <Spinner className="size-3" />
             Atualizando opções do catálogo...
-          </p>
+          </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
           <Controller
@@ -44,11 +53,19 @@ export const AdminProductFormClassification = memo(
             render={({ field, fieldState }) => (
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value || '__empty__'}
+                  onValueChange={(value) =>
+                    field.onChange(value === '__empty__' ? '' : value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="__empty__" disabled>
+                      {emptyCategoryMessage}
+                    </SelectItem>
                     {categories.map((c) => (
                       <SelectItem key={c.slug} value={c.slug}>
                         {c.label}
@@ -90,17 +107,30 @@ export const AdminProductFormClassification = memo(
               </div>
             )}
           />
+          <FormInput<AdminProductFormSchema>
+            name="model"
+            label="Modelo"
+            placeholder="Ex.: Torcedor, Jogador, Home 2024/25"
+          />
           <Controller
             name="collection"
             control={control}
             render={({ field }) => (
               <div className="space-y-2">
                 <Label>Coleção</Label>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value || '__empty__'}
+                  onValueChange={(value) =>
+                    field.onChange(value === '__empty__' ? '' : value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Coleção" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="__empty__" disabled>
+                      {emptyCollectionMessage}
+                    </SelectItem>
                     {collections.map((c) => (
                       <SelectItem key={c} value={c}>
                         {c}
@@ -149,6 +179,11 @@ export const AdminProductFormClassification = memo(
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
+                    {teams.length === 0 && !isLoading ? (
+                      <SelectItem value="__no-teams__" disabled>
+                        Nenhum time cadastrado
+                      </SelectItem>
+                    ) : null}
                     {teams.map((t) => (
                       <SelectItem key={t} value={t}>
                         {t}
@@ -176,6 +211,11 @@ export const AdminProductFormClassification = memo(
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhuma</SelectItem>
+                    {selections.length === 0 && !isLoading ? (
+                      <SelectItem value="__no-selections__" disabled>
+                        Nenhuma seleção cadastrada
+                      </SelectItem>
+                    ) : null}
                     {selections.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s}

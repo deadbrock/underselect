@@ -1,4 +1,7 @@
-import { MarketingLayoutNav } from '@presentation/components/admin/marketing';
+import {
+  MarketingHydrator,
+  MarketingLayoutNav,
+} from '@presentation/components/admin/marketing';
 
 export default function MarketingLayout({
   children,
@@ -7,6 +10,7 @@ export default function MarketingLayout({
 }) {
   return (
     <>
+      <MarketingHydrator />
       <MarketingLayoutNav />
       {children}
     </>

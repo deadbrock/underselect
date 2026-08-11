@@ -68,7 +68,7 @@ export const checkoutAddressSchema = z.object({
 });
 
 export const checkoutPaymentSchema = z.object({
-  paymentMethod: z.enum(['pix', 'card', 'boleto']),
+  paymentMethod: z.enum(['pix', 'card']),
   cardInstallments: z.number().int().min(1).max(12),
 });
 

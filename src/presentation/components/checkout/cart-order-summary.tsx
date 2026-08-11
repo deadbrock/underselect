@@ -33,7 +33,7 @@ export interface CartOrderSummaryProps {
   onRemoveCoupon: () => void;
   onClearCouponFeedback: () => void;
   onShippingCepChange: (cep: string) => void;
-  onCalculateShipping: (cep: string) => void;
+  onCalculateShipping: (cep: string) => Promise<void>;
   onSelectShippingOption: (optionId: string) => void;
   onCheckout?: () => void;
   sticky?: boolean;

@@ -29,13 +29,6 @@ export function useProductListState(products: AdminProduct[]) {
   const [sort, setSort] = useState<AdminProductSortOption>('newest');
   const [viewMode, setViewMode] = useState<AdminProductViewMode>('list');
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, [filters, sort, page, viewMode]);
 
   useEffect(() => {
     setPage(1);
@@ -77,7 +70,6 @@ export function useProductListState(products: AdminProduct[]) {
     sort,
     viewMode,
     page,
-    isLoading,
     filtered,
     paginated,
     totalPages,

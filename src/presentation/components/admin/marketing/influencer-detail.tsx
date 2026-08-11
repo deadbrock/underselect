@@ -14,7 +14,10 @@ import {
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
 import { useMarketingStore } from '@presentation/stores/admin/marketing';
-import { getInfluencerPerformanceChart } from '@presentation/stores/admin/marketing/marketing.utils';
+import {
+  computeInfluencerMetrics,
+  getInfluencerPerformanceChart,
+} from '@presentation/stores/admin/marketing/marketing.utils';
 import type {
   AdminCampaign,
   AdminCoupon,
@@ -34,22 +37,42 @@ export interface InfluencerDetailProps {
 export const InfluencerDetail = memo(function InfluencerDetail({
   influencerId,
 }: InfluencerDetailProps) {
-  const influencer = useMarketingStore((s) =>
-    s.getInfluencerById(influencerId),
-  );
-  const metrics = useMarketingStore((s) =>
-    s.getInfluencerMetrics(influencerId),
-  );
-  const campaigns = useMarketingStore((s) =>
-    s.getCampaignsByInfluencer(influencerId),
-  );
-  const coupons = useMarketingStore((s) =>
-    s.getCouponsByInfluencer(influencerId),
-  );
-  const attributions = useMarketingStore((s) =>
-    s.getAttributionsByInfluencer(influencerId),
-  );
+  const influencers = useMarketingStore((s) => s.influencers);
+  const allCampaigns = useMarketingStore((s) => s.campaigns);
+  const allCoupons = useMarketingStore((s) => s.coupons);
+  const allAttributions = useMarketingStore((s) => s.attributions);
   const toggleStatus = useMarketingStore((s) => s.toggleInfluencerStatus);
+
+  const influencer = useMemo(
+    () => influencers.find((i) => i.id === influencerId),
+    [influencers, influencerId],
+  );
+
+  const metrics = useMemo(() => {
+    if (!influencer) return undefined;
+    return computeInfluencerMetrics(
+      influencerId,
+      allCampaigns,
+      allCoupons,
+      allAttributions,
+      influencer,
+    );
+  }, [influencerId, allCampaigns, allCoupons, allAttributions, influencer]);
+
+  const campaigns = useMemo(
+    () => allCampaigns.filter((c) => c.influencerId === influencerId),
+    [allCampaigns, influencerId],
+  );
+
+  const coupons = useMemo(
+    () => allCoupons.filter((c) => c.influencerId === influencerId),
+    [allCoupons, influencerId],
+  );
+
+  const attributions = useMemo(
+    () => allAttributions.filter((a) => a.influencerId === influencerId),
+    [allAttributions, influencerId],
+  );
 
   const perfChart = useMemo(
     () => getInfluencerPerformanceChart(influencerId, attributions),

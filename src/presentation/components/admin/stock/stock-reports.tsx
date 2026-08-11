@@ -17,7 +17,8 @@ import {
   getDashboardStats,
   getMovementChartData,
   getTopMovedProducts,
-} from '@presentation/stores/admin/stock/stock.utils';
+  getStaleStockItems,
+} from '@presentation/stores/admin/stock';
 import { formatCurrency } from '@shared/utils/format';
 
 interface TopProduct {
@@ -44,8 +45,7 @@ export const StockReports = memo(function StockReports() {
 
   const stale = useMemo(
     () =>
-      stockItems
-        .filter((i) => i.status === 'ok')
+      getStaleStockItems(stockItems)
         .slice(0, 5)
         .map((i) => ({ name: i.productName, count: i.quantity })),
     [stockItems],
@@ -93,6 +93,7 @@ export const StockReports = memo(function StockReports() {
         title="Produtos sem movimentação recente"
         data={stale}
         valueLabel="Qtd."
+        emptyMessage="Nenhum produto parado há 90+ dias."
       />
     </div>
   );
@@ -102,10 +103,12 @@ function ReportTable({
   title,
   data,
   valueLabel = 'Movimentado',
+  emptyMessage = 'Sem dados.',
 }: {
   title: string;
   data: TopProduct[];
   valueLabel?: string;
+  emptyMessage?: string;
 }) {
   const columns: Column<TopProduct>[] = [
     { key: 'name', header: 'Produto', cell: (r) => r.name },
@@ -126,7 +129,7 @@ function ReportTable({
           data={data}
           columns={columns}
           keyExtractor={(r) => r.name}
-          emptyMessage="Sem dados."
+          emptyMessage={emptyMessage}
         />
       </CardContent>
     </Card>

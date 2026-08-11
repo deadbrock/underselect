@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Breadcrumb } from '@presentation/components/ui';
 import { Container } from '@presentation/components/layout';
@@ -11,6 +11,14 @@ import {
   productDetailToCartInput,
   useCartStore,
 } from '@presentation/stores/cart';
+import {
+  getProductPurchaseState,
+  resolveVariationPricing,
+} from '@shared/utils/product-variation.utils';
+import {
+  getSizeOutOfStockMessage,
+  SIZE_SELECTION_REQUIRED_MESSAGE,
+} from '@shared/constants/pdp.constants';
 import { PdpBuyBox } from './pdp-buy-box';
 import { PdpDetailsTabs } from './pdp-details-tabs';
 import { PdpGallery } from './pdp-gallery';
@@ -32,7 +40,7 @@ export interface ProductDetailExperienceProps {
 function getDefaultSelection<T extends { disabled?: boolean; id: string }>(
   items: T[],
 ): string | undefined {
-  return items.find((item) => !item.disabled)?.id;
+  return items.find((item) => !item.disabled)?.id ?? items[0]?.id;
 }
 
 const ProductDetailExperience = memo(function ProductDetailExperience({
@@ -42,13 +50,15 @@ const ProductDetailExperience = memo(function ProductDetailExperience({
 }: ProductDetailExperienceProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
-
-  const defaultSize = useMemo(
-    () =>
-      product.sizes.find((s) => !product.unavailableSizes.includes(s)) ??
-      product.sizes[0],
-    [product.sizes, product.unavailableSizes],
-  );
+  const defaultSize = useMemo(() => {
+    const variations = product.variations ?? [];
+    return (
+      product.sizes.find((size) => !product.unavailableSizes.includes(size)) ??
+      product.sizes[0] ??
+      variations.find((variation) => variation.stock > 0)?.size ??
+      variations[0]?.size
+    );
+  }, [product.sizes, product.unavailableSizes, product.variations]);
   const defaultColor = useMemo(
     () => getDefaultSelection(product.colors),
     [product.colors],
@@ -61,37 +71,102 @@ const ProductDetailExperience = memo(function ProductDetailExperience({
   const [selectedSize, setSelectedSize] = useState(defaultSize);
   const [selectedColor, setSelectedColor] = useState(defaultColor);
   const [selectedModel, setSelectedModel] = useState(defaultModel);
+  const [sizeStockAlert, setSizeStockAlert] = useState<string | null>(null);
+
+  const notifySizeStockAlert = useCallback((message: string | null) => {
+    setSizeStockAlert(message);
+  }, []);
+
+  useEffect(() => {
+    setSelectedSize(defaultSize);
+    setSelectedColor(defaultColor);
+    setSelectedModel(defaultModel);
+    setSizeStockAlert(null);
+  }, [product.id, defaultSize, defaultColor, defaultModel]);
+
+  const selectedColorOption = useMemo(
+    () => product.colors.find((color) => color.id === selectedColor),
+    [product.colors, selectedColor],
+  );
+  const selectedModelOption = useMemo(
+    () => product.models.find((model) => model.id === selectedModel),
+    [product.models, selectedModel],
+  );
+
+  const { activeVariation, variationInStock, hasVariations } = useMemo(
+    () =>
+      getProductPurchaseState(product, {
+        size: selectedSize,
+        colorLabel: selectedColorOption?.label,
+        modelLabel: selectedModelOption?.label,
+      }),
+    [
+      product,
+      selectedColorOption?.label,
+      selectedModelOption?.label,
+      selectedSize,
+    ],
+  );
+
+  const activePricing = useMemo(
+    () => resolveVariationPricing(product, activeVariation),
+    [activeVariation, product],
+  );
 
   const canPurchase = Boolean(
-    selectedSize && selectedColor && selectedModel && product.inStock,
+    selectedSize && selectedColor && selectedModel && variationInStock,
   );
 
   const handleAddToCart = useCallback(() => {
-    if (!canPurchase || !selectedSize || !selectedColor || !selectedModel) {
+    if (!selectedSize || !selectedColor || !selectedModel) {
+      notifySizeStockAlert(SIZE_SELECTION_REQUIRED_MESSAGE);
       return;
     }
 
+    if (!variationInStock) {
+      notifySizeStockAlert(
+        hasVariations && selectedSize
+          ? getSizeOutOfStockMessage(selectedSize)
+          : 'Produto indisponível no momento.',
+      );
+      return;
+    }
+
+    notifySizeStockAlert(null);
     addItem(
       productDetailToCartInput(product, {
         size: selectedSize,
         colorId: selectedColor,
         modelId: selectedModel,
+        variation: activeVariation,
       }),
     );
     toast.success('Produto adicionado à sacola');
   }, [
+    activeVariation,
     addItem,
-    canPurchase,
+    hasVariations,
+    notifySizeStockAlert,
     product,
     selectedColor,
     selectedModel,
     selectedSize,
+    variationInStock,
   ]);
 
   const handleBuyNow = useCallback(() => {
     handleAddToCart();
-    router.push('/carrinho' as Route);
-  }, [handleAddToCart, router]);
+    if (selectedSize && selectedColor && selectedModel && variationInStock) {
+      router.push('/carrinho' as Route);
+    }
+  }, [
+    handleAddToCart,
+    router,
+    selectedColor,
+    selectedModel,
+    selectedSize,
+    variationInStock,
+  ]);
 
   return (
     <>
@@ -102,12 +177,18 @@ const ProductDetailExperience = memo(function ProductDetailExperience({
           <PdpGallery images={product.images} productName={product.name} />
 
           <div className="space-y-8">
-            <PdpInfoHeader product={product} />
+            <PdpInfoHeader
+              product={product}
+              selectedSize={selectedSize}
+              variationStock={activeVariation?.stock}
+            />
             <PdpBuyBox
               product={product}
               selectedSize={selectedSize}
               selectedColor={selectedColor}
               selectedModel={selectedModel}
+              sizeStockAlert={sizeStockAlert}
+              onSizeStockAlertChange={notifySizeStockAlert}
               onSizeChange={setSelectedSize}
               onColorChange={setSelectedColor}
               onModelChange={setSelectedModel}
@@ -127,9 +208,9 @@ const ProductDetailExperience = memo(function ProductDetailExperience({
 
       <PdpMobileBar
         productName={product.name}
-        price={product.price}
-        compareAtPrice={product.compareAtPrice}
-        inStock={product.inStock}
+        price={activePricing.price}
+        compareAtPrice={activePricing.compareAtPrice}
+        inStock={variationInStock}
         canPurchase={canPurchase}
         onBuyNow={handleBuyNow}
       />

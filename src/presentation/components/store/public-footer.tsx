@@ -1,15 +1,16 @@
+'use client';
+
 import Link from 'next/link';
 import type { Route } from 'next';
 
 import { Separator } from '@presentation/components/ui';
 import { Container } from '@presentation/components/layout';
 import { NewsletterForm } from '@presentation/components/store/newsletter-form';
+import { useStoreSettings } from '@presentation/contexts/store-settings-context';
 import {
   FOOTER_ACCOUNT,
   FOOTER_POLICIES,
   FOOTER_SUPPORT,
-  SOCIAL_LINKS,
-  STORE_NAME,
 } from '@shared/constants/store-navigation';
 
 interface FooterColumnProps {
@@ -38,7 +39,11 @@ function FooterColumn({ title, links }: FooterColumnProps) {
 }
 
 export function PublicFooter() {
+  const settings = useStoreSettings();
   const year = new Date().getFullYear();
+  const socialLinks = settings.instagramUrl
+    ? [{ label: 'Instagram', href: settings.instagramUrl }]
+    : [];
 
   return (
     <footer className="border-border bg-brand-gray-100 dark:bg-brand-gray-900 mt-auto border-t">
@@ -49,25 +54,27 @@ export function PublicFooter() {
               href="/"
               className="text-foreground inline-block text-sm font-medium tracking-[0.25em] uppercase"
             >
-              {STORE_NAME}
+              {settings.storeName}
             </Link>
             <p className="text-muted-foreground mt-4 max-w-xs text-sm leading-relaxed">
               Camisas esportivas de primeira linha. Clubes, seleções e edições
               especiais com acabamento premium para quem leva a paixão a sério.
             </p>
-            <div className="mt-6 flex flex-wrap gap-4">
-              {SOCIAL_LINKS.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-label text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {social.label}
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 ? (
+              <div className="mt-6 flex flex-wrap gap-4">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-label text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {social.label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-6">
@@ -85,9 +92,9 @@ export function PublicFooter() {
 
         <div className="text-muted-foreground flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; {year} {STORE_NAME}. Todos os direitos reservados.
+            &copy; {year} {settings.storeName}. Todos os direitos reservados.
           </p>
-          <p className="tracking-wider uppercase">Recife, Brasil</p>
+          <p className="tracking-wider uppercase">{settings.storeLocation}</p>
         </div>
       </Container>
     </footer>

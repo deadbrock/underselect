@@ -11,4 +11,3 @@ export {
   generateOrderId,
   type CheckoutStore,
 } from './checkout.store';
-export { mockCepLookup, mockCreatePaymentIntent } from './checkout.utils';

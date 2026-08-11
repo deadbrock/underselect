@@ -30,17 +30,37 @@ export interface CouponDetailProps {
 export const CouponDetail = memo(function CouponDetail({
   couponId,
 }: CouponDetailProps) {
-  const coupon = useMarketingStore((s) => s.getCouponById(couponId));
-  const influencer = useMarketingStore((s) =>
-    coupon?.influencerId ? s.getInfluencerById(coupon.influencerId) : undefined,
-  );
-  const campaign = useMarketingStore((s) =>
-    coupon?.campaignId ? s.getCampaignById(coupon.campaignId) : undefined,
-  );
-  const attributions = useMarketingStore((s) =>
-    s.getAttributionsByCoupon(couponId),
-  );
+  const coupons = useMarketingStore((s) => s.coupons);
+  const campaigns = useMarketingStore((s) => s.campaigns);
+  const influencers = useMarketingStore((s) => s.influencers);
+  const allAttributions = useMarketingStore((s) => s.attributions);
   const toggleStatus = useMarketingStore((s) => s.toggleCouponStatus);
+
+  const coupon = useMemo(
+    () => coupons.find((c) => c.id === couponId),
+    [coupons, couponId],
+  );
+
+  const influencer = useMemo(
+    () =>
+      coupon?.influencerId
+        ? influencers.find((i) => i.id === coupon.influencerId)
+        : undefined,
+    [coupon, influencers],
+  );
+
+  const campaign = useMemo(
+    () =>
+      coupon?.campaignId
+        ? campaigns.find((c) => c.id === coupon.campaignId)
+        : undefined,
+    [coupon, campaigns],
+  );
+
+  const attributions = useMemo(
+    () => allAttributions.filter((a) => a.couponId === couponId),
+    [allAttributions, couponId],
+  );
 
   const stats = useMemo(() => {
     const revenue = getCouponRevenue(couponId, attributions);

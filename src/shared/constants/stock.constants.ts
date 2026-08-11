@@ -22,7 +22,6 @@ export const STOCK_NAV_ITEMS = [
   { label: 'Entradas', href: '/admin/estoque/entradas' },
   { label: 'Saídas', href: '/admin/estoque/saidas' },
   { label: 'Ajustes', href: '/admin/estoque/ajustes' },
-  { label: 'Transferências', href: '/admin/estoque/transferencias' },
   { label: 'Inventário', href: '/admin/estoque/inventario' },
   { label: 'Alertas', href: '/admin/estoque/alertas' },
   { label: 'Relatórios', href: '/admin/estoque/relatorios' },
@@ -32,7 +31,6 @@ export const STOCK_MOVEMENT_LABELS: Record<StockMovementType, string> = {
   entry: 'Entrada',
   exit: 'Saída',
   adjustment: 'Ajuste',
-  transfer: 'Transferência',
   inventory: 'Inventário',
 };
 

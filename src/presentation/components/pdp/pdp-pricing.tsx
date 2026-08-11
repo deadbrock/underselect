@@ -1,11 +1,17 @@
-import { memo } from 'react';
+'use client';
+
+import { memo, useMemo } from 'react';
 
 import { Price } from '@presentation/components/data-display';
 import { cn } from '@shared/utils/cn';
-import type { ProductDetail } from '@shared/types/product-detail.types';
+import { resolveVariationPricing } from '@shared/utils/product-variation.utils';
+import type { ProductVariationOption } from '@shared/utils/product-variation.utils';
 
 export interface PdpPricingProps {
-  product: ProductDetail;
+  price: number;
+  compareAtPrice?: number;
+  installmentCount: number;
+  discountPercent?: number;
   className?: string;
 }
 
@@ -16,21 +22,38 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+export interface PdpPricingFromProductProps {
+  product: {
+    price: number;
+    compareAtPrice?: number;
+    installmentCount: number;
+    discountPercent?: number;
+  };
+  variation?: ProductVariationOption;
+  className?: string;
+}
+
 const PdpPricing = memo(function PdpPricing({
   product,
+  variation,
   className,
-}: PdpPricingProps) {
-  const installmentValue = product.price / product.installmentCount;
+}: PdpPricingFromProductProps) {
+  const pricing = useMemo(
+    () => resolveVariationPricing(product, variation),
+    [product, variation],
+  );
+
+  const installmentValue = pricing.price / product.installmentCount;
   const savings =
-    product.compareAtPrice && product.compareAtPrice > product.price
-      ? product.compareAtPrice - product.price
+    pricing.compareAtPrice && pricing.compareAtPrice > pricing.price
+      ? pricing.compareAtPrice - pricing.price
       : null;
 
   return (
     <div className={cn('space-y-2', className)}>
       <Price
-        value={product.price}
-        compareAt={product.compareAtPrice}
+        value={pricing.price}
+        compareAt={pricing.compareAtPrice}
         size="lg"
       />
       <p className="text-muted-foreground text-sm">
@@ -43,7 +66,7 @@ const PdpPricing = memo(function PdpPricing({
       {savings !== null && (
         <p className="text-sm text-[var(--brand-bronze)]">
           Economize {formatCurrency(savings)}
-          {product.discountPercent ? ` (−${product.discountPercent}%)` : ''}
+          {pricing.discountPercent ? ` (−${pricing.discountPercent}%)` : ''}
         </p>
       )}
     </div>

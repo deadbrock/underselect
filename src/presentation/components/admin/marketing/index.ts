@@ -1,3 +1,4 @@
+export { MarketingHydrator } from './marketing-hydrator';
 export { MarketingLayoutNav } from './marketing-layout-nav';
 export { MarketingDashboard } from './marketing-dashboard';
 export { InfluencerList } from './influencer-list';

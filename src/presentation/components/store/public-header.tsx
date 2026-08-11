@@ -9,11 +9,11 @@ import { memo, useEffect, useState } from 'react';
 import { Button } from '@presentation/components/ui';
 import { CartHeaderButton } from '@presentation/components/checkout';
 import { PromoBar } from '@presentation/components/store/promo-bar';
+import { useStoreSettings } from '@presentation/contexts/store-settings-context';
 import { cn } from '@shared/utils/cn';
 import {
   HEADER_ACTIONS,
   MAIN_NAV,
-  STORE_NAME,
   type NavCategory,
 } from '@shared/constants/store-navigation';
 import { useIsMobile } from '@presentation/hooks';
@@ -92,6 +92,7 @@ const DesktopNav = memo(function DesktopNav({
 });
 
 export const PublicHeader = memo(function PublicHeader() {
+  const settings = useStoreSettings();
   const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -106,6 +107,8 @@ export const PublicHeader = memo(function PublicHeader() {
   return (
     <header className="sticky top-0 z-50">
       <PromoBar
+        enabled={settings.promoBarEnabled}
+        message={settings.promoBarMessage}
         className={cn(
           'overflow-hidden transition-all duration-300',
           isScrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100',
@@ -149,7 +152,7 @@ export const PublicHeader = memo(function PublicHeader() {
                 isScrolled ? 'text-xs' : 'text-sm',
               )}
             >
-              {STORE_NAME}
+              {settings.storeName}
             </Link>
           </div>
 

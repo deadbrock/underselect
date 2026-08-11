@@ -1,9 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
-import { MARKETING_STORAGE_KEY } from '@shared/constants/marketing-admin.constants';
 import type {
   AdminCampaign,
   AdminCoupon,
@@ -12,25 +10,47 @@ import type {
   CouponAttribution,
   CouponFormInput,
   InfluencerFormInput,
+  MarketingDashboardStats,
 } from '@shared/types/marketing-admin.types';
 
 import {
-  buildInitialAttributions,
-  buildInitialCampaigns,
-  buildInitialCoupons,
-  buildInitialInfluencers,
-  computeInfluencerMetrics,
-} from './marketing.utils';
+  createCampaignApi,
+  createCouponApi,
+  createInfluencerApi,
+  deleteCampaignApi,
+  deleteCouponApi,
+  deleteInfluencerApi,
+  fetchCampaigns,
+  fetchCoupons,
+  fetchInfluencers,
+  fetchMarketingDashboard,
+  toggleCampaignStatusApi,
+  toggleCouponStatusApi,
+  toggleInfluencerStatusApi,
+  updateCampaignApi,
+  updateCouponApi,
+  updateInfluencerApi,
+} from './marketing.api';
+import { computeInfluencerMetrics } from './marketing.utils';
 
 interface MarketingState {
   influencers: AdminInfluencer[];
   campaigns: AdminCampaign[];
   coupons: AdminCoupon[];
   attributions: CouponAttribution[];
-  initialized: boolean;
+  dashboardStats: MarketingDashboardStats | null;
+  dashboardCharts: {
+    topCoupons: { label: string; value: number }[];
+    revenueByInfluencer: { label: string; value: number }[];
+  } | null;
+  loading: boolean;
+  hydrated: boolean;
+  error: string | null;
 }
 
 interface MarketingActions {
+  hydrate: () => Promise<void>;
+  loadDashboard: (period?: string) => Promise<void>;
   getInfluencerById: (id: string) => AdminInfluencer | undefined;
   getCampaignById: (id: string) => AdminCampaign | undefined;
   getCouponById: (id: string) => AdminCoupon | undefined;
@@ -43,180 +63,180 @@ interface MarketingActions {
   getCouponsByInfluencer: (id: string) => AdminCoupon[];
   getCouponsByCampaign: (id: string) => AdminCoupon[];
   getCampaignsByInfluencer: (id: string) => AdminCampaign[];
-  createInfluencer: (input: InfluencerFormInput) => AdminInfluencer;
-  updateInfluencer: (id: string, input: InfluencerFormInput) => void;
-  toggleInfluencerStatus: (id: string) => void;
-  createCampaign: (input: CampaignFormInput) => AdminCampaign;
-  updateCampaign: (id: string, input: CampaignFormInput) => void;
-  toggleCampaignStatus: (id: string) => void;
-  createCoupon: (input: CouponFormInput) => AdminCoupon;
-  updateCoupon: (id: string, input: CouponFormInput) => void;
-  toggleCouponStatus: (id: string) => void;
+  createInfluencer: (input: InfluencerFormInput) => Promise<AdminInfluencer>;
+  updateInfluencer: (id: string, input: InfluencerFormInput) => Promise<void>;
+  toggleInfluencerStatus: (id: string) => Promise<void>;
+  deleteInfluencer: (id: string) => Promise<void>;
+  createCampaign: (input: CampaignFormInput) => Promise<AdminCampaign>;
+  updateCampaign: (id: string, input: CampaignFormInput) => Promise<void>;
+  toggleCampaignStatus: (id: string) => Promise<void>;
+  deleteCampaign: (id: string) => Promise<void>;
+  createCoupon: (input: CouponFormInput) => Promise<AdminCoupon>;
+  updateCoupon: (id: string, input: CouponFormInput) => Promise<void>;
+  toggleCouponStatus: (id: string) => Promise<void>;
+  deleteCoupon: (id: string) => Promise<void>;
 }
 
 export type MarketingStore = MarketingState & MarketingActions;
 
-export const useMarketingStore = create<MarketingStore>()(
-  persist(
-    (set, get) => ({
-      influencers: buildInitialInfluencers(),
-      campaigns: buildInitialCampaigns(),
-      coupons: buildInitialCoupons(),
-      attributions: buildInitialAttributions(),
-      initialized: true,
+export const useMarketingStore = create<MarketingStore>((set, get) => ({
+  influencers: [],
+  campaigns: [],
+  coupons: [],
+  attributions: [],
+  dashboardStats: null,
+  dashboardCharts: null,
+  loading: false,
+  hydrated: false,
+  error: null,
 
-      getInfluencerById: (id) => get().influencers.find((i) => i.id === id),
+  hydrate: async () => {
+    if (get().loading) return;
+    set({ loading: true, error: null });
+    try {
+      const [influencers, campaigns, coupons, dashboard] = await Promise.all([
+        fetchInfluencers(),
+        fetchCampaigns(),
+        fetchCoupons(),
+        fetchMarketingDashboard(),
+      ]);
+      set({
+        influencers,
+        campaigns,
+        coupons,
+        attributions: dashboard.recentAttributions,
+        dashboardStats: dashboard.stats,
+        dashboardCharts: dashboard.charts,
+        hydrated: true,
+      });
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Falha ao carregar marketing.',
+      });
+    } finally {
+      set({ loading: false });
+    }
+  },
 
-      getCampaignById: (id) => get().campaigns.find((c) => c.id === id),
+  loadDashboard: async (period) => {
+    const dashboard = await fetchMarketingDashboard(period);
+    set({
+      dashboardStats: dashboard.stats,
+      dashboardCharts: dashboard.charts,
+      attributions: dashboard.recentAttributions,
+    });
+  },
 
-      getCouponById: (id) => get().coupons.find((c) => c.id === id),
+  getInfluencerById: (id) => get().influencers.find((i) => i.id === id),
+  getCampaignById: (id) => get().campaigns.find((c) => c.id === id),
+  getCouponById: (id) => get().coupons.find((c) => c.id === id),
 
-      getInfluencerMetrics: (id) => {
-        const inf = get().getInfluencerById(id);
-        if (!inf) return undefined;
-        return computeInfluencerMetrics(
-          id,
-          get().campaigns,
-          get().coupons,
-          get().attributions,
-          inf,
-        );
-      },
+  getInfluencerMetrics: (id) => {
+    const inf = get().getInfluencerById(id);
+    if (!inf) return undefined;
+    return computeInfluencerMetrics(
+      id,
+      get().campaigns,
+      get().coupons,
+      get().attributions,
+      inf,
+    );
+  },
 
-      getAttributionsByInfluencer: (id) =>
-        get().attributions.filter((a) => a.influencerId === id),
+  getAttributionsByInfluencer: (id) =>
+    get().attributions.filter((a) => a.influencerId === id),
+  getAttributionsByCampaign: (id) =>
+    get().attributions.filter((a) => a.campaignId === id),
+  getAttributionsByCoupon: (id) =>
+    get().attributions.filter((a) => a.couponId === id),
+  getCouponsByInfluencer: (id) =>
+    get().coupons.filter((c) => c.influencerId === id),
+  getCouponsByCampaign: (id) =>
+    get().coupons.filter((c) => c.campaignId === id),
+  getCampaignsByInfluencer: (id) =>
+    get().campaigns.filter((c) => c.influencerId === id),
 
-      getAttributionsByCampaign: (id) =>
-        get().attributions.filter((a) => a.campaignId === id),
+  createInfluencer: async (input) => {
+    const influencer = await createInfluencerApi(input);
+    set((s) => ({ influencers: [influencer, ...s.influencers] }));
+    return influencer;
+  },
 
-      getAttributionsByCoupon: (id) =>
-        get().attributions.filter((a) => a.couponId === id),
+  updateInfluencer: async (id, input) => {
+    const influencer = await updateInfluencerApi(id, input);
+    set((s) => ({
+      influencers: s.influencers.map((i) => (i.id === id ? influencer : i)),
+    }));
+  },
 
-      getCouponsByInfluencer: (id) =>
-        get().coupons.filter((c) => c.influencerId === id),
+  toggleInfluencerStatus: async (id) => {
+    const influencer = await toggleInfluencerStatusApi(id);
+    set((s) => ({
+      influencers: s.influencers.map((i) => (i.id === id ? influencer : i)),
+    }));
+  },
 
-      getCouponsByCampaign: (id) =>
-        get().coupons.filter((c) => c.campaignId === id),
+  deleteInfluencer: async (id) => {
+    await deleteInfluencerApi(id);
+    set((s) => ({
+      influencers: s.influencers.filter((i) => i.id !== id),
+    }));
+  },
 
-      getCampaignsByInfluencer: (id) =>
-        get().campaigns.filter((c) => c.influencerId === id),
+  createCampaign: async (input) => {
+    const campaign = await createCampaignApi(input);
+    set((s) => ({ campaigns: [campaign, ...s.campaigns] }));
+    return campaign;
+  },
 
-      createInfluencer: (input) => {
-        const influencer: AdminInfluencer = {
-          id: `inf-${Date.now()}`,
-          ...input,
-          createdAt: now(),
-          updatedAt: now(),
-        };
-        set((s) => ({ influencers: [influencer, ...s.influencers] }));
-        return influencer;
-      },
+  updateCampaign: async (id, input) => {
+    const campaign = await updateCampaignApi(id, input);
+    set((s) => ({
+      campaigns: s.campaigns.map((c) => (c.id === id ? campaign : c)),
+    }));
+  },
 
-      updateInfluencer: (id, input) => {
-        set((s) => ({
-          influencers: s.influencers.map((i) =>
-            i.id === id ? { ...i, ...input, updatedAt: now() } : i,
-          ),
-        }));
-      },
+  toggleCampaignStatus: async (id) => {
+    const campaign = await toggleCampaignStatusApi(id);
+    set((s) => ({
+      campaigns: s.campaigns.map((c) => (c.id === id ? campaign : c)),
+    }));
+  },
 
-      toggleInfluencerStatus: (id) => {
-        set((s) => ({
-          influencers: s.influencers.map((i) =>
-            i.id === id
-              ? {
-                  ...i,
-                  status: i.status === 'active' ? 'inactive' : 'active',
-                  updatedAt: now(),
-                }
-              : i,
-          ),
-        }));
-      },
+  deleteCampaign: async (id) => {
+    await deleteCampaignApi(id);
+    set((s) => ({
+      campaigns: s.campaigns.filter((c) => c.id !== id),
+    }));
+  },
 
-      createCampaign: (input) => {
-        const campaign: AdminCampaign = {
-          id: `camp-${Date.now()}`,
-          ...input,
-          createdAt: now(),
-          updatedAt: now(),
-        };
-        set((s) => ({ campaigns: [campaign, ...s.campaigns] }));
-        return campaign;
-      },
+  createCoupon: async (input) => {
+    const coupon = await createCouponApi(input);
+    set((s) => ({ coupons: [coupon, ...s.coupons] }));
+    return coupon;
+  },
 
-      updateCampaign: (id, input) => {
-        set((s) => ({
-          campaigns: s.campaigns.map((c) =>
-            c.id === id ? { ...c, ...input, updatedAt: now() } : c,
-          ),
-        }));
-      },
+  updateCoupon: async (id, input) => {
+    const coupon = await updateCouponApi(id, input);
+    set((s) => ({
+      coupons: s.coupons.map((c) => (c.id === id ? coupon : c)),
+    }));
+  },
 
-      toggleCampaignStatus: (id) => {
-        set((s) => ({
-          campaigns: s.campaigns.map((c) => {
-            if (c.id !== id) return c;
-            const next =
-              c.status === 'active'
-                ? 'paused'
-                : c.status === 'paused'
-                  ? 'active'
-                  : c.status;
-            return { ...c, status: next, updatedAt: now() };
-          }),
-        }));
-      },
+  toggleCouponStatus: async (id) => {
+    const coupon = await toggleCouponStatusApi(id);
+    set((s) => ({
+      coupons: s.coupons.map((c) => (c.id === id ? coupon : c)),
+    }));
+  },
 
-      createCoupon: (input) => {
-        const coupon: AdminCoupon = {
-          id: `coup-${Date.now()}`,
-          ...input,
-          usageCount: 0,
-          createdAt: now(),
-          updatedAt: now(),
-        };
-        set((s) => ({ coupons: [coupon, ...s.coupons] }));
-        return coupon;
-      },
-
-      updateCoupon: (id, input) => {
-        set((s) => ({
-          coupons: s.coupons.map((c) =>
-            c.id === id ? { ...c, ...input, updatedAt: now() } : c,
-          ),
-        }));
-      },
-
-      toggleCouponStatus: (id) => {
-        set((s) => ({
-          coupons: s.coupons.map((c) => {
-            if (c.id !== id) return c;
-            const next =
-              c.status === 'active'
-                ? 'paused'
-                : c.status === 'paused'
-                  ? 'active'
-                  : c.status;
-            return { ...c, status: next, updatedAt: now() };
-          }),
-        }));
-      },
-    }),
-    {
-      name: MARKETING_STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        influencers: state.influencers,
-        campaigns: state.campaigns,
-        coupons: state.coupons,
-        attributions: state.attributions,
-        initialized: state.initialized,
-      }),
-    },
-  ),
-);
-
-function now() {
-  return new Date().toISOString();
-}
+  deleteCoupon: async (id) => {
+    await deleteCouponApi(id);
+    set((s) => ({
+      coupons: s.coupons.filter((c) => c.id !== id),
+    }));
+  },
+}));

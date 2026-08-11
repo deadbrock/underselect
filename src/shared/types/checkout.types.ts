@@ -30,6 +30,9 @@ export interface CheckoutOrderResult {
   paymentMethod: PaymentMethod;
   total: number;
   createdAt: string;
+  checkoutUrl?: string;
+  paymentStatus?: 'pending' | 'approved' | 'failed';
+  receiptUrl?: string | null;
 }
 
 export interface CepLookupResult {
@@ -37,6 +40,7 @@ export interface CepLookupResult {
   neighborhood: string;
   city: string;
   state: string;
+  complement?: string;
 }
 
 /** Payload preparado para integração futura com InfinitePay */

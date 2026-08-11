@@ -45,3 +45,14 @@ export const ADMIN_PRODUCT_STATUS_LABELS: Record<AdminProductStatus, string> = {
 };
 
 export const ADMIN_PRODUCT_PAGE_SIZE = 12;
+
+export const PRODUCT_CLOTHING_SIZES = [
+  'PP',
+  'P',
+  'M',
+  'G',
+  'GG',
+  'XG',
+  'XXG',
+  '3G',
+] as const;

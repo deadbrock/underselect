@@ -73,10 +73,12 @@ export function calculateCartTotals(
   const catalogDiscount = calculateCatalogDiscount(items);
   const couponDiscount = calculateCouponDiscount(items, subtotal, coupon);
   const shipping = calculateShippingCost(shippingQuote, coupon);
-  const total = Math.max(0, subtotal - couponDiscount + shipping);
+  const totalBeforeShipping = Math.max(0, subtotal - couponDiscount);
+  const total = Math.max(0, totalBeforeShipping + shipping);
   const installmentCount =
     items.reduce((max, item) => Math.max(max, item.installmentCount), 0) ||
     DEFAULT_INSTALLMENT_COUNT;
+  const payableTotal = shippingQuote ? total : totalBeforeShipping;
 
   return {
     itemCount: calculateItemCount(items),
@@ -85,8 +87,9 @@ export function calculateCartTotals(
     couponDiscount,
     shipping,
     total,
+    totalBeforeShipping,
     installmentCount,
-    installmentValue: total / installmentCount,
+    installmentValue: payableTotal / installmentCount,
   };
 }
 
@@ -130,8 +133,4 @@ export function resolveCoupon(code: string): {
       message: `Cupom ${mock.code} aplicado — ${mock.label}.`,
     },
   };
-}
-
-export function mockShippingQuote(_cep: string): ShippingQuote | null {
-  return null;
 }

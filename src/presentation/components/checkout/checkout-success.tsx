@@ -7,6 +7,7 @@ import { memo } from 'react';
 
 import { Button } from '@presentation/components/ui';
 import { Container } from '@presentation/components/layout';
+import { useCheckoutStore } from '@presentation/stores/checkout';
 import type { CheckoutOrderResult } from '@shared/types/checkout.types';
 
 export interface CheckoutSuccessProps {
@@ -16,6 +17,8 @@ export interface CheckoutSuccessProps {
 export const CheckoutSuccess = memo(function CheckoutSuccess({
   order,
 }: CheckoutSuccessProps) {
+  const resetCheckout = useCheckoutStore((state) => state.resetCheckout);
+
   const formattedTotal = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -60,10 +63,14 @@ export const CheckoutSuccess = memo(function CheckoutSuccess({
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button variant="bronze" size="lg" asChild>
-            <Link href={'/categoria' as Route}>Continuar comprando</Link>
+            <Link href={'/categoria' as Route} onClick={resetCheckout}>
+              Continuar comprando
+            </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link href={'/pedidos' as Route}>Ver pedidos</Link>
+            <Link href={'/pedidos' as Route} onClick={resetCheckout}>
+              Ver pedidos
+            </Link>
           </Button>
         </div>
       </div>

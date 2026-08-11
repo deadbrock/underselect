@@ -59,6 +59,7 @@ export interface MockCoupon {
 }
 
 export interface AppliedCoupon {
+  id?: string;
   code: string;
   type: CouponType;
   value: number;
@@ -82,6 +83,9 @@ export interface ShippingOption {
 
 export interface ShippingQuote {
   cep: string;
+  originCep?: string;
+  originCity?: string;
+  originState?: string;
   options: ShippingOption[];
   selectedOptionId: string;
 }
@@ -93,6 +97,7 @@ export interface CartTotals {
   couponDiscount: number;
   shipping: number;
   total: number;
+  totalBeforeShipping: number;
   installmentCount: number;
   installmentValue: number;
 }

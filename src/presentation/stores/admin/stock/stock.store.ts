@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+import { useProductStore } from '@presentation/stores/admin/product';
 import { STOCK_STORAGE_KEY } from '@shared/constants/stock.constants';
 import type { AdminProduct } from '@shared/types/product-admin.types';
 import type {
@@ -20,7 +21,7 @@ import {
   buildStockItemsFromProducts,
   createMovement,
   generateAlerts,
-  resolveStockStatus,
+  mergeInventoryFromItems,
 } from './stock.utils';
 
 interface StockState {
@@ -33,36 +34,36 @@ interface StockState {
 interface StockActions {
   syncFromProducts: (products: AdminProduct[]) => void;
   getStockItemById: (id: string) => StockItem | undefined;
-  registerEntry: (input: StockEntryInput) => void;
-  registerExit: (input: StockExitInput) => void;
-  registerAdjustment: (input: StockAdjustmentInput) => void;
+  registerEntry: (input: StockEntryInput) => Promise<void>;
+  registerExit: (input: StockExitInput) => Promise<void>;
+  registerAdjustment: (input: StockAdjustmentInput) => Promise<void>;
   updateInventoryCount: (
     inventoryId: string,
     counted: number,
     notes?: string,
   ) => void;
-  applyInventoryAdjustment: (inventoryId: string) => void;
+  applyInventoryAdjustment: (inventoryId: string) => Promise<void>;
   getAlerts: () => ReturnType<typeof generateAlerts>;
 }
 
 export type StockStore = StockState & StockActions;
 
-function updateItemQuantity(
-  items: StockItem[],
-  stockItemId: string,
-  newQty: number,
-): StockItem[] {
-  const now = new Date().toISOString();
-  return items.map((item) =>
-    item.id === stockItemId
-      ? {
-          ...item,
-          quantity: newQty,
-          status: resolveStockStatus(newQty, item.minQuantity),
-          lastUpdated: now,
-        }
-      : item,
-  );
+async function persistStockQuantity(item: StockItem, stock: number) {
+  await useProductStore.getState().patchProductStock(item.productId, {
+    variationId: item.variationId,
+    stock,
+  });
+}
+
+function appendMovement(
+  set: (
+    partial: Partial<StockState> | ((state: StockState) => Partial<StockState>),
+  ) => void,
+  movement: StockMovement,
+) {
+  set((state) => ({
+    movements: [movement, ...state.movements],
+  }));
 }
 
 export const useStockStore = create<StockStore>()(
@@ -74,96 +75,102 @@ export const useStockStore = create<StockStore>()(
       initialized: false,
 
       syncFromProducts: (products) => {
-        const state = get();
-        if (state.initialized && state.stockItems.length > 0) return;
-
         const items = buildStockItemsFromProducts(products);
-        const movements = buildInitialMovements(items);
-        const inventory = buildInitialInventory(items);
 
-        set({
+        set((state) => ({
           stockItems: items,
-          movements,
-          inventory,
+          movements: state.initialized
+            ? state.movements
+            : buildInitialMovements(items),
+          inventory: state.initialized
+            ? mergeInventoryFromItems(items, state.inventory)
+            : buildInitialInventory(items),
           initialized: true,
-        });
+        }));
       },
 
       getStockItemById: (id) => get().stockItems.find((i) => i.id === id),
 
-      registerEntry: (input) => {
+      registerEntry: async (input) => {
         const item = get().getStockItemById(input.stockItemId);
-        if (!item) return;
+        if (!item) {
+          throw new Error('Item de estoque não encontrado.');
+        }
 
         const previous = item.quantity;
         const current = previous + input.quantity;
-        const movement = createMovement(
-          item,
-          'entry',
-          input.quantity,
-          previous,
-          current,
-          input.reason,
-          { notes: input.notes, supplier: input.supplier },
-        );
 
-        set((state) => ({
-          stockItems: updateItemQuantity(state.stockItems, item.id, current),
-          movements: [movement, ...state.movements],
-        }));
+        await persistStockQuantity(item, current);
+
+        appendMovement(
+          set,
+          createMovement(
+            item,
+            'entry',
+            input.quantity,
+            previous,
+            current,
+            input.reason,
+            { notes: input.notes, supplier: input.supplier },
+          ),
+        );
       },
 
-      registerExit: (input) => {
+      registerExit: async (input) => {
         const item = get().getStockItemById(input.stockItemId);
-        if (!item) return;
+        if (!item) {
+          throw new Error('Item de estoque não encontrado.');
+        }
 
         const previous = item.quantity;
         const current = Math.max(0, previous - input.quantity);
-        const movement = createMovement(
-          item,
-          'exit',
-          input.quantity,
-          previous,
-          current,
-          input.reason,
-          { notes: input.notes, destination: input.destination },
-        );
 
-        set((state) => ({
-          stockItems: updateItemQuantity(state.stockItems, item.id, current),
-          movements: [movement, ...state.movements],
-        }));
+        await persistStockQuantity(item, current);
+
+        appendMovement(
+          set,
+          createMovement(
+            item,
+            'exit',
+            input.quantity,
+            previous,
+            current,
+            input.reason,
+            { notes: input.notes, destination: input.destination },
+          ),
+        );
       },
 
-      registerAdjustment: (input) => {
+      registerAdjustment: async (input) => {
         const item = get().getStockItemById(input.stockItemId);
-        if (!item) return;
+        if (!item) {
+          throw new Error('Item de estoque não encontrado.');
+        }
 
         const previous = item.quantity;
         let current = previous;
-        let delta = input.quantity;
 
         if (input.mode === 'add') current = previous + input.quantity;
         else if (input.mode === 'remove')
           current = Math.max(0, previous - input.quantity);
         else current = input.quantity;
 
-        delta = Math.abs(current - previous);
+        const delta = Math.abs(current - previous);
 
-        const movement = createMovement(
-          item,
-          'adjustment',
-          delta,
-          previous,
-          current,
-          input.reason,
-          { notes: input.notes },
+        await persistStockQuantity(item, current);
+
+        appendMovement(
+          set,
+          createMovement(
+            item,
+            input.reason === 'Correção inventário' ? 'inventory' : 'adjustment',
+            delta,
+            previous,
+            current,
+            input.reason,
+            { notes: input.notes },
+          ),
         );
-
-        set((state) => ({
-          stockItems: updateItemQuantity(state.stockItems, item.id, current),
-          movements: [movement, ...state.movements],
-        }));
       },
 
       updateInventoryCount: (inventoryId, counted, notes) => {
@@ -185,12 +192,12 @@ export const useStockStore = create<StockStore>()(
         }));
       },
 
-      applyInventoryAdjustment: (inventoryId) => {
+      applyInventoryAdjustment: async (inventoryId) => {
         const state = get();
         const inv = state.inventory.find((i) => i.id === inventoryId);
         if (!inv || inv.countedQuantity === undefined) return;
 
-        get().registerAdjustment({
+        await get().registerAdjustment({
           stockItemId: inv.stockItemId,
           mode: 'set',
           quantity: inv.countedQuantity,
@@ -211,7 +218,6 @@ export const useStockStore = create<StockStore>()(
       name: STOCK_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        stockItems: state.stockItems,
         movements: state.movements,
         inventory: state.inventory,
         initialized: state.initialized,

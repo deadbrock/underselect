@@ -25,6 +25,7 @@ export interface AdminProductVariation {
   sku: string;
   price: number;
   stock: number;
+  minStock?: number;
   imageUrl?: string;
 }
 
@@ -60,6 +61,7 @@ export interface AdminProduct {
   collection: string;
   team?: string;
   selection?: string;
+  model: string;
   brand: string;
   season: string;
   tags: string[];
@@ -77,6 +79,7 @@ export interface AdminProduct {
   status: AdminProductStatus;
   inStock: boolean;
   stockQuantity: number;
+  minStock?: number;
   sizes: string[];
   installmentCount: number;
   imageUrl: string;

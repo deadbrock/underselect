@@ -4,10 +4,13 @@ import {
   PagePlaceholder,
   PublicLayoutShell,
 } from '@presentation/components/store';
+import { getStoreSettings } from '@infrastructure/database/repositories/store-settings.repository';
 
-export default function NotFoundPage() {
+export default async function NotFoundPage() {
+  const settings = await getStoreSettings();
+
   return (
-    <PublicLayoutShell>
+    <PublicLayoutShell settings={settings}>
       <PagePlaceholder
         title="Página não encontrada"
         description="A página que você procura não existe ou foi movida."

@@ -19,8 +19,8 @@ export interface PdpMobileBarProps {
 const PdpMobileBar = memo(function PdpMobileBar({
   price,
   compareAtPrice,
-  inStock,
-  canPurchase,
+  inStock: _inStock,
+  canPurchase: _canPurchase,
   onBuyNow,
   className,
 }: PdpMobileBarProps) {
@@ -41,7 +41,6 @@ const PdpMobileBar = memo(function PdpMobileBar({
           variant="bronze"
           size="lg"
           className="shrink-0 px-6"
-          disabled={!inStock || !canPurchase}
           onClick={onBuyNow}
           aria-label="Comprar agora"
         >

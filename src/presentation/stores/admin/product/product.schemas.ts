@@ -12,12 +12,13 @@ const productTypes = [
 
 export const productVariationSchema = z.object({
   id: z.string().optional(),
-  size: z.string().optional(),
+  size: z.string().trim().min(1, 'Informe o tamanho'),
   color: z.string().optional(),
   model: z.string().optional(),
   sku: z.string().trim().min(1, 'Informe o SKU da variação'),
   price: z.coerce.number().positive('Preço inválido'),
   stock: z.coerce.number().int().min(0, 'Estoque inválido'),
+  minStock: z.coerce.number().int().min(0, 'Mínimo inválido').optional(),
   imageUrl: z.string().optional(),
 });
 
@@ -54,11 +55,13 @@ const adminProductFormFields = z.object({
   category: z
     .string()
     .trim()
+    .min(1, 'Selecione uma categoria')
     .regex(/^[a-z0-9-]+$/, 'Selecione uma categoria válida'),
   type: z.enum(productTypes),
   collection: z.string().trim().min(1, 'Informe a coleção'),
   team: z.string().optional(),
   selection: z.string().optional(),
+  model: z.string().trim().min(1, 'Informe o modelo'),
   brand: z.string().trim().min(1, 'Informe a marca'),
   season: z.string().trim().min(1, 'Informe a temporada'),
   tags: z.array(z.string()),
@@ -89,8 +92,8 @@ const adminProductFormFields = z.object({
   seo: productSeoSchema,
 });
 
-export const adminProductFormSchema = adminProductFormFields.superRefine(
-  (data, ctx) => {
+export const adminProductFormSchema = adminProductFormFields
+  .superRefine((data, ctx) => {
     if (data.noPromotionalPrice) return;
 
     const promo = data.promoPrice;
@@ -110,8 +113,34 @@ export const adminProductFormSchema = adminProductFormFields.superRefine(
         message: 'O preço promocional deve ser menor que o preço de tabela',
       });
     }
-  },
-);
+  })
+  .superRefine((data, ctx) => {
+    if (data.variations.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['variations'],
+        message: 'Adicione ao menos um tamanho na aba Variações',
+      });
+      return;
+    }
+
+    const seenSizes = new Set<string>();
+
+    data.variations.forEach((variation, index) => {
+      const size = variation.size.trim().toUpperCase();
+
+      if (seenSizes.has(size)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['variations', index, 'size'],
+          message: 'Tamanho duplicado',
+        });
+        return;
+      }
+
+      seenSizes.add(size);
+    });
+  });
 
 export function enrichProductFormPricing(input: unknown): unknown {
   if (!input || typeof input !== 'object') return input;

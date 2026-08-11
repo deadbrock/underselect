@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -80,7 +81,7 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
-async function main() {
+async function seedTaxonomies() {
   for (const [index, category] of CATEGORIES.entries()) {
     await prisma.category.upsert({
       where: { slug: category.slug },
@@ -126,8 +127,37 @@ async function main() {
       create: { name, slug, status: 'active' },
     });
   }
+}
 
-  console.log('Seed concluído: categorias, coleções, times e seleções.');
+async function seedAdminUser() {
+  const email = (process.env.ADMIN_SEED_EMAIL || 'admin@underselect.com')
+    .toLowerCase()
+    .trim();
+  const password = process.env.ADMIN_SEED_PASSWORD || 'Admin@123456';
+  const name = process.env.ADMIN_SEED_NAME || 'Administrador';
+
+  const existing = await prisma.adminUser.findUnique({ where: { email } });
+  if (existing) {
+    console.log(`Admin já existe: ${email}`);
+    return;
+  }
+
+  await prisma.adminUser.create({
+    data: {
+      email,
+      name,
+      passwordHash: await bcrypt.hash(password, 12),
+      role: 'admin',
+    },
+  });
+
+  console.log(`Admin criado: ${email}`);
+}
+
+async function main() {
+  await seedTaxonomies();
+  await seedAdminUser();
+  console.log('Seed concluído: categorias, coleções, times, seleções e admin.');
 }
 
 main()

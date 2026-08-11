@@ -14,12 +14,6 @@ import {
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
 import { useMarketingStore } from '@presentation/stores/admin/marketing';
-import {
-  getMarketingDashboardStats,
-  getRevenueByInfluencerChart,
-  getTopCouponsChart,
-  getUsageChartData,
-} from '@presentation/stores/admin/marketing/marketing.utils';
 import type { CouponAttribution } from '@shared/types/marketing-admin.types';
 import { formatCurrency, formatDate } from '@shared/utils/format';
 
@@ -64,23 +58,18 @@ const recentColumns: Column<CouponAttribution>[] = [
 ];
 
 export const MarketingDashboard = memo(function MarketingDashboard() {
-  const influencers = useMarketingStore((s) => s.influencers);
-  const campaigns = useMarketingStore((s) => s.campaigns);
-  const coupons = useMarketingStore((s) => s.coupons);
+  const loading = useMarketingStore((s) => s.loading);
+  const error = useMarketingStore((s) => s.error);
+  const stats = useMarketingStore((s) => s.dashboardStats);
+  const dashboardCharts = useMarketingStore((s) => s.dashboardCharts);
   const attributions = useMarketingStore((s) => s.attributions);
 
-  const stats = useMemo(
-    () =>
-      getMarketingDashboardStats(influencers, campaigns, coupons, attributions),
-    [influencers, campaigns, coupons, attributions],
-  );
-
-  const usageChart = useMemo(() => getUsageChartData(), []);
-  const revenueChart = useMemo(
-    () => getRevenueByInfluencerChart(influencers, attributions),
-    [influencers, attributions],
-  );
-  const topCoupons = useMemo(() => getTopCouponsChart(coupons), [coupons]);
+  const revenueChart = dashboardCharts?.revenueByInfluencer ?? [];
+  const topCoupons = dashboardCharts?.topCoupons ?? [];
+  const discountChart = topCoupons.map((d) => ({
+    label: d.label,
+    value: Math.round(d.value * 12.5),
+  }));
   const recent = useMemo(
     () =>
       [...attributions]
@@ -88,6 +77,28 @@ export const MarketingDashboard = memo(function MarketingDashboard() {
         .slice(0, 5),
     [attributions],
   );
+
+  if (loading && !stats) {
+    return (
+      <p className="text-muted-foreground py-16 text-center text-sm">
+        Carregando dashboard de marketing...
+      </p>
+    );
+  }
+
+  if (error && !stats) {
+    return (
+      <p className="text-destructive py-16 text-center text-sm">{error}</p>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <p className="text-muted-foreground py-16 text-center text-sm">
+        Nenhum dado de marketing disponível.
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -136,11 +147,6 @@ export const MarketingDashboard = memo(function MarketingDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <MarketingBarChart
-          title="Utilizações por período"
-          description="Cupons aplicados."
-          data={usageChart}
-        />
-        <MarketingBarChart
           title="Faturamento por influenciador"
           description="Receita atribuída."
           data={revenueChart}
@@ -153,10 +159,7 @@ export const MarketingDashboard = memo(function MarketingDashboard() {
         <MarketingBarChart
           title="Desconto concedido"
           description="Por mês."
-          data={usageChart.map((d) => ({
-            ...d,
-            value: Math.round(d.value * 12.5),
-          }))}
+          data={discountChart}
         />
       </div>
 

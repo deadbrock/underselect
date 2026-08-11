@@ -15,6 +15,7 @@ export default function CategoriasAdminPage() {
       nameLabel="Categoria"
       slugLabel="Slug da categoria"
       showSlugField
+      autoSlugFromName
     />
   );
 }

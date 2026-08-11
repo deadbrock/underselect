@@ -7,13 +7,27 @@ import { Badge, Card, CardContent } from '@presentation/components/ui';
 import type { StockItem } from '@shared/types/stock.types';
 import { formatDate } from '@shared/utils/format';
 
+import { StockItemActions } from './stock-item-actions';
 import { StockStatusBadge } from './stock-status-badge';
 
 export interface StockCardsProps {
   items: StockItem[];
+  onSaveStock: (
+    item: StockItem,
+    values: { stock: number; minStock: number },
+  ) => Promise<void>;
+  onDeleteProduct: (item: StockItem) => Promise<void>;
+  savingItemId?: string | null;
+  deletingProductId?: string | null;
 }
 
-export const StockCards = memo(function StockCards({ items }: StockCardsProps) {
+export const StockCards = memo(function StockCards({
+  items,
+  onSaveStock,
+  onDeleteProduct,
+  savingItemId,
+  deletingProductId,
+}: StockCardsProps) {
   return (
     <ul className="space-y-3" aria-label="Itens em estoque">
       {items.map((item) => (
@@ -29,7 +43,7 @@ export const StockCards = memo(function StockCards({ items }: StockCardsProps) {
                   sizes="80px"
                 />
               </div>
-              <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="min-w-0 flex-1 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <p className="truncate font-medium">{item.productName}</p>
                   <StockStatusBadge status={item.status} />
@@ -58,6 +72,13 @@ export const StockCards = memo(function StockCards({ items }: StockCardsProps) {
                 >
                   {formatDate(item.lastUpdated)}
                 </time>
+                <StockItemActions
+                  item={item}
+                  onSaveStock={onSaveStock}
+                  onDeleteProduct={onDeleteProduct}
+                  isSaving={savingItemId === item.id}
+                  isDeleting={deletingProductId === item.productId}
+                />
               </div>
             </CardContent>
           </Card>

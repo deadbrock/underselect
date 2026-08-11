@@ -12,6 +12,7 @@ import {
   Textarea,
 } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
+import { toast } from '@presentation/hooks';
 import { useStockStore } from '@presentation/stores/admin/stock';
 import type { InventoryItem } from '@shared/types/stock.types';
 
@@ -104,10 +105,25 @@ function InventoryRow({
 }: {
   item: InventoryItem;
   onCount: (id: string, counted: number, notes?: string) => void;
-  onApply: (id: string) => void;
+  onApply: (id: string) => Promise<void>;
 }) {
   const [counted, setCounted] = useState(String(item.countedQuantity ?? ''));
   const [notes, setNotes] = useState(item.notes ?? '');
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleApply = async () => {
+    setIsApplying(true);
+    try {
+      await onApply(item.id);
+      toast.success('Correção de inventário aplicada.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao aplicar correção.',
+      );
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <tr className="border-border border-b">
@@ -168,8 +184,13 @@ function InventoryRow({
             Conferir
           </Button>
           {item.status === 'counted' && item.difference !== 0 && (
-            <Button type="button" size="sm" onClick={() => onApply(item.id)}>
-              Corrigir
+            <Button
+              type="button"
+              size="sm"
+              disabled={isApplying}
+              onClick={() => void handleApply()}
+            >
+              {isApplying ? 'Salvando...' : 'Corrigir'}
             </Button>
           )}
         </div>
@@ -185,10 +206,25 @@ function InventoryCard({
 }: {
   item: InventoryItem;
   onCount: (id: string, counted: number, notes?: string) => void;
-  onApply: (id: string) => void;
+  onApply: (id: string) => Promise<void>;
 }) {
   const [counted, setCounted] = useState(String(item.countedQuantity ?? ''));
   const [notes, setNotes] = useState(item.notes ?? '');
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleApply = async () => {
+    setIsApplying(true);
+    try {
+      await onApply(item.id);
+      toast.success('Correção de inventário aplicada.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao aplicar correção.',
+      );
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <Card className="shadow-none">
@@ -239,9 +275,10 @@ function InventoryCard({
             <Button
               type="button"
               className="min-h-10"
-              onClick={() => onApply(item.id)}
+              disabled={isApplying}
+              onClick={() => void handleApply()}
             >
-              Aplicar correção
+              {isApplying ? 'Salvando...' : 'Aplicar correção'}
             </Button>
           )}
         </div>

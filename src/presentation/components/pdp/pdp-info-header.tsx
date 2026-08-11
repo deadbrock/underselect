@@ -4,11 +4,26 @@ import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpInfoHeaderProps {
   product: ProductDetail;
+  selectedSize?: string;
+  variationStock?: number;
   className?: string;
 }
 
-export function PdpInfoHeader({ product, className }: PdpInfoHeaderProps) {
+export function PdpInfoHeader({
+  product,
+  selectedSize,
+  variationStock,
+  className,
+}: PdpInfoHeaderProps) {
   const entity = product.team ?? product.selection;
+  const availabilityLabel =
+    selectedSize && variationStock != null
+      ? variationStock > 0
+        ? `${variationStock} un. no tamanho ${selectedSize}`
+        : `Esgotado no tamanho ${selectedSize}`
+      : product.inStock
+        ? 'Em estoque'
+        : 'Indisponível';
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -46,8 +61,16 @@ export function PdpInfoHeader({ product, className }: PdpInfoHeaderProps) {
         </div>
         <div>
           <dt className="text-label text-foreground/70">Disponibilidade</dt>
-          <dd className={product.inStock ? 'text-foreground' : ''}>
-            {product.inStock ? 'Em estoque' : 'Indisponível'}
+          <dd
+            className={
+              variationStock != null && variationStock > 0
+                ? 'text-foreground'
+                : product.inStock
+                  ? 'text-foreground'
+                  : ''
+            }
+          >
+            {availabilityLabel}
           </dd>
         </div>
       </dl>

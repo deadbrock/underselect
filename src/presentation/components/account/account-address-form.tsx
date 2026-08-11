@@ -7,8 +7,8 @@ import { useFormContext } from 'react-hook-form';
 import { Button, Checkbox, Label } from '@presentation/components/ui';
 import { FormInput, FormSection } from '@presentation/components/forms';
 import { toast } from '@presentation/hooks';
-import { mockCepLookup } from '@presentation/stores/checkout';
 import { normalizeCep } from '@presentation/stores/cart';
+import { fetchCepLookup } from '@presentation/stores/shipping/shipping.api';
 import type { AddressFormSchema } from '@presentation/stores/account';
 
 export const AccountAddressForm = memo(function AccountAddressForm() {
@@ -26,21 +26,27 @@ export const AccountAddressForm = memo(function AccountAddressForm() {
     }
 
     setIsLookingUp(true);
-    const result = mockCepLookup(normalized);
 
-    if (!result) {
-      toast.error('CEP não encontrado.');
+    try {
+      const result = await fetchCepLookup(normalized);
+
+      setValue('cep', normalized, { shouldValidate: true });
+      setValue('street', result.street, { shouldValidate: true });
+      setValue('neighborhood', result.neighborhood, { shouldValidate: true });
+      setValue('city', result.city, { shouldValidate: true });
+      setValue('state', result.state, { shouldValidate: true });
+      if (result.complement) {
+        setValue('complement', result.complement, { shouldValidate: true });
+      }
+
+      toast.success('Endereço preenchido automaticamente.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'CEP não encontrado.',
+      );
+    } finally {
       setIsLookingUp(false);
-      return;
     }
-
-    setValue('cep', normalized, { shouldValidate: true });
-    setValue('street', result.street, { shouldValidate: true });
-    setValue('neighborhood', result.neighborhood, { shouldValidate: true });
-    setValue('city', result.city, { shouldValidate: true });
-    setValue('state', result.state, { shouldValidate: true });
-    toast.success('Endereço preenchido automaticamente.');
-    setIsLookingUp(false);
   };
 
   return (

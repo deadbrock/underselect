@@ -35,7 +35,7 @@ export function buildStockItemsFromProducts(
   for (const product of products) {
     if (product.variations.length > 0) {
       for (const v of product.variations) {
-        const minQty = STOCK_DEFAULT_MIN_QTY;
+        const minQty = v.minStock ?? product.minStock ?? STOCK_DEFAULT_MIN_QTY;
         items.push({
           id: `${product.id}-${v.id}`,
           productId: product.id,
@@ -58,7 +58,7 @@ export function buildStockItemsFromProducts(
         });
       }
     } else {
-      const minQty = STOCK_DEFAULT_MIN_QTY;
+      const minQty = product.minStock ?? STOCK_DEFAULT_MIN_QTY;
       items.push({
         id: `${product.id}-main`,
         productId: product.id,
@@ -86,8 +86,76 @@ export function buildInitialMovements(_items: StockItem[]): StockMovement[] {
   return [];
 }
 
-export function buildInitialInventory(_items: StockItem[]): InventoryItem[] {
-  return [];
+export function buildInitialInventory(items: StockItem[]): InventoryItem[] {
+  return items.map((item) => ({
+    id: `inv-${item.id}`,
+    stockItemId: item.id,
+    productName: item.productName,
+    sku: item.sku,
+    variationLabel:
+      [item.size, item.color].filter(Boolean).join(' · ') || undefined,
+    systemQuantity: item.quantity,
+    status: 'pending' as const,
+  }));
+}
+
+export function mergeInventoryFromItems(
+  items: StockItem[],
+  existing: InventoryItem[],
+): InventoryItem[] {
+  const existingByStockItem = new Map(
+    existing.map((entry) => [entry.stockItemId, entry]),
+  );
+
+  return items.map((item) => {
+    const previous = existingByStockItem.get(item.id);
+
+    if (!previous) {
+      return {
+        id: `inv-${item.id}`,
+        stockItemId: item.id,
+        productName: item.productName,
+        sku: item.sku,
+        variationLabel:
+          [item.size, item.color].filter(Boolean).join(' · ') || undefined,
+        systemQuantity: item.quantity,
+        status: 'pending' as const,
+      };
+    }
+
+    const countedQuantity = previous.countedQuantity;
+
+    return {
+      ...previous,
+      productName: item.productName,
+      sku: item.sku,
+      variationLabel:
+        [item.size, item.color].filter(Boolean).join(' · ') || undefined,
+      systemQuantity: item.quantity,
+      difference:
+        countedQuantity !== undefined
+          ? countedQuantity - item.quantity
+          : previous.difference,
+    };
+  });
+}
+
+const STALE_STOCK_DAYS = 90;
+
+function isStaleStockItem(item: StockItem): boolean {
+  const updatedAt = new Date(item.lastUpdated).getTime();
+  if (Number.isNaN(updatedAt)) return false;
+  const staleThreshold = Date.now() - STALE_STOCK_DAYS * 24 * 60 * 60 * 1000;
+  return updatedAt <= staleThreshold;
+}
+
+export function getStaleStockItems(items: StockItem[]): StockItem[] {
+  return items
+    .filter(isStaleStockItem)
+    .sort(
+      (a, b) =>
+        new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime(),
+    );
 }
 
 export function generateAlerts(items: StockItem[]): StockAlert[] {
@@ -132,18 +200,18 @@ export function generateAlerts(items: StockItem[]): StockAlert[] {
     }
   }
 
-  items.slice(0, 2).forEach((item, i) => {
+  for (const item of getStaleStockItems(items)) {
     alerts.push({
       id: `alert-stale-${item.id}`,
       type: 'stale',
       stockItemId: item.id,
       productName: item.productName,
       sku: item.sku,
-      message: `${item.productName} sem movimentação há 90+ dias.`,
+      message: `${item.productName} sem atualização há ${STALE_STOCK_DAYS}+ dias.`,
       quantity: item.quantity,
-      createdAt: new Date(Date.now() - i * 3600000).toISOString(),
+      createdAt: item.lastUpdated,
     });
-  });
+  }
 
   return alerts;
 }
@@ -270,10 +338,12 @@ export function getMovementChartData(movements: StockMovement[]) {
   const entries = movements.filter((m) => m.type === 'entry').length;
   const exits = movements.filter((m) => m.type === 'exit').length;
   const adjustments = movements.filter((m) => m.type === 'adjustment').length;
+  const inventory = movements.filter((m) => m.type === 'inventory').length;
+
   return [
-    { label: 'Entradas', value: entries || 12 },
-    { label: 'Saídas', value: exits || 8 },
-    { label: 'Ajustes', value: adjustments || 3 },
+    { label: 'Entradas', value: entries },
+    { label: 'Saídas', value: exits },
+    { label: 'Ajustes', value: adjustments + inventory },
   ];
 }
 

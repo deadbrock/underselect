@@ -11,6 +11,10 @@ import type {
   AdminProductSortOption,
 } from '@shared/types/product-admin.types';
 import { slugify } from '@shared/utils/slugify';
+import {
+  deriveProductStockFromVariations,
+  deriveSizesFromVariations,
+} from '@shared/utils/product-variation.utils';
 
 import type { AdminProductFormSchema } from './product.schemas';
 
@@ -71,6 +75,7 @@ export function catalogToAdminProduct(
     collection,
     team: product.team,
     selection: product.selection,
+    model: 'Padrão',
     brand: product.brand,
     season: product.season,
     tags: product.badge ? [product.badge] : product.isNew ? ['Lançamento'] : [],
@@ -137,11 +142,12 @@ export function createEmptyProductDefaults(): AdminProductInput {
     sku: '',
     shortDescription: '',
     fullDescription: '',
-    category: 'clubes-brasileiros',
+    category: '',
     type: 'camisa-clube',
-    collection: ADMIN_PRODUCT_COLLECTIONS[0],
+    collection: '',
     team: '',
     selection: '',
+    model: '',
     brand: 'UNDER SELECT',
     season: '2024/25',
     tags: [],
@@ -159,12 +165,23 @@ export function createEmptyProductDefaults(): AdminProductInput {
     status: 'draft',
     inStock: true,
     stockQuantity: 0,
-    sizes: ['M'],
-    installmentCount: 6,
+    minStock: 5,
+    sizes: [],
+    installmentCount: 2,
     imageUrl: '/images/catalog/product-1.svg',
     imageAlt: '',
     badge: '',
-    variations: [],
+    variations: [
+      {
+        id: 'var-default-m',
+        size: 'M',
+        color: 'Principal',
+        model: '',
+        sku: '',
+        price: 99,
+        stock: 0,
+      },
+    ],
     gallery: [],
     seo: {
       metaTitle: '',
@@ -179,11 +196,63 @@ export function createEmptyProductDefaults(): AdminProductInput {
 }
 
 export function createEmptyProductFormDefaults(): AdminProductFormSchema {
+  const defaults = createEmptyProductDefaults();
+
   return {
-    ...createEmptyProductDefaults(),
+    ...defaults,
     listPrice: 99,
     promoPrice: undefined,
     noPromotionalPrice: true,
+    variations: defaults.variations.map((variation) => ({
+      id: variation.id,
+      size: variation.size ?? 'M',
+      color: variation.color ?? 'Principal',
+      model: variation.model ?? defaults.model,
+      sku: variation.sku,
+      price: variation.price,
+      stock: variation.stock,
+      imageUrl: variation.imageUrl,
+    })),
+    sizes: ['M'],
+  };
+}
+
+export function syncVariationsFromForm(
+  values: AdminProductFormSchema,
+): AdminProductFormSchema['variations'] {
+  return values.variations.map((variation, index) => ({
+    ...variation,
+    size: variation.size.trim().toUpperCase(),
+    color: variation.color?.trim() || 'Principal',
+    model: variation.model?.trim() || values.model.trim() || 'Padrão',
+    sku:
+      variation.sku.trim() ||
+      `${values.sku.trim() || generateSku()}-${variation.size.trim().toUpperCase()}`,
+    id: variation.id ?? `var-${Date.now()}-${index}`,
+  }));
+}
+
+export function syncSizesAndStockFromVariations(
+  values: AdminProductFormSchema,
+): Pick<AdminProductFormSchema, 'sizes' | 'stockQuantity' | 'inStock'> {
+  const variations = syncVariationsFromForm(values);
+  const sizes = deriveSizesFromVariations(variations);
+  const stockSummary = deriveProductStockFromVariations(
+    variations.map((variation, index) => ({
+      id: variation.id ?? `var-${index}`,
+      size: variation.size,
+      color: variation.color,
+      model: variation.model,
+      sku: variation.sku,
+      price: variation.price,
+      stock: variation.stock,
+    })),
+  );
+
+  return {
+    sizes: sizes.length > 0 ? sizes : values.sizes,
+    stockQuantity: stockSummary.stockQuantity,
+    inStock: stockSummary.inStock,
   };
 }
 
@@ -197,20 +266,28 @@ export function formValuesToProductInput(
     ...rest
   } = values;
 
+  const syncedVariations = syncVariationsFromForm(values);
+  const syncedStock = syncSizesAndStockFromVariations({
+    ...values,
+    variations: syncedVariations,
+  });
+
   return {
     ...rest,
+    ...syncedStock,
     team: values.team?.trim() ? values.team : undefined,
     selection: values.selection?.trim() ? values.selection : undefined,
     imageAlt: values.imageAlt?.trim() ? values.imageAlt : undefined,
     badge: values.badge?.trim() ? values.badge : undefined,
-    variations: values.variations.map((v, i) => ({
-      id: v.id ?? `var-${Date.now()}-${i}`,
+    variations: syncedVariations.map((v) => ({
+      id: v.id ?? `var-${Date.now()}`,
       size: v.size,
       color: v.color,
       model: v.model,
       sku: v.sku,
       price: v.price,
       stock: v.stock,
+      minStock: v.minStock ?? 5,
       imageUrl: v.imageUrl,
     })),
     gallery: values.gallery.map((g, i) => ({
@@ -233,6 +310,7 @@ export function productToFormValues(
     createdAt: _ca,
     updatedAt: _ua,
     discountPercent: _d,
+    variations,
     ...rest
   } = product;
 
@@ -241,6 +319,28 @@ export function productToFormValues(
 
   return {
     ...rest,
+    variations:
+      variations.length > 0
+        ? variations.map((variation) => ({
+            id: variation.id,
+            size: variation.size ?? 'M',
+            color: variation.color ?? 'Principal',
+            model: variation.model ?? product.model ?? 'Padrão',
+            sku: variation.sku,
+            price: variation.price,
+            stock: variation.stock,
+            imageUrl: variation.imageUrl,
+          }))
+        : [
+            {
+              size: 'M',
+              color: 'Principal',
+              model: product.model || 'Padrão',
+              sku: product.sku,
+              price: product.price,
+              stock: product.stockQuantity,
+            },
+          ],
     listPrice: hasPromo ? product.compareAtPrice! : product.price,
     promoPrice: hasPromo ? product.price : undefined,
     noPromotionalPrice: !hasPromo,
@@ -376,6 +476,20 @@ export function prepareProductFormValues(
     promoPrice > 0 &&
     promoPrice < listPrice;
 
+  const syncedVariations = syncVariationsFromForm({
+    ...values,
+    price,
+    compareAtPrice,
+    onSale,
+  });
+  const syncedStock = syncSizesAndStockFromVariations({
+    ...values,
+    price,
+    compareAtPrice,
+    onSale,
+    variations: syncedVariations,
+  });
+
   return {
     ...values,
     name,
@@ -389,6 +503,10 @@ export function prepareProductFormValues(
     price,
     compareAtPrice,
     onSale,
+    variations: syncedVariations,
+    sizes: syncedStock.sizes,
+    stockQuantity: syncedStock.stockQuantity,
+    inStock: syncedStock.inStock,
     cost: normalizeOptionalNumber(values.cost),
     weight: normalizeOptionalNumber(values.weight),
     height: normalizeOptionalNumber(values.height),

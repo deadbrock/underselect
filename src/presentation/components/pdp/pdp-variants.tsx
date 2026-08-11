@@ -1,16 +1,21 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 
 import { VariantSelector } from '@presentation/components/product';
+import { getSizeOutOfStockMessage } from '@shared/constants/pdp.constants';
 import { cn } from '@shared/utils/cn';
 import type { ProductDetail } from '@shared/types/product-detail.types';
+
+import { PdpSizeStockAlert } from './pdp-size-stock-alert';
 
 export interface PdpVariantsProps {
   product: ProductDetail;
   selectedSize?: string;
   selectedColor?: string;
   selectedModel?: string;
+  sizeStockAlert?: string | null;
+  onSizeStockAlertChange?: (message: string | null) => void;
   onSizeChange: (value: string) => void;
   onColorChange: (value: string) => void;
   onModelChange: (value: string) => void;
@@ -22,21 +27,58 @@ const PdpVariants = memo(function PdpVariants({
   selectedSize,
   selectedColor,
   selectedModel,
+  sizeStockAlert,
+  onSizeStockAlertChange,
   onSizeChange,
   onColorChange,
   onModelChange,
   className,
 }: PdpVariantsProps) {
-  const sizeOptions = useMemo(
-    () =>
-      product.sizes.map((size) => ({
-        id: size,
-        label: size,
-        value: size,
-        disabled: product.unavailableSizes.includes(size),
-      })),
-    [product.sizes, product.unavailableSizes],
+  const sizeOptions = useMemo(() => {
+    const variations = product.variations ?? [];
+    const sizes =
+      product.sizes.length > 0
+        ? product.sizes
+        : variations
+            .map((variation) => variation.size)
+            .filter((size): size is string => Boolean(size));
+
+    return sizes.map((size) => ({
+      id: size,
+      label: size,
+      value: size,
+      unavailable: product.unavailableSizes.includes(size),
+    }));
+  }, [product.sizes, product.unavailableSizes, product.variations]);
+
+  const handleSizeChange = useCallback(
+    (size: string) => {
+      onSizeStockAlertChange?.(null);
+      onSizeChange(size);
+    },
+    [onSizeChange, onSizeStockAlertChange],
   );
+
+  const handleUnavailableSize = useCallback(
+    (size: string) => {
+      onSizeStockAlertChange?.(getSizeOutOfStockMessage(size));
+    },
+    [onSizeStockAlertChange],
+  );
+
+  useEffect(() => {
+    if (!selectedSize || !sizeStockAlert) return;
+
+    const isUnavailable = product.unavailableSizes.includes(selectedSize);
+    if (!isUnavailable) {
+      onSizeStockAlertChange?.(null);
+    }
+  }, [
+    onSizeStockAlertChange,
+    product.unavailableSizes,
+    selectedSize,
+    sizeStockAlert,
+  ]);
 
   const modelOptions = useMemo(
     () =>
@@ -51,12 +93,16 @@ const PdpVariants = memo(function PdpVariants({
 
   return (
     <div className={cn('space-y-6', className)}>
-      <VariantSelector
-        label="Tamanho"
-        options={sizeOptions}
-        value={selectedSize}
-        onChange={onSizeChange}
-      />
+      <div className="space-y-2">
+        <VariantSelector
+          label="Tamanho"
+          options={sizeOptions}
+          value={selectedSize}
+          onChange={handleSizeChange}
+          onUnavailableSelect={(option) => handleUnavailableSize(option.label)}
+        />
+        <PdpSizeStockAlert message={sizeStockAlert} />
+      </div>
 
       {product.colors.length > 0 && (
         <div className="space-y-3">

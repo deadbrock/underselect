@@ -10,6 +10,7 @@ export interface VariantOption {
   label: string;
   value: string;
   disabled?: boolean;
+  unavailable?: boolean;
 }
 
 export interface VariantSelectorProps {
@@ -17,6 +18,7 @@ export interface VariantSelectorProps {
   options: VariantOption[];
   value?: string;
   onChange: (value: string) => void;
+  onUnavailableSelect?: (option: VariantOption) => void;
   className?: string;
 }
 
@@ -25,25 +27,44 @@ const VariantSelector = memo(function VariantSelector({
   options,
   value,
   onChange,
+  onUnavailableSelect,
   className,
 }: VariantSelectorProps) {
+  const handleSelect = (option: VariantOption) => {
+    if (option.disabled || option.unavailable) {
+      onUnavailableSelect?.(option);
+      return;
+    }
+
+    onChange(option.value);
+  };
+
   return (
     <div className={cn('space-y-3', className)}>
       <span className="text-label">{label}</span>
       <div className="flex flex-wrap gap-2">
-        {options.map((option) => (
-          <Button
-            key={option.id}
-            type="button"
-            variant={value === option.value ? 'default' : 'outline'}
-            size="sm"
-            disabled={option.disabled}
-            onClick={() => onChange(option.value)}
-            className="min-w-[3rem]"
-          >
-            {option.label}
-          </Button>
-        ))}
+        {options.map((option) => {
+          const isUnavailable = Boolean(option.disabled || option.unavailable);
+
+          return (
+            <Button
+              key={option.id}
+              type="button"
+              variant={value === option.value ? 'default' : 'outline'}
+              size="sm"
+              aria-disabled={isUnavailable}
+              aria-pressed={value === option.value}
+              onClick={() => handleSelect(option)}
+              className={cn(
+                'min-w-[3rem]',
+                isUnavailable &&
+                  'border-border text-muted-foreground line-through opacity-60',
+              )}
+            >
+              {option.label}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ import { Spinner } from '@presentation/components/feedback';
 import { Badge, Card, CardContent } from '@presentation/components/ui';
 import { PageHeader } from '@presentation/components/layout';
 import { AdminModulePagination } from '@presentation/components/admin/admin-module-pagination';
-import { useAdminStore } from '@presentation/stores/admin';
 import { useProductStore } from '@presentation/stores/admin/product';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import { formatCurrency, formatDate } from '@shared/utils/format';
@@ -26,7 +25,6 @@ export const AdminProductList = memo(function AdminProductList() {
   const loadProducts = useProductStore((s) => s.loadProducts);
   const isHydrated = useProductStore((s) => s.isHydrated);
   const storeLoading = useProductStore((s) => s.isLoading);
-  const setGlobalLoading = useAdminStore((s) => s.setGlobalLoading);
   const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
@@ -49,10 +47,6 @@ export const AdminProductList = memo(function AdminProductList() {
   } = useProductListState(products);
 
   const isLoading = !isHydrated || storeLoading;
-
-  useEffect(() => {
-    setGlobalLoading(isLoading);
-  }, [isLoading, setGlobalLoading]);
 
   return (
     <div className="space-y-6">

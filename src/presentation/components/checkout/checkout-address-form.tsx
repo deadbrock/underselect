@@ -8,10 +8,8 @@ import { Button } from '@presentation/components/ui';
 import { FormInput, FormSection } from '@presentation/components/forms';
 import { toast } from '@presentation/hooks';
 import { normalizeCep, useCartStore } from '@presentation/stores/cart';
-import {
-  mockCepLookup,
-  type CheckoutFormSchema,
-} from '@presentation/stores/checkout';
+import { fetchCepLookup } from '@presentation/stores/shipping/shipping.api';
+import { type CheckoutFormSchema } from '@presentation/stores/checkout';
 
 export interface CheckoutAddressFormProps {
   onCepResolved?: (cep: string) => void;
@@ -35,31 +33,46 @@ export const CheckoutAddressForm = memo(function CheckoutAddressForm({
     }
 
     setIsLookingUp(true);
-    const result = mockCepLookup(normalized);
 
-    if (!result) {
-      toast.error('CEP não encontrado.');
+    try {
+      const result = await fetchCepLookup(normalized);
+
+      setValue('cep', normalized, { shouldValidate: true });
+      setValue('street', result.street, { shouldValidate: true });
+      setValue('neighborhood', result.neighborhood, { shouldValidate: true });
+      setValue('city', result.city, { shouldValidate: true });
+      setValue('state', result.state, { shouldValidate: true });
+      if (result.complement) {
+        setValue('complement', result.complement, { shouldValidate: true });
+      }
+
+      setShippingCep(normalized);
+
+      try {
+        await calculateShipping(normalized);
+        toast.success('Endereço e frete atualizados.');
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Endereço encontrado, mas não foi possível calcular o frete.',
+        );
+      }
+
+      onCepResolved?.(normalized);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'CEP não encontrado.',
+      );
+    } finally {
       setIsLookingUp(false);
-      return;
     }
-
-    setValue('cep', normalized, { shouldValidate: true });
-    setValue('street', result.street, { shouldValidate: true });
-    setValue('neighborhood', result.neighborhood, { shouldValidate: true });
-    setValue('city', result.city, { shouldValidate: true });
-    setValue('state', result.state, { shouldValidate: true });
-
-    setShippingCep(normalized);
-    calculateShipping(normalized);
-    onCepResolved?.(normalized);
-    toast.success('Endereço preenchido automaticamente.');
-    setIsLookingUp(false);
   };
 
   return (
     <FormSection
       title="Entrega"
-      description="Informe o endereço de entrega. Integração com API de CEP preparada."
+      description="Informe o endereço de entrega. O CEP é consultado automaticamente."
     >
       <div className="flex gap-2">
         <FormInput<CheckoutFormSchema>

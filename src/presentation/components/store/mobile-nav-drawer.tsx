@@ -16,8 +16,8 @@ import {
   FOOTER_ACCOUNT,
   HEADER_ACTIONS,
   MAIN_NAV,
-  STORE_NAME,
 } from '@shared/constants/store-navigation';
+import { useStoreSettings } from '@presentation/contexts/store-settings-context';
 
 export interface MobileNavDrawerProps {
   open: boolean;
@@ -28,11 +28,15 @@ export const MobileNavDrawer = memo(function MobileNavDrawer({
   open,
   onOpenChange,
 }: MobileNavDrawerProps) {
+  const settings = useStoreSettings();
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="left">
       <DrawerContent side="left" className="w-[min(100vw,320px)]">
         <DrawerHeader className="border-b pb-4 text-left">
-          <DrawerTitle className="text-luxury">{STORE_NAME}</DrawerTitle>
+          <DrawerTitle className="text-luxury">
+            {settings.storeName}
+          </DrawerTitle>
         </DrawerHeader>
 
         <nav

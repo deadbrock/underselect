@@ -1,9 +1,12 @@
 import { PublicLayoutShell } from '@presentation/components/store';
+import { getStoreSettings } from '@infrastructure/database/repositories/store-settings.repository';
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <PublicLayoutShell>{children}</PublicLayoutShell>;
+  const settings = await getStoreSettings();
+
+  return <PublicLayoutShell settings={settings}>{children}</PublicLayoutShell>;
 }
