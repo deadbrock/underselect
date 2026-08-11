@@ -7,7 +7,7 @@ import type {
 
 export const STOCK_STORAGE_KEY = 'underselect-admin-stock';
 
-export const STOCK_MOCK_USER = 'Rafael Souza';
+export const STOCK_MOCK_USER = 'Sistema';
 
 export const STOCK_DEFAULT_MIN_QTY = 5;
 

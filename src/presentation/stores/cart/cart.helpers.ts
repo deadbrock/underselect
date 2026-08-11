@@ -1,5 +1,5 @@
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 import type { AddCartItemInput, CartLineItem } from '@shared/types/cart.types';
 
 export function buildCartLineId(

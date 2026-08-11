@@ -27,7 +27,7 @@ const ProductGallery = memo(function ProductGallery({
           alt={active.alt ?? 'Produto'}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain p-4"
           priority
         />
       </div>
@@ -51,7 +51,7 @@ const ProductGallery = memo(function ProductGallery({
                 alt={image.alt ?? ''}
                 fill
                 sizes="64px"
-                className="object-cover"
+                className="object-contain p-1"
               />
             </button>
           ))}

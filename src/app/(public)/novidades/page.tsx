@@ -8,7 +8,7 @@ import {
   createWebPageSchema,
   createBreadcrumbSchema,
 } from '@shared/seo';
-import { getNewProducts } from '@shared/mocks/catalog.utils';
+import { fetchNewProducts } from '@shared/services/catalog.service';
 
 export const metadata = createPageMetadata({
   title: 'Novidades',
@@ -16,6 +16,8 @@ export const metadata = createPageMetadata({
     'Lançamentos UNDER SELECT. Camisas de clubes, seleções, retrô e linha íntima masculina.',
   path: '/novidades',
 });
+
+export const revalidate = 60;
 
 function CatalogFallback() {
   return (
@@ -25,8 +27,8 @@ function CatalogFallback() {
   );
 }
 
-export default function NovidadesPage() {
-  const products = getNewProducts();
+export default async function NovidadesPage() {
+  const products = await fetchNewProducts();
 
   return (
     <>

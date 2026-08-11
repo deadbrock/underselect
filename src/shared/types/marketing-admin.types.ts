@@ -1,4 +1,4 @@
-import type { CatalogCategorySlug } from '@shared/mocks/catalog.types';
+import type { CatalogCategorySlug } from '@shared/types/catalog.types';
 
 export type AdminInfluencerStatus = 'active' | 'inactive';
 

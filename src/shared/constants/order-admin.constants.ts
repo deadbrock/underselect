@@ -9,7 +9,7 @@ import type {
 
 export const ORDER_STORAGE_KEY = 'underselect-admin-orders';
 
-export const ORDER_MOCK_USER = 'Rafael Souza';
+export const ORDER_MOCK_USER = 'Sistema';
 
 export const ORDER_PAGE_SIZE = 12;
 

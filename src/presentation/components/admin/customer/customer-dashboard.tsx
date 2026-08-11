@@ -24,15 +24,6 @@ import { formatCurrency, formatDate, maskCpf } from '@shared/utils/format';
 import { CustomerStatusBadge } from './customer-status-badge';
 import { CustomerTypeBadge } from './customer-type-badge';
 
-const MOCK_GROWTH = [
-  { label: 'Jan', value: 120 },
-  { label: 'Fev', value: 145 },
-  { label: 'Mar', value: 168 },
-  { label: 'Abr', value: 190 },
-  { label: 'Mai', value: 210 },
-  { label: 'Jun', value: 235 },
-];
-
 const recentColumns: Column<AdminCustomer>[] = [
   {
     key: 'name',
@@ -136,11 +127,8 @@ export const CustomerDashboard = memo(function CustomerDashboard() {
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard title="Novos clientes" description="Últimos 6 meses (mock)">
+        <ChartCard title="Novos clientes" description="Últimos 6 meses">
           <AdminChartBars data={chartData} />
-        </ChartCard>
-        <ChartCard title="Base de clientes" description="Crescimento (mock)">
-          <AdminChartBars data={MOCK_GROWTH} />
         </ChartCard>
       </div>
 

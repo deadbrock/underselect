@@ -19,7 +19,7 @@ import {
   Input,
 } from '@presentation/components/ui';
 import { useAdminStore } from '@presentation/stores/admin';
-import { MOCK_ADMIN_PROFILE, searchAdmin } from '@shared/mocks/admin.data';
+import { MOCK_ADMIN_PROFILE, searchAdmin } from '@shared/data/admin.data';
 
 import { AdminBreadcrumb } from './admin-breadcrumb';
 import { AdminNotificationsPanel } from './admin-notifications-panel';

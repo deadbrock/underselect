@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { memo } from 'react';
 
 import { Badge, Button, Card, CardContent } from '@presentation/components/ui';
-import { MOCK_ACCOUNT_ORDERS } from '@shared/mocks/account.data';
+import { MOCK_ACCOUNT_ORDERS } from '@shared/data/account.data';
 import { ORDER_STATUS_LABELS } from '@shared/constants/account.constants';
 import { formatCurrency, formatDate } from '@shared/utils/format';
 

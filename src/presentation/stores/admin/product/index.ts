@@ -17,7 +17,9 @@ export {
 export {
   filterProducts,
   sortProducts,
+  createEmptyProductFormDefaults,
   formValuesToProductInput,
+  prepareProductFormValues,
   slugify,
   generateSku,
 } from './product.utils';

@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@presentation/components/ui';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpDetailsTabsProps {
   product: ProductDetail;

@@ -6,4 +6,5 @@ export { MobileNavDrawer } from './mobile-nav-drawer';
 export { CategoryDropdown } from './category-dropdown';
 export { NewsletterForm } from './newsletter-form';
 export { PagePlaceholder, type PagePlaceholderProps } from './page-placeholder';
+export { LegalDocument } from './legal-document';
 export { PublicLayoutShell, PublicPageFallback } from './public-layout-shell';

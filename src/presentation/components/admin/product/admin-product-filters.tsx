@@ -17,7 +17,7 @@ import {
   CATALOG_CATEGORIES,
   CATALOG_SELECTIONS,
   CATALOG_TEAMS,
-} from '@shared/mocks/catalog.constants';
+} from '@shared/constants/catalog.constants';
 import { ADMIN_PRODUCT_COLLECTIONS } from '@shared/constants/product-admin.constants';
 import type { AdminProductFilters } from '@shared/types/product-admin.types';
 import { cn } from '@shared/utils/cn';

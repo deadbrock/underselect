@@ -7,9 +7,9 @@ import { CatalogProductCard } from '@presentation/components/catalog';
 import { EmptyState } from '@presentation/components/feedback';
 import { Button } from '@presentation/components/ui';
 import { toast } from '@presentation/hooks';
-import { getProductsByIds } from '@shared/mocks/account.data';
+import { getProductsByIds } from '@shared/data/account.data';
 import { useAccountStore } from '@presentation/stores/account';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 
 import { AccountPageHeader } from './account-page-header';
 

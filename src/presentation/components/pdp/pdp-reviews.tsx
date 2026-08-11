@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 import { memo } from 'react';
 
 import { cn } from '@shared/utils/cn';
-import type { ProductReviews } from '@shared/mocks/product-detail.types';
+import type { ProductReviews } from '@shared/types/product-detail.types';
 
 export interface PdpReviewsProps {
   reviews: ProductReviews;

@@ -1,8 +1,8 @@
+import type { CatalogProduct } from '@shared/types/catalog.types';
 import {
   CATALOG_CATEGORIES,
   CATALOG_TYPES,
-} from '@shared/mocks/catalog.constants';
-import { CATALOG_PRODUCTS } from '@shared/mocks/catalog.utils';
+} from '@shared/constants/catalog.constants';
 import { ADMIN_PRODUCT_COLLECTIONS } from '@shared/constants/product-admin.constants';
 import type {
   AdminProduct,
@@ -22,9 +22,7 @@ function getTypeLabel(type: AdminProduct['type']): string {
   return CATALOG_TYPES.find((t) => t.value === type)?.label ?? type;
 }
 
-function buildVariations(
-  product: (typeof CATALOG_PRODUCTS)[0],
-): AdminProduct['variations'] {
+function buildVariations(product: CatalogProduct): AdminProduct['variations'] {
   return product.sizes.slice(0, 3).map((size, i) => ({
     id: `var-${product.id}-${size}`,
     size,
@@ -36,7 +34,7 @@ function buildVariations(
 }
 
 function buildGallery(
-  product: (typeof CATALOG_PRODUCTS)[0],
+  product: CatalogProduct,
   index: number,
 ): AdminProduct['gallery'] {
   const base = (index % 12) + 1;
@@ -50,7 +48,7 @@ function buildGallery(
 }
 
 export function catalogToAdminProduct(
-  product: (typeof CATALOG_PRODUCTS)[0],
+  product: CatalogProduct,
   index: number,
 ): AdminProduct {
   const collection =
@@ -120,7 +118,7 @@ export function catalogToAdminProduct(
 }
 
 export function seedAdminProducts(): AdminProduct[] {
-  return CATALOG_PRODUCTS.map(catalogToAdminProduct);
+  return [];
 }
 
 export function resolveLabels(
@@ -173,15 +171,38 @@ export function createEmptyProductDefaults(): AdminProductInput {
       metaDescription: '',
       keywords: '',
       slug: '',
+      ogTitle: '',
+      ogDescription: '',
+      ogImage: '',
     },
+  };
+}
+
+export function createEmptyProductFormDefaults(): AdminProductFormSchema {
+  return {
+    ...createEmptyProductDefaults(),
+    listPrice: 99,
+    promoPrice: undefined,
+    noPromotionalPrice: true,
   };
 }
 
 export function formValuesToProductInput(
   values: AdminProductFormSchema,
 ): AdminProductInput {
+  const {
+    listPrice: _listPrice,
+    promoPrice: _promoPrice,
+    noPromotionalPrice: _noPromotionalPrice,
+    ...rest
+  } = values;
+
   return {
-    ...values,
+    ...rest,
+    team: values.team?.trim() ? values.team : undefined,
+    selection: values.selection?.trim() ? values.selection : undefined,
+    imageAlt: values.imageAlt?.trim() ? values.imageAlt : undefined,
+    badge: values.badge?.trim() ? values.badge : undefined,
     variations: values.variations.map((v, i) => ({
       id: v.id ?? `var-${Date.now()}-${i}`,
       size: v.size,
@@ -202,7 +223,9 @@ export function formValuesToProductInput(
   };
 }
 
-export function productToFormValues(product: AdminProduct): AdminProductInput {
+export function productToFormValues(
+  product: AdminProduct,
+): AdminProductFormSchema {
   const {
     categoryLabel: _c,
     typeLabel: _t,
@@ -212,7 +235,26 @@ export function productToFormValues(product: AdminProduct): AdminProductInput {
     discountPercent: _d,
     ...rest
   } = product;
-  return rest;
+
+  const hasPromo =
+    Boolean(product.compareAtPrice) && product.compareAtPrice! > product.price;
+
+  return {
+    ...rest,
+    listPrice: hasPromo ? product.compareAtPrice! : product.price,
+    promoPrice: hasPromo ? product.price : undefined,
+    noPromotionalPrice: !hasPromo,
+    team: rest.team ?? '',
+    selection: rest.selection ?? '',
+    imageAlt: rest.imageAlt ?? '',
+    badge: rest.badge ?? '',
+    seo: {
+      ...rest.seo,
+      ogTitle: rest.seo.ogTitle ?? '',
+      ogDescription: rest.seo.ogDescription ?? '',
+      ogImage: rest.seo.ogImage ?? '',
+    },
+  };
 }
 
 export function filterProducts(
@@ -305,6 +347,71 @@ export function sortProducts(
 
 export function generateSku(prefix = 'US'): string {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}`;
+}
+
+export function prepareProductFormValues(
+  values: AdminProductFormSchema,
+): AdminProductFormSchema {
+  const name = values.name.trim();
+  const slug = values.slug.trim() || (name ? slugify(name) : '');
+  const sku = values.sku.trim() || generateSku();
+  const shortDescription = values.shortDescription.trim();
+  const fullDescription = values.fullDescription.trim();
+
+  const normalizeOptionalNumber = (value: unknown): number | undefined => {
+    if (value === '' || value === null || value === undefined) return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  const listPrice = Number(values.listPrice) || 0;
+  const promoPrice = normalizeOptionalNumber(values.promoPrice);
+  const noPromotionalPrice = values.noPromotionalPrice;
+
+  const price = noPromotionalPrice ? listPrice : (promoPrice ?? listPrice);
+  const compareAtPrice = noPromotionalPrice ? undefined : listPrice;
+  const onSale =
+    !noPromotionalPrice &&
+    promoPrice != null &&
+    promoPrice > 0 &&
+    promoPrice < listPrice;
+
+  return {
+    ...values,
+    name,
+    slug,
+    sku,
+    shortDescription,
+    fullDescription,
+    listPrice,
+    promoPrice: noPromotionalPrice ? undefined : promoPrice,
+    noPromotionalPrice,
+    price,
+    compareAtPrice,
+    onSale,
+    cost: normalizeOptionalNumber(values.cost),
+    weight: normalizeOptionalNumber(values.weight),
+    height: normalizeOptionalNumber(values.height),
+    width: normalizeOptionalNumber(values.width),
+    length: normalizeOptionalNumber(values.length),
+    team: values.team?.trim() ?? '',
+    selection: values.selection?.trim() ?? '',
+    seo: {
+      ...values.seo,
+      slug: values.seo.slug.trim() || slug,
+      metaTitle:
+        values.seo.metaTitle.trim() ||
+        (name ? `${name} | UNDER SELECT` : values.seo.metaTitle),
+      metaDescription:
+        values.seo.metaDescription.trim() ||
+        shortDescription ||
+        fullDescription.slice(0, 160),
+      keywords: values.seo.keywords.trim(),
+      ogTitle: values.seo.ogTitle?.trim() ?? '',
+      ogDescription: values.seo.ogDescription?.trim() ?? '',
+      ogImage: values.seo.ogImage?.trim() ?? '',
+    },
+  };
 }
 
 export { slugify };

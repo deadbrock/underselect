@@ -1,7 +1,5 @@
 // =============================================================================
 // Prisma Schema — Underselect E-commerce Premium
-// Apenas configuração de infraestrutura. Modelos de negócio serão adicionados
-// futuramente na camada de domínio e refletidos aqui via migrations.
 // =============================================================================
 
 generator client {
@@ -9,9 +7,158 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// Modelos de domínio serão adicionados via migrations conforme
-// funcionalidades forem implementadas na camada de domínio.
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  label       String
+  description String?
+  sortOrder   Int       @default(0)
+  status      String    @default("active")
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Collection {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  status      String    @default("active")
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Selection {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                     String   @id @default(cuid())
+  name                   String
+  slug                   String   @unique
+  sku                    String   @unique
+  shortDescription       String
+  fullDescription        String   @db.Text
+  categoryId             String
+  category               Category @relation(fields: [categoryId], references: [id])
+  type                   String
+  collectionId           String?
+  collection             Collection? @relation(fields: [collectionId], references: [id])
+  team                   String?
+  selection              String?
+  brand                  String
+  season                 String
+  tags                   String[]
+  price                  Decimal  @db.Decimal(10, 2)
+  compareAtPrice         Decimal? @db.Decimal(10, 2)
+  cost                   Decimal? @db.Decimal(10, 2)
+  weight                 Decimal? @db.Decimal(8, 3)
+  height                 Decimal? @db.Decimal(8, 2)
+  width                  Decimal? @db.Decimal(8, 2)
+  length                 Decimal? @db.Decimal(8, 2)
+  isFeatured             Boolean  @default(false)
+  isNew                  Boolean  @default(false)
+  onSale                 Boolean  @default(false)
+  isBestSeller           Boolean  @default(false)
+  status                 String   @default("draft")
+  inStock                Boolean  @default(true)
+  stockQuantity          Int      @default(0)
+  sizes                  String[]
+  installmentCount       Int      @default(6)
+  imageUrl               String
+  imageAlt               String?
+  badge                  String?
+  metaTitle              String
+  metaDescription        String
+  seoSlug                String
+  keywords               String?
+  ogTitle                String?
+  ogDescription          String?
+  ogImage                String?
+  description            String?  @db.Text
+  returnsPolicy          String?  @db.Text
+  estimatedDelivery      String?
+  customizationAvailable Boolean  @default(false)
+  specifications         Json?
+  sizeChart              Json?
+  faq                    Json?
+  unavailableSizes       String[]
+  reviewsAverage         Float    @default(0)
+  reviewsCount           Int      @default(0)
+  reviewsDistribution    Json?
+  reviewsComments        Json?
+  variations             ProductVariation[]
+  gallery                ProductGalleryImage[]
+  colors                 ProductColor[]
+  models                 ProductModel[]
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([collectionId])
+  @@index([isFeatured])
+  @@index([isNew])
+  @@index([onSale])
+}
+
+model ProductVariation {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String?
+  color     String?
+  model     String?
+  sku       String  @unique
+  price     Decimal @db.Decimal(10, 2)
+  stock     Int     @default(0)
+  imageUrl  String?
+}
+
+model ProductGalleryImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  isCover   Boolean @default(false)
+  sortOrder Int     @default(0)
+}
+
+model ProductColor {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  hex       String  @default("#1a1a1a")
+  disabled  Boolean @default(false)
+}
+
+model ProductModel {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  disabled  Boolean @default(false)
+}

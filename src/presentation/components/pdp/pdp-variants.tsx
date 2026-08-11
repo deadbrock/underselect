@@ -4,7 +4,7 @@ import { memo, useMemo } from 'react';
 
 import { VariantSelector } from '@presentation/components/product';
 import { cn } from '@shared/utils/cn';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpVariantsProps {
   product: ProductDetail;

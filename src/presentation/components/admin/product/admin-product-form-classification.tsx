@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { FormInput, FormSection } from '@presentation/components/forms';
+import { Spinner } from '@presentation/components/feedback';
 import {
   Label,
   Select,
@@ -12,23 +13,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@presentation/components/ui';
+import { useClassificationOptions } from '@presentation/hooks/use-classification-options';
 import {
   CATALOG_BRANDS,
-  CATALOG_CATEGORIES,
   CATALOG_SEASONS,
-  CATALOG_SELECTIONS,
-  CATALOG_TEAMS,
   CATALOG_TYPES,
-} from '@shared/mocks/catalog.constants';
-import { ADMIN_PRODUCT_COLLECTIONS } from '@shared/constants/product-admin.constants';
+} from '@shared/constants/catalog.constants';
 import type { AdminProductFormSchema } from '@presentation/stores/admin/product';
+
+import { ProductImageUploadField } from './product-image-upload-field';
 
 export const AdminProductFormClassification = memo(
   function AdminProductFormClassification() {
     const { control } = useFormContext<AdminProductFormSchema>();
+    const { categories, collections, teams, selections, isLoading } =
+      useClassificationOptions();
 
     return (
       <FormSection title="Classificação">
+        {isLoading && (
+          <p className="text-muted-foreground flex items-center gap-2 text-xs">
+            <Spinner className="size-3" />
+            Atualizando opções do catálogo...
+          </p>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <Controller
             name="category"
@@ -41,7 +49,7 @@ export const AdminProductFormClassification = memo(
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATALOG_CATEGORIES.map((c) => (
+                    {categories.map((c) => (
                       <SelectItem key={c.slug} value={c.slug}>
                         {c.label}
                       </SelectItem>
@@ -93,7 +101,7 @@ export const AdminProductFormClassification = memo(
                     <SelectValue placeholder="Coleção" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ADMIN_PRODUCT_COLLECTIONS.map((c) => (
+                    {collections.map((c) => (
                       <SelectItem key={c} value={c}>
                         {c}
                       </SelectItem>
@@ -141,7 +149,7 @@ export const AdminProductFormClassification = memo(
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    {CATALOG_TEAMS.map((t) => (
+                    {teams.map((t) => (
                       <SelectItem key={t} value={t}>
                         {t}
                       </SelectItem>
@@ -168,7 +176,7 @@ export const AdminProductFormClassification = memo(
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhuma</SelectItem>
-                    {CATALOG_SELECTIONS.map((s) => (
+                    {selections.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s}
                       </SelectItem>
@@ -200,10 +208,7 @@ export const AdminProductFormClassification = memo(
             )}
           />
         </div>
-        <FormInput<AdminProductFormSchema>
-          name="imageUrl"
-          label="Imagem principal (URL)"
-        />
+        <ProductImageUploadField />
         <FormInput<AdminProductFormSchema>
           name="imageAlt"
           label="Alt da imagem"

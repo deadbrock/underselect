@@ -7,7 +7,7 @@ import { memo } from 'react';
 import { CatalogProductGrid } from '@presentation/components/catalog';
 import { EmptyState } from '@presentation/components/feedback';
 import { Button } from '@presentation/components/ui';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 
 export interface AccountProductSectionProps {
   title: string;

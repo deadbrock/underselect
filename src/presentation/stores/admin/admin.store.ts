@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { ADMIN_STORAGE_KEY } from '@shared/constants/admin.constants';
-import { MOCK_ADMIN_NOTIFICATIONS } from '@shared/mocks/admin.data';
+import { MOCK_ADMIN_NOTIFICATIONS } from '@shared/data/admin.data';
 
 interface AdminState {
   notifications: typeof MOCK_ADMIN_NOTIFICATIONS;

@@ -11,7 +11,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@presentation/components/ui';
-import { MOCK_ACCOUNT_COUPONS } from '@shared/mocks/account.data';
+import { MOCK_ACCOUNT_COUPONS } from '@shared/data/account.data';
 import type { CouponAccountStatus } from '@shared/types/account.types';
 import { formatDate } from '@shared/utils/format';
 

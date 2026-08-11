@@ -26,15 +26,6 @@ import { formatCurrency, formatDateTime } from '@shared/utils/format';
 
 import { StockAlertsBanner } from './stock-alerts-banner';
 
-const MOCK_STOCK_CHART = [
-  { label: 'Jan', value: 420 },
-  { label: 'Fev', value: 380 },
-  { label: 'Mar', value: 510 },
-  { label: 'Abr', value: 470 },
-  { label: 'Mai', value: 590 },
-  { label: 'Jun', value: 620 },
-];
-
 const movementColumns: Column<StockMovement>[] = [
   {
     key: 'type',
@@ -126,25 +117,12 @@ export const StockDashboard = memo(function StockDashboard() {
         ]}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard
-          title="Movimentações por tipo"
-          description="Entradas, saídas e ajustes"
-        >
-          <AdminChartBars data={chartData} />
-        </ChartCard>
-        <ChartCard
-          title="Evolução do estoque"
-          description="Últimos 6 meses (mock)"
-        >
-          <AdminChartBars
-            data={MOCK_STOCK_CHART}
-            formatValue={(v) =>
-              new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(v)
-            }
-          />
-        </ChartCard>
-      </div>
+      <ChartCard
+        title="Movimentações por tipo"
+        description="Entradas, saídas e ajustes"
+      >
+        <AdminChartBars data={chartData} />
+      </ChartCard>
 
       <Card className="shadow-none">
         <CardHeader className="flex flex-row items-center justify-between">

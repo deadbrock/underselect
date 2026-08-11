@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { EmptyState } from '@presentation/components/feedback';
 import { Spinner } from '@presentation/components/feedback';
@@ -12,8 +13,6 @@ import { useAdminStore } from '@presentation/stores/admin';
 import { useProductStore } from '@presentation/stores/admin/product';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import { formatCurrency, formatDate } from '@shared/utils/format';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 import { AdminProductGridView } from './admin-product-grid-view';
 import { AdminProductImportDialog } from './admin-product-import-dialog';
@@ -24,15 +23,21 @@ import { useProductListState } from './use-product-list-state';
 export const AdminProductList = memo(function AdminProductList() {
   const router = useRouter();
   const products = useProductStore((s) => s.products);
+  const loadProducts = useProductStore((s) => s.loadProducts);
+  const isHydrated = useProductStore((s) => s.isHydrated);
+  const storeLoading = useProductStore((s) => s.isLoading);
   const setGlobalLoading = useAdminStore((s) => s.setGlobalLoading);
   const [importOpen, setImportOpen] = useState(false);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   const {
     filters,
     sort,
     viewMode,
     page,
-    isLoading,
     paginated,
     totalPages,
     totalItems,
@@ -42,6 +47,8 @@ export const AdminProductList = memo(function AdminProductList() {
     updateFilter,
     resetFilters,
   } = useProductListState(products);
+
+  const isLoading = !isHydrated || storeLoading;
 
   useEffect(() => {
     setGlobalLoading(isLoading);

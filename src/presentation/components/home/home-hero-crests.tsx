@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { memo } from 'react';
 
-import type { HomeHeroCrest } from '@shared/mocks/home.data';
+import type { HomeHeroCrest } from '@shared/types/home.types';
 
 interface HomeHeroCrestsProps {
   crests: HomeHeroCrest[];

@@ -9,7 +9,7 @@ import { memo, useCallback, useState } from 'react';
 import { Badge, Button } from '@presentation/components/ui';
 import { Price } from '@presentation/components/data-display';
 import { cn } from '@shared/utils/cn';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 import { toast } from '@presentation/hooks';
 import {
   catalogProductToCartInput,
@@ -75,7 +75,7 @@ export const CatalogProductCard = memo(function CatalogProductCard({
             alt={product.imageAlt ?? product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-contain p-4"
             priority={priority}
           />
 

@@ -81,8 +81,8 @@ export const MAIN_NAV: NavCategory[] = [
 
 export const FOOTER_POLICIES: NavLink[] = [
   { label: 'Política de privacidade', href: '/politica' },
-  { label: 'Termos de uso', href: '/politica' },
-  { label: 'Política de cookies', href: '/politica' },
+  { label: 'Termos de uso', href: '/termos' },
+  { label: 'Política de cookies', href: '/cookies' },
 ];
 
 export const FOOTER_SUPPORT: NavLink[] = [
@@ -99,7 +99,10 @@ export const FOOTER_ACCOUNT: NavLink[] = [
 ];
 
 export const SOCIAL_LINKS = [
-  { label: 'Instagram', href: 'https://instagram.com' },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/underselectoficial_?igsh=MXJtc3p2ZDByNWI4Zg%3D%3D',
+  },
 ] as const;
 
 export const HEADER_ACTIONS = {

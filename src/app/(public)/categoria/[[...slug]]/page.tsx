@@ -11,10 +11,11 @@ import {
 import {
   buildCategoryBreadcrumbs,
   buildCategoryPath,
-  CATALOG_PRODUCTS,
   getCategoryMeta,
-  getProductsByCategorySlug,
-} from '@shared/mocks/catalog.utils';
+} from '@shared/utils/catalog.utils';
+import { fetchProductsByCategorySlug } from '@shared/services/catalog.service';
+
+export const revalidate = 60;
 
 interface CategoryPageProps {
   params: Promise<{ slug?: string[] }>;
@@ -60,7 +61,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug = [] } = await params;
   const meta = getCategoryMeta(slug);
   const path = buildCategoryPath(slug);
-  const products = getProductsByCategorySlug(slug);
+  const products = await fetchProductsByCategorySlug(slug);
   const breadcrumbs = buildCategoryBreadcrumbs(slug);
 
   return (
@@ -82,7 +83,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       />
       <Suspense fallback={<CatalogFallback />}>
         <CatalogExperience
-          products={products.length ? products : CATALOG_PRODUCTS}
+          products={products}
           config={{
             title: meta.title,
             description: meta.description,

@@ -1,59 +1,11 @@
-import type { Route } from 'next';
-
 import type { ProductCardData } from '@presentation/components/product';
-import type { CatalogProduct } from './catalog.types';
-import { CATALOG_PRODUCTS } from './catalog.utils';
-
-export interface HomeHeroData {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  ctaPrimary: { label: string; href: Route | string };
-  ctaSecondary: { label: string; href: Route | string };
-}
-
-export interface HomeHeroCrest {
-  id: string;
-  label: string;
-  imageUrl: string;
-  imageAlt: string;
-}
-
-export interface HomeCategoryData {
-  id: string;
-  name: string;
-  description: string;
-  href: Route | string;
-  imageUrl: string;
-  imageAlt: string;
-}
-
-export interface HomePromotionData {
-  id: string;
-  title: string;
-  subtitle: string;
-  badge?: string;
-  href: Route | string;
-  imageUrl: string;
-  imageAlt: string;
-  flags?: HomePromotionFlag[];
-  flagDisplay?: 'banner' | 'crest';
-  highlightGradient?: string;
-}
-
-export interface HomePromotionFlag {
-  id: string;
-  label: string;
-  imageUrl: string;
-  imageAlt: string;
-  featured?: boolean;
-}
-
-export interface HomeBenefitData {
-  id: string;
-  title: string;
-  description: string;
-}
+import type {
+  HomeBenefitData,
+  HomeCategoryData,
+  HomeHeroCrest,
+  HomeHeroData,
+  HomePromotionData,
+} from '@shared/types/home.types';
 
 export const HOME_HERO: HomeHeroData = {
   eyebrow: 'Temporada 2024/25',
@@ -184,23 +136,23 @@ export const HOME_CATEGORIES: HomeCategoryData[] = [
     name: 'Clubes Brasileiros',
     description: 'Flamengo, Palmeiras, Corinthians e mais',
     href: '/categoria/clubes-brasileiros',
-    imageUrl: '/images/catalog/product-1.svg',
-    imageAlt: 'Camisas de clubes brasileiros',
+    imageUrl: '/images/clubs/flamengo.svg',
+    imageAlt: 'Clubes brasileiros',
   },
   {
     id: 'selecoes',
     name: 'Seleções',
     description: 'Brasil, Argentina, Portugal e outras',
     href: '/categoria/selecoes',
-    imageUrl: '/images/catalog/product-2.svg',
-    imageAlt: 'Camisas de seleções nacionais',
+    imageUrl: '/images/nations/brasil.svg',
+    imageAlt: 'Seleções nacionais',
   },
   {
     id: 'retro',
     name: 'Retrô',
     description: 'Clássicos que marcaram gerações',
     href: '/categoria/retro',
-    imageUrl: '/images/catalog/product-3.svg',
+    imageUrl: '/images/clubs/corinthians.svg',
     imageAlt: 'Camisas retrô',
   },
   {
@@ -208,42 +160,13 @@ export const HOME_CATEGORIES: HomeCategoryData[] = [
     name: 'Casual Esportiva',
     description: 'Estilo lifestyle com identidade esportiva',
     href: '/categoria/casual-esportiva',
-    imageUrl: '/images/catalog/product-4.svg',
+    imageUrl: '/images/clubs/real-madrid.svg',
     imageAlt: 'Casual esportiva',
   },
 ];
 
-const SHIRT_TYPES = new Set([
-  'camisa-clube',
-  'camisa-selecao',
-  'camisa-retro',
-  'casual-esportiva',
-]);
-
-function toProductCard(product: CatalogProduct): ProductCardData {
-  return {
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    price: product.price,
-    compareAtPrice: product.compareAtPrice,
-    imageUrl: product.imageUrl,
-    imageAlt: product.imageAlt,
-    badge: product.badge,
-    isNew: product.isNew,
-  };
-}
-
-export const HOME_FEATURED_PRODUCTS: ProductCardData[] =
-  CATALOG_PRODUCTS.filter((p) => p.isBestSeller && SHIRT_TYPES.has(p.type))
-    .slice(0, 4)
-    .map(toProductCard);
-
-export const HOME_NEW_ARRIVALS: ProductCardData[] = CATALOG_PRODUCTS.filter(
-  (p) => p.isNew && SHIRT_TYPES.has(p.type),
-)
-  .slice(0, 4)
-  .map(toProductCard);
+export const HOME_FEATURED_PRODUCTS: ProductCardData[] = [];
+export const HOME_NEW_ARRIVALS: ProductCardData[] = [];
 
 export const HOME_PROMOTIONS: HomePromotionData[] = [
   {
@@ -252,7 +175,7 @@ export const HOME_PROMOTIONS: HomePromotionData[] = [
     subtitle: 'Flamengo, Corinthians, Palmeiras e os maiores do Brasil',
     badge: 'Destaque',
     href: '/categoria/clubes-brasileiros',
-    imageUrl: '/images/catalog/product-5.svg',
+    imageUrl: '/images/clubs/flamengo.svg',
     imageAlt: 'Promoção camisas de clubes brasileiros',
     flagDisplay: 'crest',
     highlightGradient: 'from-red-900/50 via-black/70 to-green-900/45',
@@ -283,7 +206,7 @@ export const HOME_PROMOTIONS: HomePromotionData[] = [
     title: 'Seleções nacionais',
     subtitle: 'Brasil, Argentina, Portugal e edições limitadas',
     href: '/categoria/selecoes',
-    imageUrl: '/images/catalog/product-6.svg',
+    imageUrl: '/images/nations/brasil.svg',
     imageAlt: 'Camisas de seleções nacionais',
     flagDisplay: 'banner',
     highlightGradient: 'from-[#002776]/40 via-black/60 to-[#006600]/30',
@@ -323,3 +246,13 @@ export const HOME_BENEFITS: HomeBenefitData[] = [
     description: 'Até 2x sem juros.',
   },
 ];
+
+export const HOME_INSTITUTIONAL = {
+  eyebrow: 'UNDER SELECT',
+  title: 'Paixão com autenticidade',
+  description:
+    'Somos especialistas em camisas de times e seleções. Curamos peças licenciadas, com tecido de alta performance e acabamento superior — para quem leva o manto a sério, dentro e fora do estádio.',
+  cta: { label: 'Explorar catálogo', href: '/categoria' as const },
+  imageUrl: '/images/home/logo-underselect.jpg',
+  imageAlt: 'Logo UNDER SELECT',
+};

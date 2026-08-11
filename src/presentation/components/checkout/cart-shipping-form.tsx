@@ -106,7 +106,8 @@ const CartShippingForm = memo(function CartShippingForm({
 
       {!quote && (
         <p className="text-muted-foreground text-xs">
-          Frete mockado — integração com API preparada para a próxima fase.
+          Calcule o frete informando seu CEP. A cotação será exibida após
+          integração com a transportadora.
         </p>
       )}
     </div>

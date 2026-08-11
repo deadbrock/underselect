@@ -7,7 +7,7 @@ import { PdpPricing } from './pdp-pricing';
 import { PdpTrustBadges } from './pdp-trust-badges';
 import { PdpVariants } from './pdp-variants';
 import { cn } from '@shared/utils/cn';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpBuyBoxProps {
   product: ProductDetail;

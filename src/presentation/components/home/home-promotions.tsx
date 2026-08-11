@@ -7,7 +7,7 @@ import { Badge, Button } from '@presentation/components/ui';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
 import { HomePromotionFlags } from '@presentation/components/home/home-promotion-flags';
 import { HomeSectionHeader } from '@presentation/components/home/home-section-header';
-import { HOME_PROMOTIONS } from '@shared/mocks/home.data';
+import { HOME_PROMOTIONS } from '@shared/constants/home.constants';
 import { cn } from '@shared/utils/cn';
 
 export function HomePromotions() {

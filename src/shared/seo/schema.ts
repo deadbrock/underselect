@@ -1,6 +1,6 @@
 import { env } from '@infrastructure/config';
 
-import { STORE_NAME } from '../constants/store-navigation';
+import { SOCIAL_LINKS, STORE_NAME } from '../constants/store-navigation';
 
 export type JsonLdObject = Record<string, unknown>;
 
@@ -11,7 +11,7 @@ export function createOrganizationSchema(): JsonLdObject {
     name: STORE_NAME,
     url: env.NEXT_PUBLIC_APP_URL,
     logo: `${env.NEXT_PUBLIC_APP_URL}/og-default.svg`,
-    sameAs: ['https://instagram.com'],
+    sameAs: SOCIAL_LINKS.map((link) => link.href),
   };
 }
 

@@ -1,4 +1,7 @@
-import type { CatalogCategorySlug, CatalogProductType } from './catalog.types';
+import type {
+  CatalogCategorySlug,
+  CatalogProductType,
+} from '@shared/types/catalog.types';
 
 export const CATALOG_CATEGORIES: {
   slug: CatalogCategorySlug;

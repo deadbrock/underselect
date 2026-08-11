@@ -9,6 +9,11 @@ const envSchema = z.object({
     .default(
       'postgresql://postgres:postgres@localhost:5432/underselect?schema=public',
     ),
+  DIRECT_URL: z
+    .string()
+    .default(
+      'postgresql://postgres:postgres@localhost:5432/underselect?schema=public',
+    ),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
   NEXT_PUBLIC_APP_NAME: z.string().default('Underselect'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),

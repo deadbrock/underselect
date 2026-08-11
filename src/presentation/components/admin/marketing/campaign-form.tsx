@@ -25,7 +25,7 @@ import {
   type CampaignFormValues,
 } from '@presentation/stores/admin/marketing';
 import { ADMIN_CAMPAIGN_STATUS_LABELS } from '@shared/constants/marketing-admin.constants';
-import type { CatalogCategorySlug } from '@shared/mocks/catalog.types';
+import type { CatalogCategorySlug } from '@shared/types/catalog.types';
 import type {
   AdminCampaign,
   CampaignFormInput,

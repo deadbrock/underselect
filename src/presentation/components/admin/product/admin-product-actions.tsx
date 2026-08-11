@@ -30,19 +30,37 @@ export const AdminProductActions = memo(function AdminProductActions({
   const archiveProduct = useProductStore((s) => s.archiveProduct);
   const deleteProduct = useProductStore((s) => s.deleteProduct);
 
-  const handleDuplicate = () => {
-    duplicateProduct(product.id);
-    toast.success('Produto duplicado como rascunho.');
+  const handleDuplicate = async () => {
+    try {
+      await duplicateProduct(product.id);
+      toast.success('Produto duplicado como rascunho.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao duplicar produto.',
+      );
+    }
   };
 
-  const handleArchive = () => {
-    archiveProduct(product.id);
-    toast.success('Produto arquivado.');
+  const handleArchive = async () => {
+    try {
+      await archiveProduct(product.id);
+      toast.success('Produto arquivado.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao arquivar produto.',
+      );
+    }
   };
 
-  const handleDelete = () => {
-    deleteProduct(product.id);
-    toast.success('Produto excluído.');
+  const handleDelete = async () => {
+    try {
+      await deleteProduct(product.id);
+      toast.success('Produto excluído.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao excluir produto.',
+      );
+    }
   };
 
   if (compact) {

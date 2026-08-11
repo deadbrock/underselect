@@ -10,7 +10,7 @@ import {
   MOCK_ACCOUNT_USER,
   MOCK_FAVORITE_IDS,
   MOCK_WISHLIST_IDS,
-} from '@shared/mocks/account.data';
+} from '@shared/data/account.data';
 import type {
   AccountAddress,
   AccountAddressInput,

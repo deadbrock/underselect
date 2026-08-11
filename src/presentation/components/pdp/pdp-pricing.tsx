@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { Price } from '@presentation/components/data-display';
 import { cn } from '@shared/utils/cn';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpPricingProps {
   product: ProductDetail;

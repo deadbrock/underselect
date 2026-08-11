@@ -12,8 +12,8 @@ import type {
   CatalogPageConfig,
   CatalogProduct,
   CatalogSortOption,
-} from '@shared/mocks/catalog.types';
-import { processCatalog } from '@shared/mocks/catalog.utils';
+} from '@shared/types/catalog.types';
+import { processCatalog } from '@shared/utils/catalog.utils';
 
 import { CatalogPageHeader } from './catalog-page-header';
 import { CatalogToolbar } from './catalog-toolbar';

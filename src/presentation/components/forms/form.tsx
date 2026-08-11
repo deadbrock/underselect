@@ -89,7 +89,12 @@ function FormInputInner<T extends FieldValues>({
       label={label}
       description={description}
       render={({ field, fieldState }) => (
-        <Input {...field} {...inputProps} error={!!fieldState.error} />
+        <Input
+          {...field}
+          {...inputProps}
+          value={field.value ?? ''}
+          error={!!fieldState.error}
+        />
       )}
     />
   );

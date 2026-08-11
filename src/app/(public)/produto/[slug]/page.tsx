@@ -9,23 +9,26 @@ import {
   createProductSchema,
 } from '@shared/seo';
 import {
-  buildProductBreadcrumbs,
-  getAllProductSlugs,
-  getProductBySlug,
-  getRelatedProducts,
-} from '@shared/mocks/product-detail.utils';
+  fetchAllProductSlugs,
+  fetchProductBySlug,
+  fetchRelatedProducts,
+} from '@shared/services/catalog.service';
+import { buildProductBreadcrumbs } from '@shared/utils/product-detail.utils';
+
+export const revalidate = 60;
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return getAllProductSlugs().map((slug) => ({ slug }));
+  const slugs = await fetchAllProductSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await fetchProductBySlug(slug);
 
   if (!product) {
     return createPageMetadata({
@@ -48,12 +51,12 @@ export async function generateMetadata({ params }: ProductPageProps) {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await fetchProductBySlug(slug);
 
   if (!product) notFound();
 
   const breadcrumbs = buildProductBreadcrumbs(product);
-  const related = getRelatedProducts(product);
+  const related = await fetchRelatedProducts(product);
   const path = `/produto/${slug}` as `/${string}`;
 
   return (

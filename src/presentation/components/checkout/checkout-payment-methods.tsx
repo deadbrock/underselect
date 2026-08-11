@@ -26,19 +26,19 @@ const PAYMENT_OPTIONS: {
   {
     id: 'pix',
     label: 'PIX',
-    description: 'Aprovação imediata — InfinitePay (mock)',
+    description: 'Aprovação imediata — InfinitePay',
     icon: QrCode,
   },
   {
     id: 'card',
     label: 'Cartão de crédito',
-    description: 'Parcelamento disponível — InfinitePay (mock)',
+    description: 'Parcelamento disponível — InfinitePay',
     icon: CreditCard,
   },
   {
     id: 'boleto',
     label: 'Boleto bancário',
-    description: 'Vencimento em 3 dias úteis — InfinitePay (mock)',
+    description: 'Vencimento em 3 dias úteis — InfinitePay',
     icon: Banknote,
   },
 ];

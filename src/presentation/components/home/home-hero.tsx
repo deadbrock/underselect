@@ -5,7 +5,7 @@ import { Container } from '@presentation/components/layout';
 import { Button } from '@presentation/components/ui';
 import { HomeHeroCrests } from '@presentation/components/home/home-hero-crests';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
-import { HOME_HERO, HOME_HERO_CRESTS } from '@shared/mocks/home.data';
+import { HOME_HERO, HOME_HERO_CRESTS } from '@shared/constants/home.constants';
 
 export function HomeHero() {
   const hero = HOME_HERO;

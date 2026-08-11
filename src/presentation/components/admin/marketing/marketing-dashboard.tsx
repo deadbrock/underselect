@@ -137,7 +137,7 @@ export const MarketingDashboard = memo(function MarketingDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <MarketingBarChart
           title="Utilizações por período"
-          description="Cupons aplicados — dados mockados."
+          description="Cupons aplicados."
           data={usageChart}
         />
         <MarketingBarChart
@@ -152,7 +152,7 @@ export const MarketingDashboard = memo(function MarketingDashboard() {
         />
         <MarketingBarChart
           title="Desconto concedido"
-          description="Por mês — mock."
+          description="Por mês."
           data={usageChart.map((d) => ({
             ...d,
             value: Math.round(d.value * 12.5),

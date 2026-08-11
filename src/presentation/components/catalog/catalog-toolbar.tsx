@@ -12,10 +12,10 @@ import {
 import {
   CATALOG_SORT_LABELS,
   type CatalogSortOption,
-} from '@shared/mocks/catalog.types';
+} from '@shared/types/catalog.types';
 
 import { CatalogFilterDrawer } from './catalog-filter-drawer';
-import type { CatalogFilters } from '@shared/mocks/catalog.types';
+import type { CatalogFilters } from '@shared/types/catalog.types';
 
 export interface CatalogToolbarProps {
   total: number;

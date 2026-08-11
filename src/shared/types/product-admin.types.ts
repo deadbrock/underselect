@@ -1,7 +1,7 @@
 import type {
   CatalogCategorySlug,
   CatalogProductType,
-} from '@shared/mocks/catalog.types';
+} from '@shared/types/catalog.types';
 
 export type AdminProductStatus = 'active' | 'inactive' | 'draft' | 'archived';
 

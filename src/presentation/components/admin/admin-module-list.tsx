@@ -14,7 +14,7 @@ import {
   ADMIN_ORDER_STATUS_LABELS,
   ADMIN_STATUS_LABELS,
 } from '@shared/constants/admin.constants';
-import { getAdminModuleData } from '@shared/mocks/admin.data';
+import { getAdminModuleData } from '@shared/data/admin.data';
 import type { AdminListRow, AdminModuleId } from '@shared/types/admin.types';
 import { formatDate } from '@shared/utils/format';
 

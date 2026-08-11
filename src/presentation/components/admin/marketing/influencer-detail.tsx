@@ -170,7 +170,7 @@ export const InfluencerDetail = memo(function InfluencerDetail({
 
       <MarketingBarChart
         title="Performance ao longo do tempo"
-        description="Faturamento atribuído — mock."
+        description="Faturamento atribuído."
         data={perfChart}
       />
 

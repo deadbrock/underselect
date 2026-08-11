@@ -13,9 +13,9 @@ import {
   createWebSiteSchema,
 } from '@shared/seo';
 import {
-  HOME_FEATURED_PRODUCTS,
-  HOME_NEW_ARRIVALS,
-} from '@shared/mocks/home.data';
+  fetchBestSellerProducts,
+  fetchNewProducts,
+} from '@shared/services/catalog.service';
 
 export const metadata = createPageMetadata({
   title: 'Início',
@@ -24,7 +24,14 @@ export const metadata = createPageMetadata({
   path: '/',
 });
 
-export default function HomePage() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const [featuredProducts, newArrivals] = await Promise.all([
+    fetchBestSellerProducts(),
+    fetchNewProducts(),
+  ]);
+
   return (
     <>
       <JsonLd
@@ -47,14 +54,14 @@ export default function HomePage() {
         eyebrow="Destaques"
         title="Mais vendidas"
         description="Camisas de clubes e seleções que lideram os acessos."
-        products={HOME_FEATURED_PRODUCTS}
+        products={featuredProducts}
       />
 
       <HomeProductSection
         eyebrow="Novidades"
         title="Lançamentos da temporada"
         description="Novos modelos de times e seleções recém-chegados."
-        products={HOME_NEW_ARRIVALS}
+        products={newArrivals}
       />
 
       <HomePromotions />

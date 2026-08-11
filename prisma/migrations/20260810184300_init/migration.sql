@@ -1,0 +1,2 @@
+-- Baseline migration for Supabase PostgreSQL.
+-- Domain models will be added in future migrations.

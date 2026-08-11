@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { memo } from 'react';
 
-import type { HomePromotionFlag } from '@shared/mocks/home.data';
+import type { HomePromotionFlag } from '@shared/types/home.types';
 import { cn } from '@shared/utils/cn';
 
 interface HomePromotionFlagsProps {

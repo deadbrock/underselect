@@ -47,12 +47,12 @@ export const AdminProductDetailView = memo(function AdminProductDetailView({
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <Card className="shadow-none">
           <CardContent className="p-4">
-            <div className="bg-muted relative aspect-square overflow-hidden">
+            <div className="bg-muted relative aspect-square overflow-hidden p-4">
               <Image
                 src={product.imageUrl}
                 alt={product.imageAlt ?? product.name}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="320px"
                 priority
               />

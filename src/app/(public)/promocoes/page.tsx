@@ -8,7 +8,7 @@ import {
   createWebPageSchema,
   createBreadcrumbSchema,
 } from '@shared/seo';
-import { getPromoProducts } from '@shared/mocks/catalog.utils';
+import { fetchPromoProducts } from '@shared/services/catalog.service';
 
 export const metadata = createPageMetadata({
   title: 'Promoções',
@@ -16,6 +16,8 @@ export const metadata = createPageMetadata({
     'Promoções exclusivas UNDER SELECT. Camisas de clubes, seleções e peças íntimas com desconto.',
   path: '/promocoes',
 });
+
+export const revalidate = 60;
 
 function CatalogFallback() {
   return (
@@ -25,8 +27,8 @@ function CatalogFallback() {
   );
 }
 
-export default function PromocoesPage() {
-  const products = getPromoProducts();
+export default async function PromocoesPage() {
+  const products = await fetchPromoProducts();
 
   return (
     <>

@@ -20,20 +20,6 @@ import {
 } from '@presentation/stores/admin/stock/stock.utils';
 import { formatCurrency } from '@shared/utils/format';
 
-const MOCK_PERIOD_ENTRIES = [
-  { label: 'Sem 1', value: 45 },
-  { label: 'Sem 2', value: 62 },
-  { label: 'Sem 3', value: 38 },
-  { label: 'Sem 4', value: 71 },
-];
-
-const MOCK_PERIOD_EXITS = [
-  { label: 'Sem 1', value: 32 },
-  { label: 'Sem 2', value: 48 },
-  { label: 'Sem 3', value: 55 },
-  { label: 'Sem 4', value: 41 },
-];
-
 interface TopProduct {
   name: string;
   count: number;
@@ -69,7 +55,7 @@ export const StockReports = memo(function StockReports() {
     <div className="space-y-8">
       <PageHeader
         title="Relatórios de Estoque"
-        description="Entradas, saídas, produtos críticos e valor estimado — dados mockados."
+        description="Entradas, saídas, produtos críticos e valor estimado."
       />
 
       <KpiGrid
@@ -86,21 +72,6 @@ export const StockReports = memo(function StockReports() {
           { title: 'Total movimentações', value: movements.length },
         ]}
       />
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard
-          title="Entradas por período"
-          description="Últimas 4 semanas (mock)"
-        >
-          <AdminChartBars data={MOCK_PERIOD_ENTRIES} />
-        </ChartCard>
-        <ChartCard
-          title="Saídas por período"
-          description="Últimas 4 semanas (mock)"
-        >
-          <AdminChartBars data={MOCK_PERIOD_EXITS} />
-        </ChartCard>
-      </div>
 
       <ChartCard
         title="Movimentações por tipo"

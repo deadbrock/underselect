@@ -12,7 +12,10 @@ import {
   SelectValue,
   Switch,
 } from '@presentation/components/ui';
-import { CATALOG_BRANDS, CATALOG_TEAMS } from '@shared/mocks/catalog.constants';
+import {
+  CATALOG_BRANDS,
+  CATALOG_TEAMS,
+} from '@shared/constants/catalog.constants';
 import { ADMIN_PRODUCT_COLLECTIONS } from '@shared/constants/product-admin.constants';
 import type { StockFilters } from '@shared/types/stock.types';
 import { cn } from '@shared/utils/cn';

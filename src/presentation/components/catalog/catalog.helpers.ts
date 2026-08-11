@@ -2,7 +2,7 @@ import type {
   CatalogFilters,
   CatalogSearchParams,
   CatalogSortOption,
-} from '@shared/mocks/catalog.types';
+} from '@shared/types/catalog.types';
 
 export function countActiveFilters(filters: CatalogFilters): number {
   let count = 0;

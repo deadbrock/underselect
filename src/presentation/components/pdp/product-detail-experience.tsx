@@ -21,7 +21,7 @@ import { PdpReviews } from './pdp-reviews';
 import type {
   ProductDetail,
   ProductRelatedGroups,
-} from '@shared/mocks/product-detail.types';
+} from '@shared/types/product-detail.types';
 
 export interface ProductDetailExperienceProps {
   product: ProductDetail;

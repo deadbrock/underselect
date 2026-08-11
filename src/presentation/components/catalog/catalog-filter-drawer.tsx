@@ -11,7 +11,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@presentation/components/ui';
-import type { CatalogFilters } from '@shared/mocks/catalog.types';
+import type { CatalogFilters } from '@shared/types/catalog.types';
 
 import { CatalogFiltersPanel } from './catalog-filters-panel';
 

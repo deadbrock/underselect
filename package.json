@@ -15,7 +15,10 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
+    "db:seed": "node prisma/seed.mjs",
+    "postinstall": "prisma generate",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:build": "docker compose build",
@@ -80,5 +83,8 @@
     "prisma": "^6.9.0",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   }
 }

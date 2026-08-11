@@ -8,7 +8,7 @@ import {
   createWebPageSchema,
   createBreadcrumbSchema,
 } from '@shared/seo';
-import { CATALOG_PRODUCTS } from '@shared/mocks/catalog.utils';
+import { fetchCatalogProducts } from '@shared/services/catalog.service';
 
 export const metadata = createPageMetadata({
   title: 'Busca',
@@ -16,6 +16,8 @@ export const metadata = createPageMetadata({
     'Encontre camisas de clubes, seleções, retrô e peças íntimas premium na UNDER SELECT.',
   path: '/busca',
 });
+
+export const revalidate = 60;
 
 function CatalogFallback() {
   return (
@@ -25,7 +27,9 @@ function CatalogFallback() {
   );
 }
 
-export default function BuscaPage() {
+export default async function BuscaPage() {
+  const products = await fetchCatalogProducts();
+
   return (
     <>
       <JsonLd
@@ -43,7 +47,7 @@ export default function BuscaPage() {
       />
       <Suspense fallback={<CatalogFallback />}>
         <CatalogExperience
-          products={CATALOG_PRODUCTS}
+          products={products}
           showSearch
           config={{
             title: 'Busca',

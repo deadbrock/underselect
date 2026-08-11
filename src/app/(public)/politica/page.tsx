@@ -1,4 +1,5 @@
-import { PagePlaceholder } from '@presentation/components/store';
+import { LegalDocument, PagePlaceholder } from '@presentation/components/store';
+import { PRIVACY_POLICY } from '@shared/content/legal-documents';
 import {
   JsonLd,
   createPageMetadata,
@@ -8,7 +9,7 @@ import {
 
 export const metadata = createPageMetadata({
   title: 'Política de Privacidade',
-  description: 'Política de privacidade e proteção de dados UNDER SELECT.',
+  description: PRIVACY_POLICY.description,
   path: '/politica',
 });
 
@@ -18,21 +19,26 @@ export default function PoliticaPage() {
       <JsonLd
         data={[
           createWebPageSchema({
-            name: 'Política de Privacidade',
-            description: 'Políticas UNDER SELECT.',
+            name: PRIVACY_POLICY.title,
+            description: PRIVACY_POLICY.description,
             path: '/politica',
           }),
           createBreadcrumbSchema([
             { name: 'Início', path: '/' },
-            { name: 'Política', path: '/politica' },
+            { name: 'Política de Privacidade', path: '/politica' },
           ]),
         ]}
       />
       <PagePlaceholder
-        title="Política de Privacidade"
-        description="Estrutura preparada para conteúdo institucional e legal."
-        breadcrumbs={[{ label: 'Início', href: '/' }, { label: 'Política' }]}
-      />
+        title={PRIVACY_POLICY.title}
+        description={PRIVACY_POLICY.description}
+        breadcrumbs={[
+          { label: 'Início', href: '/' },
+          { label: 'Política de Privacidade' },
+        ]}
+      >
+        <LegalDocument document={PRIVACY_POLICY} />
+      </PagePlaceholder>
     </>
   );
 }

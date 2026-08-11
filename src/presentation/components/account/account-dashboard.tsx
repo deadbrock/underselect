@@ -17,7 +17,7 @@ import {
   MOCK_ACCOUNT_COUPONS,
   MOCK_ACCOUNT_ORDERS,
   MOCK_RECENTLY_VIEWED_IDS,
-} from '@shared/mocks/account.data';
+} from '@shared/data/account.data';
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,

@@ -1,4 +1,4 @@
-import type { CatalogProduct } from './catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 
 export interface ProductImage {
   url: string;

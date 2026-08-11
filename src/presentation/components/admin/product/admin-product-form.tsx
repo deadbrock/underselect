@@ -1,17 +1,21 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
+import type { FieldErrors } from 'react-hook-form';
 
 import { Form, useAppForm } from '@presentation/components/forms';
 import {
+  Button,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@presentation/components/ui';
+import { toast } from '@presentation/hooks';
 import {
   adminProductFormSchema,
-  createEmptyProductDefaults,
+  createEmptyProductFormDefaults,
+  prepareProductFormValues,
   productToFormValues,
   type AdminProductFormSchema,
 } from '@presentation/stores/admin/product';
@@ -27,8 +31,22 @@ import { AdminProductFormVariations } from './admin-product-form-variations';
 
 export interface AdminProductFormProps {
   product?: AdminProduct;
-  onSubmit: (values: AdminProductFormSchema) => void;
+  onSubmit: (values: AdminProductFormSchema) => void | Promise<void>;
   formId?: string;
+}
+
+function getFirstFormError(errors: FieldErrors): string | undefined {
+  for (const value of Object.values(errors)) {
+    if (!value) continue;
+    if (typeof value === 'object' && 'message' in value && value.message) {
+      return String(value.message);
+    }
+    if (typeof value === 'object') {
+      const nested = getFirstFormError(value as FieldErrors);
+      if (nested) return nested;
+    }
+  }
+  return undefined;
 }
 
 export const AdminProductForm = memo(function AdminProductForm({
@@ -38,12 +56,36 @@ export const AdminProductForm = memo(function AdminProductForm({
 }: AdminProductFormProps) {
   const form = useAppForm(adminProductFormSchema, {
     defaultValues: product
-      ? (productToFormValues(product) as AdminProductFormSchema)
-      : (createEmptyProductDefaults() as AdminProductFormSchema),
+      ? productToFormValues(product)
+      : createEmptyProductFormDefaults(),
   });
 
+  const handleInvalid = useCallback(
+    (errors: FieldErrors<AdminProductFormSchema>) => {
+      const message =
+        getFirstFormError(errors) ??
+        'Revise os campos obrigatórios nas abas Básico, Preço e SEO.';
+      toast.error(message);
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    async (values: AdminProductFormSchema) => {
+      await onSubmit(values);
+    },
+    [onSubmit],
+  );
+
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const prepared = prepareProductFormValues(form.getValues());
+    form.reset(prepared, { keepDirtyValues: false });
+    void form.handleSubmit(handleSubmit, handleInvalid)();
+  };
+
   return (
-    <Form form={form} id={formId} onSubmit={form.handleSubmit(onSubmit)}>
+    <Form form={form} id={formId} onSubmit={onFormSubmit}>
       <Tabs defaultValue="basic" className="space-y-6">
         <TabsList className="flex h-auto flex-wrap gap-1">
           <TabsTrigger value="basic">Básico</TabsTrigger>
@@ -54,28 +96,62 @@ export const AdminProductForm = memo(function AdminProductForm({
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="flags">Status</TabsTrigger>
         </TabsList>
-        <TabsContent value="basic">
+        <TabsContent
+          value="basic"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormBasic />
         </TabsContent>
-        <TabsContent value="classification">
+        <TabsContent
+          value="classification"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormClassification />
         </TabsContent>
-        <TabsContent value="pricing">
+        <TabsContent
+          value="pricing"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormPricing />
         </TabsContent>
-        <TabsContent value="variations">
+        <TabsContent
+          value="variations"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormVariations />
         </TabsContent>
-        <TabsContent value="gallery">
+        <TabsContent
+          value="gallery"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormGallery />
         </TabsContent>
-        <TabsContent value="seo">
+        <TabsContent
+          value="seo"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormSeo />
         </TabsContent>
-        <TabsContent value="flags">
+        <TabsContent
+          value="flags"
+          forceMount
+          className="data-[state=inactive]:hidden"
+        >
           <AdminProductFormFlags />
         </TabsContent>
       </Tabs>
+
+      <div className="flex justify-end border-t pt-6">
+        <Button type="submit" className="min-h-11 min-w-[160px]">
+          Salvar produto
+        </Button>
+      </div>
     </Form>
   );
 });

@@ -3,7 +3,7 @@ import { CreditCard, RefreshCw } from 'lucide-react';
 import { Container } from '@presentation/components/layout';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
 import { HomeSectionHeader } from '@presentation/components/home/home-section-header';
-import { HOME_BENEFITS } from '@shared/mocks/home.data';
+import { HOME_BENEFITS } from '@shared/constants/home.constants';
 
 const benefitIcons = {
   returns: RefreshCw,

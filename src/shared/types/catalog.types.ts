@@ -12,13 +12,7 @@ export type CatalogProductType =
   | 'boxer'
   | 'intima-masculina';
 
-export type CatalogCategorySlug =
-  | 'clubes-brasileiros'
-  | 'selecoes'
-  | 'retro'
-  | 'casual-esportiva'
-  | 'cuecas-boxer'
-  | 'intimas-masculinas';
+export type CatalogCategorySlug = string;
 
 export interface CatalogProduct extends ProductCardData {
   category: CatalogCategorySlug;

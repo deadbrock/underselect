@@ -4,7 +4,7 @@ import { memo } from 'react';
 
 import { Checkbox, Label, Separator } from '@presentation/components/ui';
 import { cn } from '@shared/utils/cn';
-import type { CatalogFilters } from '@shared/mocks/catalog.types';
+import type { CatalogFilters } from '@shared/types/catalog.types';
 import {
   CATALOG_BRANDS,
   CATALOG_CATEGORIES,
@@ -14,7 +14,7 @@ import {
   CATALOG_SIZES,
   CATALOG_TEAMS,
   CATALOG_TYPES,
-} from '@shared/mocks/catalog.constants';
+} from '@shared/constants/catalog.constants';
 
 interface FilterSectionProps {
   title: string;

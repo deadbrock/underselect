@@ -1,6 +1,6 @@
 import { Badge } from '@presentation/components/ui';
 import { cn } from '@shared/utils/cn';
-import type { ProductDetail } from '@shared/mocks/product-detail.types';
+import type { ProductDetail } from '@shared/types/product-detail.types';
 
 export interface PdpInfoHeaderProps {
   product: ProductDetail;

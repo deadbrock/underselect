@@ -21,6 +21,8 @@ export function HomeProductSection({
   products,
   href = '/categoria',
 }: HomeProductSectionProps) {
+  if (products.length === 0) return null;
+
   return (
     <section aria-label={title} className="py-12 md:py-16">
       <Container>

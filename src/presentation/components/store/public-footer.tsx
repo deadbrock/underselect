@@ -87,9 +87,7 @@ export function PublicFooter() {
           <p>
             &copy; {year} {STORE_NAME}. Todos os direitos reservados.
           </p>
-          <p className="tracking-wider uppercase">
-            CNPJ 00.000.000/0001-00 · São Paulo, Brasil
-          </p>
+          <p className="tracking-wider uppercase">Recife, Brasil</p>
         </div>
       </Container>
     </footer>

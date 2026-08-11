@@ -4,7 +4,7 @@ import { memo } from 'react';
 
 import { Input, Label, Switch } from '@presentation/components/ui';
 import { ADMIN_COUPON_TYPE_LABELS } from '@shared/constants/marketing-admin.constants';
-import type { CatalogCategorySlug } from '@shared/mocks/catalog.types';
+import type { CatalogCategorySlug } from '@shared/types/catalog.types';
 import type { AdminCouponRules } from '@shared/types/marketing-admin.types';
 
 interface CouponRulesPanelProps {

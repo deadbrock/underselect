@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { AccountOrderDetail } from '@presentation/components/account';
-import { getAllOrderIds, getOrderById } from '@shared/mocks/account.data';
+import { getAllOrderIds, getOrderById } from '@shared/data/account.data';
 import {
   JsonLd,
   createPrivatePageMetadata,

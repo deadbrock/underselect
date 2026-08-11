@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { Container } from '@presentation/components/layout';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
 import { HomeSectionHeader } from '@presentation/components/home/home-section-header';
-import { HOME_CATEGORIES } from '@shared/mocks/home.data';
+import { HOME_CATEGORIES } from '@shared/constants/home.constants';
 
 export function HomeCategories() {
   return (

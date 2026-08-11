@@ -7,8 +7,8 @@ import { memo } from 'react';
 import { CatalogProductGrid } from '@presentation/components/catalog';
 import { Container } from '@presentation/components/layout';
 import { MotionReveal } from '@presentation/components/home/motion-reveal';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
-import type { ProductRelatedGroups } from '@shared/mocks/product-detail.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
+import type { ProductRelatedGroups } from '@shared/types/product-detail.types';
 
 export interface PdpRelatedSectionsProps {
   related: ProductRelatedGroups;

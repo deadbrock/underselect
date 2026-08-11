@@ -24,7 +24,7 @@ import {
   MOCK_ORDERS_CHART,
   MOCK_REVENUE_CHART,
   getAdminRecentOrders,
-} from '@shared/mocks/admin.data';
+} from '@shared/data/admin.data';
 import type { AdminListRow } from '@shared/types/admin.types';
 import { formatCurrency, formatDateTime } from '@shared/utils/format';
 
@@ -78,7 +78,7 @@ export const AdminDashboard = memo(function AdminDashboard() {
     <div className="space-y-8">
       <PageHeader
         title="Dashboard"
-        description="Visão executiva da UNDER SELECT em tempo real (dados mockados)."
+        description="Visão executiva da UNDER SELECT — indicadores e atividades recentes."
       />
 
       <KpiGrid

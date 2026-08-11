@@ -1,14 +1,5 @@
 import { z } from 'zod';
 
-const categorySlugs = [
-  'clubes-brasileiros',
-  'selecoes',
-  'retro',
-  'casual-esportiva',
-  'cuecas-boxer',
-  'intimas-masculinas',
-] as const;
-
 const productTypes = [
   'camisa-clube',
   'camisa-selecao',
@@ -51,7 +42,7 @@ export const productSeoSchema = z.object({
   ogImage: z.string().optional(),
 });
 
-export const adminProductFormSchema = z.object({
+const adminProductFormFields = z.object({
   name: z.string().trim().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   slug: z
     .string()
@@ -60,7 +51,10 @@ export const adminProductFormSchema = z.object({
   sku: z.string().trim().min(1, 'Informe o SKU'),
   shortDescription: z.string().trim().min(10, 'Descrição curta muito curta'),
   fullDescription: z.string().trim().min(20, 'Descrição completa muito curta'),
-  category: z.enum(categorySlugs),
+  category: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]+$/, 'Selecione uma categoria válida'),
   type: z.enum(productTypes),
   collection: z.string().trim().min(1, 'Informe a coleção'),
   team: z.string().optional(),
@@ -68,6 +62,9 @@ export const adminProductFormSchema = z.object({
   brand: z.string().trim().min(1, 'Informe a marca'),
   season: z.string().trim().min(1, 'Informe a temporada'),
   tags: z.array(z.string()),
+  listPrice: z.coerce.number().min(0, 'Informe o preço de tabela'),
+  promoPrice: z.coerce.number().min(0).optional(),
+  noPromotionalPrice: z.boolean(),
   price: z.coerce.number().min(0, 'Preço inválido'),
   compareAtPrice: z.coerce.number().min(0).optional(),
   cost: z.coerce.number().min(0).optional(),
@@ -91,6 +88,52 @@ export const adminProductFormSchema = z.object({
   gallery: z.array(productGallerySchema),
   seo: productSeoSchema,
 });
+
+export const adminProductFormSchema = adminProductFormFields.superRefine(
+  (data, ctx) => {
+    if (data.noPromotionalPrice) return;
+
+    const promo = data.promoPrice;
+    if (promo == null || promo <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['promoPrice'],
+        message: 'Informe o preço promocional',
+      });
+      return;
+    }
+
+    if (promo >= data.listPrice) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['promoPrice'],
+        message: 'O preço promocional deve ser menor que o preço de tabela',
+      });
+    }
+  },
+);
+
+export function enrichProductFormPricing(input: unknown): unknown {
+  if (!input || typeof input !== 'object') return input;
+  const data = input as Record<string, unknown>;
+  if ('listPrice' in data) return input;
+
+  const price = Number(data.price ?? 0);
+  const compareAt =
+    data.compareAtPrice != null ? Number(data.compareAtPrice) : undefined;
+  const hasPromo = compareAt != null && compareAt > price;
+
+  return {
+    ...data,
+    listPrice: hasPromo ? compareAt : price,
+    promoPrice: hasPromo ? price : undefined,
+    noPromotionalPrice: !hasPromo,
+  };
+}
+
+export function parseAdminProductForm(body: unknown) {
+  return adminProductFormSchema.parse(enrichProductFormPricing(body));
+}
 
 export type AdminProductFormSchema = z.infer<typeof adminProductFormSchema>;
 export type ProductVariationSchema = z.infer<typeof productVariationSchema>;

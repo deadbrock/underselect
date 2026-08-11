@@ -10,8 +10,6 @@ import type {
   ShippingQuote,
 } from '@shared/types/cart.types';
 
-import { normalizeCep } from './cart.helpers';
-
 export function calculateCatalogDiscount(items: CartLineItem[]): number {
   return items.reduce((acc, item) => {
     if (!item.compareAtPrice || item.compareAtPrice <= item.price) return acc;
@@ -134,38 +132,6 @@ export function resolveCoupon(code: string): {
   };
 }
 
-export function mockShippingQuote(cep: string): ShippingQuote | null {
-  const normalized = normalizeCep(cep);
-  if (normalized.length !== 8) return null;
-
-  return {
-    cep: normalized,
-    options: [
-      {
-        id: 'pac',
-        label: 'PAC',
-        days: '8 a 12 dias úteis',
-        price: 19.9,
-      },
-      {
-        id: 'sedex',
-        label: 'SEDEX',
-        days: '3 a 5 dias úteis',
-        price: 39.9,
-      },
-      {
-        id: 'express',
-        label: 'Expressa',
-        days: '1 a 2 dias úteis',
-        price: 59.9,
-      },
-      {
-        id: 'pickup',
-        label: 'Retirada',
-        days: 'Retire em loja parceira',
-        price: 0,
-      },
-    ],
-    selectedOptionId: 'pac',
-  };
+export function mockShippingQuote(_cep: string): ShippingQuote | null {
+  return null;
 }

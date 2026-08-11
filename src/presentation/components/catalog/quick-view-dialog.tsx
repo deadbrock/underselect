@@ -18,7 +18,7 @@ import {
   catalogProductToCartInput,
   useCartStore,
 } from '@presentation/stores/cart';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 
 export interface QuickViewDialogProps {
   product: CatalogProduct | null;
@@ -57,7 +57,7 @@ export const QuickViewDialog = memo(function QuickViewDialog({
               alt={product.imageAlt ?? product.name}
               fill
               sizes="(max-width: 768px) 100vw, 400px"
-              className="object-cover"
+              className="object-contain p-4"
             />
           </div>
           <div className="flex flex-col p-6">

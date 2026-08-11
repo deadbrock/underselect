@@ -23,15 +23,6 @@ import { formatCurrency, formatDateTime } from '@shared/utils/format';
 
 import { OrderStatusBadge } from './order-status-badge';
 
-const MOCK_REVENUE = [
-  { label: '08h', value: 1200 },
-  { label: '10h', value: 2800 },
-  { label: '12h', value: 4100 },
-  { label: '14h', value: 3600 },
-  { label: '16h', value: 5200 },
-  { label: '18h', value: 4800 },
-];
-
 const recentColumns: Column<AdminOrder>[] = [
   {
     key: 'number',
@@ -108,22 +99,9 @@ export const OrderDashboard = memo(function OrderDashboard() {
         items={[{ title: 'Entregues', value: stats.deliveredOrders }]}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard title="Pedidos por dia" description="Última semana (mock)">
-          <AdminChartBars data={chartData} />
-        </ChartCard>
-        <ChartCard title="Faturamento do dia" description="Por hora (mock)">
-          <AdminChartBars
-            data={MOCK_REVENUE}
-            formatValue={(v) =>
-              new Intl.NumberFormat('pt-BR', {
-                notation: 'compact',
-                compactDisplay: 'short',
-              }).format(v)
-            }
-          />
-        </ChartCard>
-      </div>
+      <ChartCard title="Pedidos por dia" description="Última semana">
+        <AdminChartBars data={chartData} />
+      </ChartCard>
 
       <Card className="shadow-none">
         <CardHeader className="flex flex-row items-center justify-between">

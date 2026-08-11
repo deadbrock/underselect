@@ -82,40 +82,12 @@ export function buildStockItemsFromProducts(
   return items;
 }
 
-export function buildInitialMovements(items: StockItem[]): StockMovement[] {
-  const now = Date.now();
-  return items.slice(0, 8).map((item, i) => ({
-    id: `mov-seed-${i}`,
-    type: (['entry', 'exit', 'adjustment'] as StockMovementType[])[i % 3],
-    productId: item.productId,
-    productName: item.productName,
-    sku: item.sku,
-    variationId: item.variationId,
-    variationLabel:
-      [item.size, item.color].filter(Boolean).join(' · ') || undefined,
-    quantity: 5 + i * 2,
-    previousBalance: item.quantity,
-    currentBalance: item.quantity + (i % 2 === 0 ? 5 : -3),
-    reason: i % 2 === 0 ? 'Reposição' : 'Venda',
-    user: STOCK_MOCK_USER,
-    createdAt: new Date(now - i * 86400000).toISOString(),
-    status: 'completed',
-  }));
+export function buildInitialMovements(_items: StockItem[]): StockMovement[] {
+  return [];
 }
 
-export function buildInitialInventory(items: StockItem[]): InventoryItem[] {
-  return items.slice(0, 10).map((item, i) => ({
-    id: `inv-${item.id}`,
-    stockItemId: item.id,
-    productName: item.productName,
-    sku: item.sku,
-    variationLabel:
-      [item.size, item.color].filter(Boolean).join(' · ') || undefined,
-    systemQuantity: item.quantity,
-    countedQuantity: i < 3 ? item.quantity : undefined,
-    difference: i < 3 ? 0 : undefined,
-    status: i < 3 ? 'counted' : 'pending',
-  }));
+export function buildInitialInventory(_items: StockItem[]): InventoryItem[] {
+  return [];
 }
 
 export function generateAlerts(items: StockItem[]): StockAlert[] {

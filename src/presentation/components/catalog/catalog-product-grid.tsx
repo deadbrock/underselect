@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import { cn } from '@shared/utils/cn';
-import type { CatalogProduct } from '@shared/mocks/catalog.types';
+import type { CatalogProduct } from '@shared/types/catalog.types';
 
 import { CatalogProductCard } from './catalog-product-card';
 

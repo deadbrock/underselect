@@ -145,7 +145,7 @@ export const CouponReports = memo(function CouponReports() {
     <div className="space-y-8">
       <PageHeader
         title="Relatório de Cupons"
-        description="Utilização, faturamento e validade — dados mockados."
+        description="Utilização, faturamento e validade."
       />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <FilterSelect

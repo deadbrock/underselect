@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { memo, useCallback, useRef, useState } from 'react';
 
 import { cn } from '@shared/utils/cn';
-import type { ProductImage } from '@shared/mocks/product-detail.types';
+import type { ProductImage } from '@shared/types/product-detail.types';
 
 export interface PdpGalleryProps {
   images: ProductImage[];
@@ -69,7 +69,7 @@ const PdpGallery = memo(function PdpGallery({
                 alt=""
                 fill
                 sizes="80px"
-                className="object-cover"
+                className="object-contain p-1"
               />
             </button>
           ))}
@@ -92,9 +92,9 @@ const PdpGallery = memo(function PdpGallery({
           fill
           sizes="(max-width: 1024px) 100vw, 50vw"
           className={cn(
-            'object-cover transition-transform duration-300',
-            isZooming && 'md:scale-[1.75]',
-            mobileScale > 1 && 'scale-[2]',
+            'object-contain p-4 transition-transform duration-300',
+            isZooming && 'md:scale-110',
+            mobileScale > 1 && 'scale-125',
           )}
           style={{
             transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,

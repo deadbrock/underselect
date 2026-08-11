@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import type { CatalogFilters } from '@shared/mocks/catalog.types';
+import type { CatalogFilters } from '@shared/types/catalog.types';
 
 import { CatalogFiltersPanel } from './catalog-filters-panel';
 
