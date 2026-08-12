@@ -1,15 +1,12 @@
 import { Container } from '@presentation/components/layout';
 import { Breadcrumb } from '@presentation/components/ui';
 import { getStoreSettings } from '@infrastructure/database/repositories/store-settings.repository';
-import { dynamic } from '@shared/config/data-page.config';
 import {
   JsonLd,
   createPageMetadata,
   createWebPageSchema,
   createBreadcrumbSchema,
 } from '@shared/seo';
-
-export { dynamic };
 
 export const metadata = createPageMetadata({
   title: 'Contato',

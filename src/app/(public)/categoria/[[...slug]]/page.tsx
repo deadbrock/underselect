@@ -14,9 +14,6 @@ import {
   getCategoryMeta,
 } from '@shared/utils/catalog.utils';
 import { fetchProductsByCategorySlug } from '@shared/services/catalog.service';
-import { dynamic } from '@shared/config/data-page.config';
-
-export { dynamic };
 
 export const revalidate = 60;
 

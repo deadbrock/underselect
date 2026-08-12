@@ -13,9 +13,6 @@ import {
   fetchRelatedProducts,
 } from '@shared/services/catalog.service';
 import { buildProductBreadcrumbs } from '@shared/utils/product-detail.utils';
-import { dynamic } from '@shared/config/data-page.config';
-
-export { dynamic };
 
 export const revalidate = 60;
 

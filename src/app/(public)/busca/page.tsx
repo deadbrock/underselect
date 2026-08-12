@@ -9,9 +9,6 @@ import {
   createBreadcrumbSchema,
 } from '@shared/seo';
 import { fetchCatalogProducts } from '@shared/services/catalog.service';
-import { dynamic } from '@shared/config/data-page.config';
-
-export { dynamic };
 
 export const metadata = createPageMetadata({
   title: 'Busca',

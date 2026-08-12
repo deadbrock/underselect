@@ -6,6 +6,8 @@ import {
 } from '@presentation/components/store';
 import { getStoreSettings } from '@infrastructure/database/repositories/store-settings.repository';
 
+export const dynamic = 'force-dynamic';
+
 export default async function NotFoundPage() {
   const settings = await getStoreSettings();
 
