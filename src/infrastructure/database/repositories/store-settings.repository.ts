@@ -1,4 +1,5 @@
 import { prisma } from '@infrastructure/database';
+import { isDatabaseConfigured } from '@infrastructure/database/runtime';
 
 import {
   mapStoreSettingsToCreateInput,
@@ -6,8 +7,13 @@ import {
   mapStoreSettingsToUpdateInput,
 } from '../mappers/store-settings.mapper';
 import type { AdminStoreSettings } from '@shared/types/admin-settings.types';
+import { DEFAULT_ADMIN_STORE_SETTINGS } from '@shared/constants/admin-settings.constants';
 
 export async function getStoreSettings(): Promise<AdminStoreSettings> {
+  if (!isDatabaseConfigured()) {
+    return DEFAULT_ADMIN_STORE_SETTINGS;
+  }
+
   const existing = await prisma.storeSettings.findUnique({
     where: { id: 'default' },
   });

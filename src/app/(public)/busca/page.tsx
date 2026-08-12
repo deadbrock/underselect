@@ -16,9 +16,6 @@ export const metadata = createPageMetadata({
     'Encontre camisas de clubes, seleções, retrô e peças íntimas premium na UNDER SELECT.',
   path: '/busca',
 });
-
-export const revalidate = 60;
-
 function CatalogFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">

@@ -24,7 +24,8 @@
     "docker:build": "docker compose build",
     "prepare": "husky",
     "security:check": "node scripts/check-secrets.mjs",
-    "security:check:staged": "node scripts/check-secrets.mjs --staged"
+    "security:check:staged": "node scripts/check-secrets.mjs --staged",
+    "build:ci": "node scripts/verify-production-build.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

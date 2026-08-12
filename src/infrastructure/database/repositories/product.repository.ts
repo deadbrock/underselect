@@ -1,4 +1,5 @@
 import { prisma } from '@infrastructure/database';
+import { isDatabaseConfigured } from '@infrastructure/database/runtime';
 import {
   buildProductCreateData,
   buildProductUpdateData,
@@ -31,6 +32,10 @@ async function resolveCollectionId(collectionName: string) {
 }
 
 export async function listPublicProducts(where?: Prisma.ProductWhereInput) {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   const products = await prisma.product.findMany({
     where: {
       status: 'active',
@@ -132,6 +137,10 @@ export async function patchProductStock(
 }
 
 export async function getProductDetailBySlug(slug: string) {
+  if (!isDatabaseConfigured()) {
+    return undefined;
+  }
+
   const product = await prisma.product.findFirst({
     where: { slug, status: 'active' },
     include: productInclude,
@@ -150,6 +159,10 @@ export async function getAdminProductById(id: string) {
 }
 
 export async function getAllActiveProductSlugs() {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   const products = await prisma.product.findMany({
     where: { status: 'active' },
     select: { slug: true },
@@ -195,6 +208,10 @@ export async function getRelatedCatalogProducts(product: {
   team?: string;
   selection?: string;
 }) {
+  if (!isDatabaseConfigured()) {
+    return { similar: [], sameCollection: [], alsoBought: [] };
+  }
+
   const [similar, sameCollection, alsoBought] = await Promise.all([
     prisma.product.findMany({
       where: {

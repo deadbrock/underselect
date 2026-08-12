@@ -22,8 +22,6 @@ import {
   sortProducts,
 } from '@shared/utils/catalog.utils';
 
-export const revalidate = 60;
-
 export async function fetchCatalogProducts(): Promise<CatalogProduct[]> {
   return listPublicProducts();
 }

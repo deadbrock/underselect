@@ -16,9 +16,6 @@ export const metadata = createPageMetadata({
     'Lançamentos UNDER SELECT. Camisas de clubes, seleções, retrô e linha íntima masculina.',
   path: '/novidades',
 });
-
-export const revalidate = 60;
-
 function CatalogFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">

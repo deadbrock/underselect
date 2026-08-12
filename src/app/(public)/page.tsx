@@ -23,9 +23,6 @@ export const metadata = createPageMetadata({
     'UNDER SELECT — Camisas oficiais de clubes brasileiros, seleções nacionais, retrô e casual esportiva.',
   path: '/',
 });
-
-export const revalidate = 60;
-
 export default async function HomePage() {
   const [featuredProducts, newArrivals] = await Promise.all([
     fetchBestSellerProducts(),

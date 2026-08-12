@@ -14,9 +14,6 @@ import {
   getCategoryMeta,
 } from '@shared/utils/catalog.utils';
 import { fetchProductsByCategorySlug } from '@shared/services/catalog.service';
-
-export const revalidate = 60;
-
 interface CategoryPageProps {
   params: Promise<{ slug?: string[] }>;
 }

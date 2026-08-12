@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { listPublicProducts } from '@infrastructure/database/repositories/product.repository';
 import { toApiErrorResponse, toApiResponse } from '@shared/utils';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

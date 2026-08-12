@@ -5,6 +5,8 @@ import { AppProviders } from '@presentation/providers';
 import '@presentation/styles/globals.css';
 import { env } from '@infrastructure/config';
 
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

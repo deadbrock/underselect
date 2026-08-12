@@ -13,9 +13,6 @@ import {
   fetchRelatedProducts,
 } from '@shared/services/catalog.service';
 import { buildProductBreadcrumbs } from '@shared/utils/product-detail.utils';
-
-export const revalidate = 60;
-
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }

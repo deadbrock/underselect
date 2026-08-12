@@ -16,9 +16,6 @@ export const metadata = createPageMetadata({
     'Promoções exclusivas UNDER SELECT. Camisas de clubes, seleções e peças íntimas com desconto.',
   path: '/promocoes',
 });
-
-export const revalidate = 60;
-
 function CatalogFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
