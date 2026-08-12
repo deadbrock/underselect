@@ -27,6 +27,7 @@ export async function adminLoginApi(input: {
   const response = await fetch('/api/admin/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: JSON.stringify(input),
   });
 
@@ -36,6 +37,7 @@ export async function adminLoginApi(input: {
 export async function adminLogoutApi() {
   const response = await fetch('/api/admin/auth/logout', {
     method: 'POST',
+    credentials: 'same-origin',
   });
 
   return parseApiResponse<{ success: boolean }>(response);

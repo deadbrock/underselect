@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { memo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 
 import { KpiGrid } from '@presentation/components/dashboard';
 import {
@@ -15,7 +15,6 @@ import {
   getDashboardStats,
   getProductsByIds,
   MOCK_ACCOUNT_COUPONS,
-  MOCK_ACCOUNT_ORDERS,
   MOCK_RECENTLY_VIEWED_IDS,
 } from '@shared/data/account.data';
 import {
@@ -23,6 +22,8 @@ import {
   PAYMENT_METHOD_LABELS,
 } from '@shared/constants/account.constants';
 import { useAccountStore } from '@presentation/stores/account';
+import { fetchAccountOrdersApi } from '@presentation/stores/account/account-orders.api';
+import type { AccountOrder } from '@shared/types/account.types';
 import { formatCurrency } from '@shared/utils/format';
 
 import { AccountPageHeader } from './account-page-header';
@@ -31,8 +32,25 @@ import { AccountProductSection } from './account-product-section';
 export const AccountDashboard = memo(function AccountDashboard() {
   const user = useAccountStore((s) => s.user);
   const favoriteIds = useAccountStore((s) => s.favoriteIds);
-  const stats = getDashboardStats(favoriteIds.length);
-  const lastOrder = MOCK_ACCOUNT_ORDERS[0];
+  const [orders, setOrders] = useState<AccountOrder[]>([]);
+
+  useEffect(() => {
+    void fetchAccountOrdersApi()
+      .then(setOrders)
+      .catch(() => setOrders([]));
+  }, []);
+
+  const stats = useMemo(() => {
+    const base = getDashboardStats(favoriteIds.length);
+    const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+    return {
+      ...base,
+      totalOrders: orders.length,
+      totalSpent,
+    };
+  }, [favoriteIds.length, orders]);
+
+  const lastOrder = orders[0];
   const favorites = getProductsByIds(favoriteIds.slice(0, 4));
   const recentlyViewed = getProductsByIds(MOCK_RECENTLY_VIEWED_IDS.slice(0, 4));
   const availableCoupons = MOCK_ACCOUNT_COUPONS.filter(

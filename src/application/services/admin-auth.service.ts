@@ -69,7 +69,7 @@ export async function verifyAdminPassword(
   return bcrypt.compare(password, passwordHash);
 }
 
-function buildSessionCookie(token: string) {
+export function getAdminSessionCookieOptions(token: string) {
   return {
     name: getAdminSessionCookieName(),
     value: token,
@@ -79,6 +79,22 @@ function buildSessionCookie(token: string) {
     path: '/',
     maxAge: getAdminSessionMaxAgeSeconds(),
   };
+}
+
+export function getAdminSessionClearCookieOptions() {
+  return {
+    name: getAdminSessionCookieName(),
+    value: '',
+    httpOnly: true,
+    secure: isProduction(),
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: 0,
+  };
+}
+
+function buildSessionCookie(token: string) {
+  return getAdminSessionCookieOptions(token);
 }
 
 export async function setAdminSessionCookie(token: string): Promise<void> {
@@ -127,7 +143,7 @@ export async function loginAdmin(input: {
   password: string;
   ipAddress?: string;
   userAgent?: string;
-}): Promise<AdminSessionUser> {
+}): Promise<{ user: AdminSessionUser; token: string }> {
   await deleteExpiredAdminSessions();
 
   const user = await findAdminUserByEmail(input.email);
@@ -154,10 +170,9 @@ export async function loginAdmin(input: {
   });
 
   const token = await signAdminSessionToken(user.id, session.id);
-  await setAdminSessionCookie(token);
   await updateAdminUserLastLogin(user.id);
 
-  return mapAdminUser(user);
+  return { user: mapAdminUser(user), token };
 }
 
 export async function logoutAdmin(token?: string | null): Promise<void> {

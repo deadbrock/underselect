@@ -3,6 +3,7 @@ export * from './infinitepay.service';
 export * from './order-checkout.service';
 export * from './payment-confirmation.service';
 export * from './admin-auth.service';
+export * from './customer-auth.service';
 export * from './shipping-calculation.service';
 export * from './shipping-distance.service';
 export * from './shipping-quote.service';

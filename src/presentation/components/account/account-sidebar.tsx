@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import {
   Bookmark,
@@ -36,11 +36,20 @@ const NAV = [
 
 export const AccountSidebar = memo(function AccountSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const logout = useAccountStore((s) => s.logout);
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Logout preparado para integração com autenticação.');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Você saiu da sua conta.');
+      router.replace('/login' as Route);
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Não foi possível sair.',
+      );
+    }
   };
 
   return (
@@ -77,7 +86,7 @@ export const AccountSidebar = memo(function AccountSidebar() {
           type="button"
           variant="ghost"
           className="text-muted-foreground w-full justify-start gap-3"
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
         >
           <LogOut className="size-4" aria-hidden />
           Sair

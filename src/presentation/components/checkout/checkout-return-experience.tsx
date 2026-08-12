@@ -17,6 +17,9 @@ import { useCheckoutStore } from '@presentation/stores/checkout';
 
 type ReturnState = 'loading' | 'approved' | 'pending' | 'failed';
 
+const POLL_INTERVAL_MS = 4000;
+const MAX_POLL_ATTEMPTS = 15;
+
 export const CheckoutReturnExperience = memo(
   function CheckoutReturnExperience() {
     const searchParams = useSearchParams();
@@ -35,50 +38,56 @@ export const CheckoutReturnExperience = memo(
     );
 
     useEffect(() => {
+      if (state !== 'approved') return;
       clearCart();
       resetCheckout();
-    }, [clearCart, resetCheckout]);
+    }, [clearCart, resetCheckout, state]);
 
     useEffect(() => {
       let cancelled = false;
+      let pollTimer: ReturnType<typeof setTimeout> | undefined;
 
-      async function resolvePayment() {
+      async function resolveStatus(): Promise<ReturnState> {
+        if (transactionNsu && slug) {
+          const result = await checkInfinitePayPaymentApi({
+            orderNsu,
+            transactionNsu,
+            slug,
+          });
+
+          setOrderTotal(result.order?.total ?? null);
+          setResolvedReceiptUrl(result.order?.receiptUrl ?? receiptUrl);
+
+          if (result.paid && result.paymentStatus === 'approved') {
+            return 'approved';
+          }
+        }
+
+        const status = await fetchOrderPaymentStatusApi(orderNsu);
+        setOrderTotal(status.total);
+        setResolvedReceiptUrl(status.receiptUrl ?? receiptUrl);
+
+        if (status.paymentStatus === 'approved') return 'approved';
+        if (status.paymentStatus === 'pending') return 'pending';
+        return 'failed';
+      }
+
+      async function resolvePayment(attempt = 0) {
         if (!orderNsu) {
           setState('failed');
           return;
         }
 
         try {
-          if (transactionNsu && slug) {
-            const result = await checkInfinitePayPaymentApi({
-              orderNsu,
-              transactionNsu,
-              slug,
-            });
-
-            if (cancelled) return;
-
-            setOrderTotal(result.order?.total ?? null);
-            setResolvedReceiptUrl(result.order?.receiptUrl ?? receiptUrl);
-
-            if (result.paid && result.paymentStatus === 'approved') {
-              setState('approved');
-              return;
-            }
-          }
-
-          const status = await fetchOrderPaymentStatusApi(orderNsu);
+          const nextState = await resolveStatus();
           if (cancelled) return;
 
-          setOrderTotal(status.total);
-          setResolvedReceiptUrl(status.receiptUrl ?? receiptUrl);
+          setState(nextState);
 
-          if (status.paymentStatus === 'approved') {
-            setState('approved');
-          } else if (status.paymentStatus === 'pending') {
-            setState('pending');
-          } else {
-            setState('failed');
+          if (nextState === 'pending' && attempt < MAX_POLL_ATTEMPTS) {
+            pollTimer = setTimeout(() => {
+              void resolvePayment(attempt + 1);
+            }, POLL_INTERVAL_MS);
           }
         } catch {
           if (!cancelled) setState('failed');
@@ -89,6 +98,7 @@ export const CheckoutReturnExperience = memo(
 
       return () => {
         cancelled = true;
+        if (pollTimer) clearTimeout(pollTimer);
       };
     }, [orderNsu, transactionNsu, slug, receiptUrl]);
 
@@ -110,7 +120,7 @@ export const CheckoutReturnExperience = memo(
         case 'approved':
           return 'Recebemos a confirmação do pagamento. Em breve você receberá a confirmação por e-mail.';
         case 'pending':
-          return 'Seu pagamento ainda está sendo processado. Assim que for confirmado, atualizaremos o pedido.';
+          return 'Seu pagamento ainda está sendo processado. Esta página atualiza automaticamente assim que for confirmado.';
         case 'failed':
           return 'Não foi possível confirmar o pagamento. Você pode tentar novamente ou entrar em contato conosco.';
         default:
@@ -121,7 +131,7 @@ export const CheckoutReturnExperience = memo(
     return (
       <Container className="py-16 md:py-24">
         <div className="mx-auto max-w-lg text-center">
-          {state === 'loading' ? (
+          {state === 'loading' || state === 'pending' ? (
             <Loader2 className="text-brand-bronze mx-auto size-12 animate-spin" />
           ) : null}
 
@@ -161,13 +171,17 @@ export const CheckoutReturnExperience = memo(
               </Button>
             ) : null}
             <Button variant="bronze" size="lg" asChild>
-              <Link href={'/categoria' as Route}>Continuar comprando</Link>
+              <Link href={'/pedidos' as Route}>Ver meus pedidos</Link>
             </Button>
             {state !== 'approved' ? (
               <Button variant="outline" size="lg" asChild>
                 <Link href={'/checkout' as Route}>Tentar novamente</Link>
               </Button>
-            ) : null}
+            ) : (
+              <Button variant="outline" size="lg" asChild>
+                <Link href={'/categoria' as Route}>Continuar comprando</Link>
+              </Button>
+            )}
           </div>
         </div>
       </Container>

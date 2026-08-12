@@ -1,4 +1,7 @@
-import { OrderLayoutNav } from '@presentation/components/admin/order';
+import {
+  OrderLayoutNav,
+  OrderHydrator,
+} from '@presentation/components/admin/order';
 
 export default function PedidosLayout({
   children,
@@ -7,6 +10,7 @@ export default function PedidosLayout({
 }) {
   return (
     <>
+      <OrderHydrator />
       <OrderLayoutNav />
       {children}
     </>

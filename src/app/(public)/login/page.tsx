@@ -1,4 +1,6 @@
-import { PagePlaceholder } from '@presentation/components/store';
+import { Suspense } from 'react';
+
+import { AccountLoginForm } from '@presentation/components/account/account-login-form';
 import {
   JsonLd,
   createPrivatePageMetadata,
@@ -28,11 +30,15 @@ export default function LoginPage() {
           ]),
         ]}
       />
-      <PagePlaceholder
-        title="Login"
-        description="Estrutura preparada para autenticação e recuperação de senha."
-        breadcrumbs={[{ label: 'Início', href: '/' }, { label: 'Login' }]}
-      />
+      <Suspense
+        fallback={
+          <div className="text-muted-foreground py-24 text-center text-sm">
+            Carregando...
+          </div>
+        }
+      >
+        <AccountLoginForm />
+      </Suspense>
     </>
   );
 }

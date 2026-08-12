@@ -1,7 +1,8 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
+import { getCustomerSessionUser } from '@application/services';
 import { AccountOrderDetail } from '@presentation/components/account';
-import { getAllOrderIds, getOrderById } from '@shared/data/account.data';
+import { getCustomerOrderById } from '@infrastructure/database/repositories/order.repository';
 import {
   JsonLd,
   createPrivatePageMetadata,
@@ -13,13 +14,18 @@ interface PedidoDetalhePageProps {
   params: Promise<{ id: string }>;
 }
 
-export function generateStaticParams() {
-  return getAllOrderIds().map((id) => ({ id }));
-}
-
 export async function generateMetadata({ params }: PedidoDetalhePageProps) {
+  const user = await getCustomerSessionUser();
+  if (!user) {
+    return createPrivatePageMetadata({
+      title: 'Pedido',
+      description: 'Pedido UNDER SELECT.',
+      path: '/pedidos',
+    });
+  }
+
   const { id } = await params;
-  const order = getOrderById(id);
+  const order = await getCustomerOrderById(user.id, id);
 
   if (!order) {
     return createPrivatePageMetadata({
@@ -39,9 +45,11 @@ export async function generateMetadata({ params }: PedidoDetalhePageProps) {
 export default async function PedidoDetalhePage({
   params,
 }: PedidoDetalhePageProps) {
-  const { id } = await params;
-  const order = getOrderById(id);
+  const user = await getCustomerSessionUser();
+  if (!user) redirect('/login');
 
+  const { id } = await params;
+  const order = await getCustomerOrderById(user.id, id);
   if (!order) notFound();
 
   return (

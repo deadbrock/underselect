@@ -10,6 +10,7 @@ import {
   OrderCheckoutValidationError,
 } from '@infrastructure/database/repositories/order.repository';
 import { toApiErrorResponse, toApiResponse } from '@shared/utils';
+import { resolveAppBaseUrl } from '@shared/utils/app-url.utils';
 
 const orderSchema = z.object({
   customer: z.object({
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
     const result = await createOrderFromCheckout({
       ...parsed,
       couponCode: parsed.couponCode?.toUpperCase(),
+      appBaseUrl: resolveAppBaseUrl(request),
     });
 
     return NextResponse.json(toApiResponse(result), { status: 201 });

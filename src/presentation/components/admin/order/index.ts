@@ -1,5 +1,6 @@
 export { OrderLayoutNav } from './order-layout-nav';
 export { OrderDashboard } from './order-dashboard';
+export { OrderHydrator } from './order-hydrator';
 export { OrderList } from './order-list';
 export { OrderTable } from './order-table';
 export { OrderCards } from './order-cards';

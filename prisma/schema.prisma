@@ -294,20 +294,36 @@ model Coupon {
 }
 
 model Customer {
-  id          String             @id @default(cuid())
-  firstName   String
-  lastName    String
-  email       String             @unique
-  cpf         String             @unique
-  phone       String
-  status      String             @default("active")
-  orders      Order[]
-  redemptions CouponRedemption[]
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id           String             @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String             @unique
+  cpf          String             @unique
+  phone        String
+  passwordHash String?
+  status       String             @default("active")
+  lastLoginAt  DateTime?
+  orders       Order[]
+  redemptions  CouponRedemption[]
+  sessions     CustomerSession[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
   @@index([email])
   @@index([status])
+}
+
+model CustomerSession {
+  id        String   @id @default(cuid())
+  customerId String
+  customer  Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([customerId])
+  @@index([expiresAt])
 }
 
 model Order {

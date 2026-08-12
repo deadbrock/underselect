@@ -16,7 +16,12 @@ import { useOrderListState } from './use-order-list-state';
 
 export const OrderList = memo(function OrderList() {
   const orders = useOrderStore((s) => s.orders);
+  const loadOrders = useOrderStore((s) => s.loadOrders);
   const setGlobalLoading = useAdminStore((s) => s.setGlobalLoading);
+
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
 
   const {
     filters,

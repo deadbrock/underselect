@@ -29,6 +29,7 @@ interface AccountState {
 
 interface AccountActions {
   updateProfile: (data: AccountProfileInput) => void;
+  syncUserFromSession: (user: AccountUser) => void;
   addAddress: (input: AccountAddressInput) => void;
   updateAddress: (id: string, input: AccountAddressInput) => void;
   removeAddress: (id: string) => void;
@@ -75,6 +76,10 @@ export const useAccountStore = create<AccountStore>()(
             ...data,
           },
         });
+      },
+
+      syncUserFromSession: (user) => {
+        set({ user });
       },
 
       addAddress: (input) => {
@@ -150,8 +155,9 @@ export const useAccountStore = create<AccountStore>()(
         }));
       },
 
-      logout: () => {
-        // Estrutura preparada para autenticação / JWT
+      logout: async () => {
+        const { customerLogoutApi } = await import('./auth.api');
+        await customerLogoutApi();
       },
     }),
     {

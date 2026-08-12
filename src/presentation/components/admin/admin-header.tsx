@@ -4,7 +4,6 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Bell, LogOut, Moon, Plus, Search, Sun } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
 import {
@@ -20,16 +19,15 @@ import {
   Input,
 } from '@presentation/components/ui';
 import { useAdminStore, useSettingsStore } from '@presentation/stores/admin';
-import { adminLogoutApi } from '@presentation/stores/admin/auth';
-import { toast } from '@presentation/hooks';
 import { searchAdmin } from '@shared/data/admin.data';
 
 import { AdminBreadcrumb } from './admin-breadcrumb';
 import { AdminNotificationsPanel } from './admin-notifications-panel';
+import { useAdminLogout } from './use-admin-logout';
 
 export const AdminHeader = memo(function AdminHeader() {
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const handleLogout = useAdminLogout();
   const notifications = useAdminStore((s) => s.notifications);
   const setGlobalSearchQuery = useAdminStore((s) => s.setGlobalSearchQuery);
   const profile = useSettingsStore((s) => s.profile);
@@ -53,18 +51,6 @@ export const AdminHeader = memo(function AdminHeader() {
   const toggleTheme = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
-
-  const handleLogout = useCallback(async () => {
-    try {
-      await adminLogoutApi();
-      router.replace('/admin/login' as Route);
-      router.refresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Não foi possível sair.',
-      );
-    }
-  }, [router]);
 
   return (
     <header className="border-border bg-background/95 sticky top-0 z-40 border-b backdrop-blur">

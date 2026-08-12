@@ -6,12 +6,13 @@ function readRequiredEnv(name: string): string {
   return value;
 }
 
-function readAppBaseUrl(): string {
-  return (
-    process.env.APP_URL?.trim() ||
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    'http://localhost:3000'
-  ).replace(/\/$/, '');
+import { resolveAppBaseUrl } from '@shared/utils/app-url.utils';
+
+function readAppBaseUrl(baseUrl?: string): string {
+  if (baseUrl?.trim()) {
+    return baseUrl.trim().replace(/\/$/, '');
+  }
+  return resolveAppBaseUrl();
 }
 
 export function getInfinitePayHandle(): string {
@@ -25,16 +26,16 @@ export function getInfinitePayApiBaseUrl(): string {
   ).replace(/\/$/, '');
 }
 
-export function getInfinitePayRedirectUrl(): string {
+export function getInfinitePayRedirectUrl(baseUrl?: string): string {
   const override = process.env.INFINITEPAY_REDIRECT_URL?.trim();
   if (override) return override;
-  return `${readAppBaseUrl()}/checkout/retorno`;
+  return `${readAppBaseUrl(baseUrl)}/checkout/retorno`;
 }
 
-export function getInfinitePayWebhookUrl(): string {
+export function getInfinitePayWebhookUrl(baseUrl?: string): string {
   const override = process.env.INFINITEPAY_WEBHOOK_URL?.trim();
   if (override) return override;
-  return `${readAppBaseUrl()}/api/webhooks/infinitepay`;
+  return `${readAppBaseUrl(baseUrl)}/api/webhooks/infinitepay`;
 }
 
 export function toCents(amount: number): number {

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   BarChart3,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Package,
   Settings,
@@ -14,18 +15,20 @@ import {
 } from 'lucide-react';
 import { memo } from 'react';
 
+import { Button, Separator } from '@presentation/components/ui';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  Separator,
 } from '@presentation/components/ui';
 import { cn } from '@shared/utils/cn';
 import {
   ADMIN_NAV_GROUPS,
   type AdminNavGroup,
 } from '@shared/constants/admin.constants';
+
+import { useAdminLogout } from './use-admin-logout';
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
   Dashboard: LayoutDashboard,
@@ -51,6 +54,7 @@ function isChildActive(href: string, pathname: string): boolean {
 
 export const AdminSidebar = memo(function AdminSidebar() {
   const pathname = usePathname();
+  const handleLogout = useAdminLogout();
 
   const defaultOpen = ADMIN_NAV_GROUPS.filter(
     (g) => g.children && isGroupActive(g, pathname),
@@ -142,7 +146,18 @@ export const AdminSidebar = memo(function AdminSidebar() {
       </div>
 
       <Separator className="my-4" />
-      <p className="text-muted-foreground px-4 text-xs">
+      <div className="px-2">
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-muted-foreground w-full justify-start gap-3"
+          onClick={() => void handleLogout()}
+        >
+          <LogOut className="size-4" aria-hidden />
+          Sair
+        </Button>
+      </div>
+      <p className="text-muted-foreground px-4 pt-4 text-xs">
         ERP UNDER SELECT v1.0
       </p>
     </nav>

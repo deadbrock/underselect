@@ -59,13 +59,20 @@ export const changePasswordSchema = z
     currentPassword: z.string().min(6, 'Informe a senha atual'),
     newPassword: z
       .string()
-      .min(8, 'A nova senha deve ter no mínimo 8 caracteres'),
+      .min(8, 'A nova senha deve ter no mínimo 8 caracteres')
+      .regex(/[A-Za-z]/, 'A nova senha deve conter letras')
+      .regex(/\d/, 'A nova senha deve conter números'),
     confirmPassword: z.string().min(8, 'Confirme a nova senha'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'As senhas não coincidem',
     path: ['confirmPassword'],
   });
+
+export const loginFormSchema = z.object({
+  email: z.string().trim().email('Informe um e-mail válido'),
+  password: z.string().min(6, 'Informe a senha'),
+});
 
 export const settingsFormSchema = z.object({
   themePreference: z.enum(['system', 'light', 'dark']),
@@ -78,4 +85,5 @@ export const settingsFormSchema = z.object({
 export type ProfileFormSchema = z.infer<typeof profileFormSchema>;
 export type AddressFormSchema = z.infer<typeof addressFormSchema>;
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
+export type LoginFormSchema = z.infer<typeof loginFormSchema>;
 export type SettingsFormSchema = z.infer<typeof settingsFormSchema>;

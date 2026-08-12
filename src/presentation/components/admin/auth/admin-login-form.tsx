@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Loader2, Lock } from 'lucide-react';
 import { memo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import {
   Form,
@@ -28,7 +28,6 @@ import {
 } from '@presentation/stores/admin/settings';
 
 export const AdminLoginForm = memo(function AdminLoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') ?? '/admin/dashboard';
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,8 +44,7 @@ export const AdminLoginForm = memo(function AdminLoginForm() {
     try {
       await adminLoginApi(values);
       toast.success('Login realizado com sucesso.');
-      router.replace(redirectTo as Route);
-      router.refresh();
+      window.location.assign(redirectTo);
     } catch (error) {
       toast.error(
         error instanceof Error

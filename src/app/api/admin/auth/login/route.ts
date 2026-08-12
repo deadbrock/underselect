@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { AdminAuthError, loginAdmin } from '@application/services';
+import {
+  AdminAuthError,
+  getAdminSessionCookieOptions,
+  loginAdmin,
+} from '@application/services';
 import { toApiErrorResponse, toApiResponse } from '@shared/utils';
 
 const loginSchema = z.object({
@@ -18,14 +22,16 @@ export async function POST(request: Request) {
       undefined;
     const userAgent = request.headers.get('user-agent') ?? undefined;
 
-    const user = await loginAdmin({
+    const { user, token } = await loginAdmin({
       email: body.email,
       password: body.password,
       ipAddress,
       userAgent,
     });
 
-    return NextResponse.json(toApiResponse({ user }));
+    const response = NextResponse.json(toApiResponse({ user }));
+    response.cookies.set(getAdminSessionCookieOptions(token));
+    return response;
   } catch (error) {
     const status = error instanceof AdminAuthError ? 401 : 400;
     return NextResponse.json(toApiErrorResponse(error), { status });

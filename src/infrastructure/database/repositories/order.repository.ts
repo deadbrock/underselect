@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import {
   createInfinitePayCheckoutLink,
   formatCheckoutCustomerPhone,
+  InfinitePayApiError,
   OrderCheckoutValidationError,
   roundMoney,
   validateCheckoutOrder,
@@ -11,6 +12,10 @@ import {
   type InfinitePayCheckoutItem,
 } from '@application/services';
 import { prisma } from '@infrastructure/database';
+import {
+  mapOrderToAccountOrder,
+  mapOrderToAdminOrder,
+} from '@infrastructure/database/mappers/order.mapper';
 import {
   getInfinitePayRedirectUrl,
   getInfinitePayWebhookUrl,
@@ -23,6 +28,7 @@ export interface CreateOrderInput {
   shippingMethod?: string;
   paymentMethod?: string;
   couponCode?: string;
+  appBaseUrl?: string;
 }
 
 export interface CreateOrderResult {
@@ -162,24 +168,46 @@ export async function createOrderFromCheckout(
 
   const customerName =
     `${input.customer.firstName} ${input.customer.lastName}`.trim();
-  const link = await createInfinitePayCheckoutLink({
-    orderNsu: order.number,
-    items: infinitePayItems,
-    redirectUrl: getInfinitePayRedirectUrl(),
-    webhookUrl: getInfinitePayWebhookUrl(),
-    customer: {
-      name: customerName,
-      email: input.customer.email,
-      phone_number: formatCheckoutCustomerPhone(input.customer.phone),
-    },
-    address: {
-      cep: String(address.cep ?? '').replace(/\D/g, ''),
-      street: String(address.street ?? ''),
-      neighborhood: String(address.neighborhood ?? ''),
-      number: String(address.number ?? ''),
-      complement: address.complement ? String(address.complement) : undefined,
-    },
-  });
+
+  let link;
+  try {
+    link = await createInfinitePayCheckoutLink({
+      orderNsu: order.number,
+      items: infinitePayItems,
+      redirectUrl: getInfinitePayRedirectUrl(input.appBaseUrl),
+      webhookUrl: getInfinitePayWebhookUrl(input.appBaseUrl),
+      customer: {
+        name: customerName,
+        email: input.customer.email,
+        phone_number: formatCheckoutCustomerPhone(input.customer.phone),
+      },
+      address: {
+        cep: String(address.cep ?? '').replace(/\D/g, ''),
+        street: String(address.street ?? ''),
+        neighborhood: String(address.neighborhood ?? ''),
+        number: String(address.number ?? ''),
+        complement: address.complement ? String(address.complement) : undefined,
+      },
+    });
+  } catch (error) {
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: 'cancelled',
+        paymentStatus: 'failed',
+      },
+    });
+
+    if (error instanceof InfinitePayApiError) {
+      throw error;
+    }
+
+    throw new InfinitePayApiError(
+      error instanceof Error
+        ? error.message
+        : 'Falha ao gerar link de pagamento InfinitePay.',
+    );
+  }
 
   await prisma.paymentTransaction.create({
     data: {
@@ -241,6 +269,10 @@ export async function listOrdersForAdmin(filters?: {
         items: true,
         coupon: { select: { code: true } },
         influencer: { select: { name: true, identifierCode: true } },
+        paymentTransactions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
       },
       orderBy: [{ createdAt: 'desc' }],
       take: filters?.limit ?? 50,
@@ -249,7 +281,102 @@ export async function listOrdersForAdmin(filters?: {
     prisma.order.count({ where }),
   ]);
 
-  return { records, total };
+  const customerIds = [...new Set(records.map((order) => order.customerId))];
+  const customerStats = await prisma.order.groupBy({
+    by: ['customerId'],
+    where: { customerId: { in: customerIds } },
+    _count: { _all: true },
+    _sum: { total: true },
+  });
+
+  const statsByCustomer = new Map(
+    customerStats.map((entry) => [
+      entry.customerId,
+      {
+        totalOrders: entry._count._all,
+        totalSpent: Number(entry._sum.total ?? 0),
+      },
+    ]),
+  );
+
+  return {
+    records: records.map((order) =>
+      mapOrderToAdminOrder(
+        order,
+        statsByCustomer.get(order.customerId) ?? {
+          totalOrders: 0,
+          totalSpent: 0,
+        },
+      ),
+    ),
+    total,
+  };
+}
+
+export async function getOrderForAdminById(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      customer: true,
+      items: true,
+      coupon: { select: { code: true } },
+      influencer: { select: { name: true, identifierCode: true } },
+      paymentTransactions: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
+
+  if (!order) return null;
+
+  const stats = await prisma.order.aggregate({
+    where: { customerId: order.customerId },
+    _count: { _all: true },
+    _sum: { total: true },
+  });
+
+  return mapOrderToAdminOrder(order, {
+    totalOrders: stats._count._all,
+    totalSpent: Number(stats._sum.total ?? 0),
+  });
+}
+
+export async function listOrdersForCustomer(customerId: string) {
+  const records = await prisma.order.findMany({
+    where: { customerId },
+    include: {
+      customer: true,
+      items: true,
+      paymentTransactions: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+    orderBy: [{ createdAt: 'desc' }],
+  });
+
+  return records.map(mapOrderToAccountOrder);
+}
+
+export async function getCustomerOrderById(
+  customerId: string,
+  orderId: string,
+) {
+  const order = await prisma.order.findFirst({
+    where: { id: orderId, customerId },
+    include: {
+      customer: true,
+      items: true,
+      paymentTransactions: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
+
+  if (!order) return null;
+  return mapOrderToAccountOrder(order);
 }
 
 export async function listAttributions(filters?: {

@@ -10,6 +10,7 @@ import { MobileSidebar } from '@presentation/components/navigation';
 import { Heart, LayoutDashboard, Package, Ticket } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
+import { AccountAuthHydrator } from './account-auth-hydrator';
 import { AccountSidebar } from './account-sidebar';
 import { cn } from '@shared/utils/cn';
 
@@ -56,6 +57,7 @@ export const AccountLayoutShell = memo(function AccountLayoutShell({
 
   return (
     <div className="pb-[var(--bottom-nav-height)] md:pb-0">
+      <AccountAuthHydrator />
       <div className="border-border flex items-center gap-3 border-b px-4 py-3 md:hidden">
         <MobileSidebar
           trigger={
