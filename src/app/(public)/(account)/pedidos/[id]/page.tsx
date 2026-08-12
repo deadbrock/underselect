@@ -3,12 +3,15 @@ import { notFound, redirect } from 'next/navigation';
 import { getCustomerSessionUser } from '@application/services';
 import { AccountOrderDetail } from '@presentation/components/account';
 import { getCustomerOrderById } from '@infrastructure/database/repositories/order.repository';
+import { dynamic } from '@shared/config/data-page.config';
 import {
   JsonLd,
   createPrivatePageMetadata,
   createWebPageSchema,
   createBreadcrumbSchema,
 } from '@shared/seo';
+
+export { dynamic };
 
 interface PedidoDetalhePageProps {
   params: Promise<{ id: string }>;

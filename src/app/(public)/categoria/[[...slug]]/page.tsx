@@ -14,27 +14,14 @@ import {
   getCategoryMeta,
 } from '@shared/utils/catalog.utils';
 import { fetchProductsByCategorySlug } from '@shared/services/catalog.service';
+import { dynamic } from '@shared/config/data-page.config';
+
+export { dynamic };
 
 export const revalidate = 60;
 
 interface CategoryPageProps {
   params: Promise<{ slug?: string[] }>;
-}
-
-export async function generateStaticParams() {
-  return [
-    { slug: [] },
-    { slug: ['clubes-brasileiros'] },
-    { slug: ['clubes-brasileiros', 'flamengo'] },
-    { slug: ['clubes-brasileiros', 'corinthians'] },
-    { slug: ['clubes-brasileiros', 'palmeiras'] },
-    { slug: ['selecoes'] },
-    { slug: ['selecoes', 'brasil'] },
-    { slug: ['retro'] },
-    { slug: ['casual-esportiva'] },
-    { slug: ['cuecas-boxer'] },
-    { slug: ['intimas-masculinas'] },
-  ];
 }
 
 export async function generateMetadata({ params }: CategoryPageProps) {

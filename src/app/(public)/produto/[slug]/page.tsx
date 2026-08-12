@@ -9,21 +9,18 @@ import {
   createProductSchema,
 } from '@shared/seo';
 import {
-  fetchAllProductSlugs,
   fetchProductBySlug,
   fetchRelatedProducts,
 } from '@shared/services/catalog.service';
 import { buildProductBreadcrumbs } from '@shared/utils/product-detail.utils';
+import { dynamic } from '@shared/config/data-page.config';
+
+export { dynamic };
 
 export const revalidate = 60;
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await fetchAllProductSlugs();
-  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
