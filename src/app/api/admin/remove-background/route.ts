@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const png = await removeBackgroundOnServer(buffer);
+    const png = await removeBackgroundOnServer(buffer, file.type);
 
     return new NextResponse(new Uint8Array(png), {
       status: 200,
@@ -46,7 +46,9 @@ export async function POST(request: Request) {
         : 'Não foi possível remover o fundo.';
     const message = /sharp/i.test(raw)
       ? 'O servidor ainda não está com o processador de imagem pronto. Recrie o container da aplicação e tente de novo.'
-      : raw;
+      : /unsupported format/i.test(raw)
+        ? 'Formato de imagem não suportado. Envie JPG, PNG ou WebP.'
+        : raw;
 
     return NextResponse.json(toApiErrorResponse(new Error(message)), {
       status: 500,

@@ -51,8 +51,9 @@ export async function removeImageBackground(
 
   onProgress?.('Enviando para o servidor…');
 
+  const jpeg = new File([input], 'product-image.jpg', { type: 'image/jpeg' });
   const body = new FormData();
-  body.append('file', input, 'product-image.jpg');
+  body.append('file', jpeg);
 
   const controller = new AbortController();
   const startedAt = Date.now();
