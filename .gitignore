@@ -41,3 +41,6 @@ prisma/*.db-journal
 # Misc
 *.tsbuildinfo
 tmp-*.tsx
+
+# Uploads de imagens de produtos (runtime)
+uploads/

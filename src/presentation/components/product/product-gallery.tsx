@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { memo, useState } from 'react';
 
 import { cn } from '@shared/utils/cn';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 export interface ProductGalleryProps {
   images: { url: string; alt?: string }[];
@@ -29,6 +30,7 @@ const ProductGallery = memo(function ProductGallery({
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain p-4"
           priority
+          unoptimized={shouldUnoptimizeImage(active.url)}
         />
       </div>
       {images.length > 1 && (
@@ -52,6 +54,7 @@ const ProductGallery = memo(function ProductGallery({
                 fill
                 sizes="64px"
                 className="object-contain p-1"
+                unoptimized={shouldUnoptimizeImage(image.url)}
               />
             </button>
           ))}

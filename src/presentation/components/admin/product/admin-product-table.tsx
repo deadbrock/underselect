@@ -8,6 +8,7 @@ import { Badge } from '@presentation/components/ui';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import type { AdminProduct } from '@shared/types/product-admin.types';
 import { formatCurrency, formatDate } from '@shared/utils/format';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 import { AdminProductActions } from './admin-product-actions';
 
@@ -29,6 +30,7 @@ const columns: Column<AdminProduct>[] = [
           fill
           className="object-cover"
           sizes="48px"
+          unoptimized={shouldUnoptimizeImage(p.imageUrl)}
         />
       </div>
     ),

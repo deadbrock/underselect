@@ -12,6 +12,7 @@ import { AdminModulePagination } from '@presentation/components/admin/admin-modu
 import { useProductStore } from '@presentation/stores/admin/product';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import { formatCurrency, formatDate } from '@shared/utils/format';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 import { AdminProductGridView } from './admin-product-grid-view';
 import { AdminProductImportDialog } from './admin-product-import-dialog';
@@ -105,6 +106,7 @@ export const AdminProductList = memo(function AdminProductList() {
                         fill
                         className="object-cover"
                         sizes="80px"
+                        unoptimized={shouldUnoptimizeImage(product.imageUrl)}
                       />
                     </div>
                     <div className="min-w-0 flex-1 space-y-1">

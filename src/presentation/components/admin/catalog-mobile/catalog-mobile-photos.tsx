@@ -1,15 +1,16 @@
 'use client';
 
-import Image from 'next/image';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { memo, useCallback, useRef, useState } from 'react';
 
+import { ProductImageEditorDialog } from '@presentation/components/admin/product/product-image-editor-dialog';
 import { Button } from '@presentation/components/ui';
 import { toast } from '@presentation/hooks';
-import { resizeImageFile } from '@shared/utils/resize-image';
-
-const PREVIEW_MAX_WIDTH = 900;
-const PREVIEW_MAX_HEIGHT = 1200;
+import {
+  isLikelyImageFile,
+  PRODUCT_IMAGE_ACCEPT,
+  uploadProductImage,
+} from '@shared/utils/product-image';
 
 export interface CatalogMobilePhotosProps {
   photos: string[];
@@ -21,56 +22,33 @@ export const CatalogMobilePhotos = memo(function CatalogMobilePhotos({
   onChange,
 }: CatalogMobilePhotosProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [queue, setQueue] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const handleFiles = useCallback(
-    async (fileList: FileList | null) => {
-      if (!fileList || fileList.length === 0) return;
+  const handleFiles = useCallback((fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
 
-      const files = Array.from(fileList).filter((file) =>
-        file.type.startsWith('image/'),
-      );
+    const files = Array.from(fileList).filter(isLikelyImageFile);
 
-      if (files.length === 0) {
-        toast.error('Selecione arquivos de imagem válidos.');
-        return;
-      }
+    if (files.length === 0) {
+      toast.error('Selecione arquivos de imagem válidos.');
+      return;
+    }
 
+    setQueue(files);
+  }, []);
+
+  const handleConfirm = useCallback(
+    async (blob: Blob) => {
       setUploading(true);
-      const uploaded: string[] = [];
-
       try {
-        for (const file of files) {
-          const resized = await resizeImageFile(file, {
-            maxWidth: PREVIEW_MAX_WIDTH,
-            maxHeight: PREVIEW_MAX_HEIGHT,
-            quality: 0.85,
-            mimeType: 'image/jpeg',
-          });
-
-          const body = new FormData();
-          body.append('file', resized, 'product-image.jpg');
-
-          const response = await fetch('/api/admin/upload', {
-            method: 'POST',
-            body,
-          });
-          const payload = await response.json();
-
-          if (!response.ok || !payload.success) {
-            throw new Error(
-              payload.error?.message ?? 'Falha ao enviar a imagem.',
-            );
-          }
-
-          uploaded.push(payload.data.url as string);
-        }
-
-        onChange([...photos, ...uploaded]);
+        const url = await uploadProductImage(blob);
+        onChange([...photos, url]);
+        setQueue((current) => current.slice(1));
         toast.success(
-          uploaded.length === 1
-            ? 'Foto enviada com sucesso.'
-            : `${uploaded.length} fotos enviadas.`,
+          queue.length > 1
+            ? 'Foto enviada. Ajuste a próxima.'
+            : 'Foto enviada com sucesso.',
         );
       } catch (error) {
         toast.error(
@@ -81,7 +59,7 @@ export const CatalogMobilePhotos = memo(function CatalogMobilePhotos({
         if (inputRef.current) inputRef.current.value = '';
       }
     },
-    [onChange, photos],
+    [onChange, photos, queue.length],
   );
 
   return (
@@ -97,15 +75,13 @@ export const CatalogMobilePhotos = memo(function CatalogMobilePhotos({
         {photos.map((url, index) => (
           <div
             key={`${url}-${index}`}
-            className="bg-muted relative aspect-[3/4] overflow-hidden rounded-lg border"
+            className="bg-muted relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg border"
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={url}
               alt={`Foto ${index + 1}`}
-              fill
-              className="object-cover"
-              sizes="33vw"
-              unoptimized={url.startsWith('/uploads/')}
+              className="h-full w-full object-cover"
             />
             {index === 0 && (
               <span className="bg-background/90 absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-[0.625rem] font-medium tracking-wide uppercase">
@@ -142,14 +118,32 @@ export const CatalogMobilePhotos = memo(function CatalogMobilePhotos({
         </button>
       </div>
 
+      <p className="text-muted-foreground text-xs">
+        JPG, PNG, WebP, HEIC, GIF, BMP e outros. Gire e ajuste o tamanho na
+        pré-visualização.
+      </p>
+
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={PRODUCT_IMAGE_ACCEPT}
         multiple
         className="sr-only"
         disabled={uploading}
-        onChange={(event) => void handleFiles(event.target.files)}
+        onChange={(event) => {
+          void handleFiles(event.target.files);
+          event.currentTarget.value = '';
+        }}
+      />
+
+      <ProductImageEditorDialog
+        file={queue[0] ?? null}
+        open={queue.length > 0}
+        confirming={uploading}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && !uploading) setQueue([]);
+        }}
+        onConfirm={handleConfirm}
       />
     </div>
   );

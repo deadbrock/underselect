@@ -7,6 +7,7 @@ import { Badge, Card, CardContent } from '@presentation/components/ui';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import type { AdminProduct } from '@shared/types/product-admin.types';
 import { formatCurrency, formatDate } from '@shared/utils/format';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 import { AdminProductActions } from './admin-product-actions';
 
@@ -33,6 +34,7 @@ export const AdminProductGridView = memo(function AdminProductGridView({
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 33vw"
+                  unoptimized={shouldUnoptimizeImage(product.imageUrl)}
                 />
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                   {product.onSale && <Badge>Promoção</Badge>}

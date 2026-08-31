@@ -9,6 +9,7 @@ import { memo, useCallback, useState } from 'react';
 import { Badge, Button } from '@presentation/components/ui';
 import { Price } from '@presentation/components/data-display';
 import { cn } from '@shared/utils/cn';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 import type { CatalogProduct } from '@shared/types/catalog.types';
 import { toast } from '@presentation/hooks';
 import {
@@ -77,6 +78,7 @@ export const CatalogProductCard = memo(function CatalogProductCard({
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-contain p-4"
             priority={priority}
+            unoptimized={shouldUnoptimizeImage(product.imageUrl)}
           />
 
           <div className="absolute top-3 left-3 flex flex-wrap gap-1">

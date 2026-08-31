@@ -17,6 +17,7 @@ import { PageHeader } from '@presentation/components/layout';
 import { ADMIN_PRODUCT_STATUS_LABELS } from '@shared/constants/product-admin.constants';
 import type { AdminProduct } from '@shared/types/product-admin.types';
 import { formatCurrency, formatDate } from '@shared/utils/format';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 import { AdminProductActions } from './admin-product-actions';
 
@@ -55,6 +56,7 @@ export const AdminProductDetailView = memo(function AdminProductDetailView({
                 className="object-contain"
                 sizes="320px"
                 priority
+                unoptimized={shouldUnoptimizeImage(product.imageUrl)}
               />
             </div>
           </CardContent>

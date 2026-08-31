@@ -5,6 +5,7 @@ import { memo, useCallback, useRef, useState } from 'react';
 
 import { cn } from '@shared/utils/cn';
 import type { ProductImage } from '@shared/types/product-detail.types';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 export interface PdpGalleryProps {
   images: ProductImage[];
@@ -70,6 +71,7 @@ const PdpGallery = memo(function PdpGallery({
                 fill
                 sizes="80px"
                 className="object-contain p-1"
+                unoptimized={shouldUnoptimizeImage(image.url)}
               />
             </button>
           ))}
@@ -100,6 +102,7 @@ const PdpGallery = memo(function PdpGallery({
             transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
           }}
           priority
+          unoptimized={shouldUnoptimizeImage(active.url)}
         />
         <span className="text-muted-foreground bg-background/80 absolute right-3 bottom-3 hidden rounded-sm px-2 py-1 text-[0.625rem] backdrop-blur-sm md:inline">
           Passe o mouse para ampliar

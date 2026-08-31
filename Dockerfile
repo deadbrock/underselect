@@ -41,6 +41,8 @@ COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/clie
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+RUN mkdir -p /app/uploads/products && chown -R nextjs:nodejs /app/uploads
+
 USER nextjs
 
 EXPOSE 3000

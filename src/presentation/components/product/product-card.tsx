@@ -8,6 +8,7 @@ import { memo } from 'react';
 import { Badge } from '@presentation/components/ui';
 import { Price } from '@presentation/components/data-display';
 import { cn } from '@shared/utils/cn';
+import { shouldUnoptimizeImage } from '@shared/utils/media-src';
 
 export interface ProductCardData {
   id: string;
@@ -43,6 +44,7 @@ const ProductCard = memo(function ProductCard({
             sizes="(max-width: 768px) 50vw, 25vw"
             className="object-contain p-4"
             priority={priority}
+            unoptimized={shouldUnoptimizeImage(product.imageUrl)}
           />
           {(product.badge || product.isNew) && (
             <div className="absolute top-3 left-3 flex gap-1">
