@@ -167,28 +167,49 @@ export async function flattenImageOnWhite(blob: Blob): Promise<Blob> {
   });
 }
 
-export function canvasSourceToPngBlob(
+export function imageToLimitedBlob(
   image: LoadedProductImage,
+  maxEdge: number,
+  options: { mimeType?: 'image/jpeg' | 'image/png'; quality?: number } = {},
 ): Promise<Blob> {
-  const canvas = document.createElement('canvas');
-  canvas.width = image.width;
-  canvas.height = image.height;
+  const mimeType = options.mimeType ?? 'image/jpeg';
+  const quality = options.quality ?? 0.85;
+  const ratio = Math.min(1, maxEdge / Math.max(image.width, image.height, 1));
+  const width = Math.max(1, Math.round(image.width * ratio));
+  const height = Math.max(1, Math.round(image.height * ratio));
 
-  const context = canvas.getContext('2d');
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d', {
+    alpha: mimeType === 'image/png',
+  });
   if (!context) {
     return Promise.reject(new Error('Não foi possível processar a imagem.'));
   }
 
-  context.drawImage(image.source, 0, 0, image.width, image.height);
+  if (mimeType === 'image/jpeg') {
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(image.source, 0, 0, width, height);
 
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error('Não foi possível gerar a imagem.'));
-        return;
-      }
-      resolve(blob);
-    }, 'image/png');
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Não foi possível gerar a imagem.'));
+          return;
+        }
+        resolve(blob);
+      },
+      mimeType,
+      quality,
+    );
   });
 }
 

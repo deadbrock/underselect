@@ -390,6 +390,11 @@ export const ProductImageEditorDialog = memo(function ProductImageEditorDialog({
     setRemovalProgress('Preparando a remoção de fundo…');
 
     try {
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 80);
+      });
+      if (requestId !== removalRequestRef.current) return;
+
       const blob = await removeImageBackground(current, setRemovalProgress);
       if (requestId !== removalRequestRef.current) return;
       const next = await loadImageFromBlob(blob);
@@ -519,7 +524,7 @@ export const ProductImageEditorDialog = memo(function ProductImageEditorDialog({
           <p className="text-muted-foreground text-xs">
             {backgroundRemoved
               ? 'O fundo original foi removido e o sistema aplicou branco automaticamente.'
-              : 'A primeira remoção de fundo baixa um modelo de IA (cerca de 40 MB) e pode levar um pouco. Depois fica mais rápido. O fundo será branco.'}
+              : 'No celular a foto é reduzida antes da IA para não travar. A primeira vez baixa o modelo e pode levar até 1 minuto — não saia desta tela. O fundo ficará branco.'}
           </p>
 
           <EditorRange
