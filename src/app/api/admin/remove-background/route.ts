@@ -40,10 +40,13 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const message =
+    const raw =
       error instanceof Error
         ? error.message
         : 'Não foi possível remover o fundo.';
+    const message = /sharp/i.test(raw)
+      ? 'O servidor ainda não está com o processador de imagem pronto. Recrie o container da aplicação e tente de novo.'
+      : raw;
 
     return NextResponse.json(toApiErrorResponse(new Error(message)), {
       status: 500,
