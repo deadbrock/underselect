@@ -4,8 +4,9 @@ import {
   type LoadedProductImage,
 } from './product-image';
 
-const MOBILE_MAX_EDGE = 640;
+const MOBILE_MAX_EDGE = 768;
 const DESKTOP_MAX_EDGE = 1024;
+const REQUEST_TIMEOUT_MS = 90_000;
 
 function isConstrainedDevice(): boolean {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') {
@@ -17,46 +18,14 @@ function isConstrainedDevice(): boolean {
   const isAndroid = /Android/i.test(userAgent);
   const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
   const smallScreen = window.matchMedia('(max-width: 768px)').matches;
-  const deviceMemory = (
-    navigator as Navigator & {
-      deviceMemory?: number;
-    }
-  ).deviceMemory;
 
-  return (
-    isIOS ||
-    isAndroid ||
-    coarsePointer ||
-    smallScreen ||
-    (typeof deviceMemory === 'number' && deviceMemory <= 4)
-  );
+  return isIOS || isAndroid || coarsePointer || smallScreen;
 }
 
 function yieldToUi(): Promise<void> {
   return new Promise((resolve) => {
     window.setTimeout(resolve, 40);
   });
-}
-
-function toFriendlyRemovalError(error: unknown): Error {
-  const message = error instanceof Error ? error.message : String(error);
-  const lower = message.toLowerCase();
-
-  if (
-    lower.includes('memory') ||
-    lower.includes('allocation') ||
-    lower.includes('out of') ||
-    lower.includes('wasm') ||
-    lower.includes('aborted')
-  ) {
-    return new Error(
-      'O aparelho ficou sem memória ao remover o fundo. Tente uma foto mais leve ou use o computador.',
-    );
-  }
-
-  return error instanceof Error
-    ? error
-    : new Error('Não foi possível remover o fundo. Tente novamente.');
 }
 
 export async function removeImageBackground(
@@ -77,56 +46,69 @@ export async function removeImageBackground(
 
   const input = await imageToLimitedBlob(image, maxEdge, {
     mimeType: 'image/jpeg',
-    quality: 0.82,
+    quality: 0.85,
   });
 
-  onProgress?.(
-    constrained ? 'Carregando a IA. Não saia desta tela…' : 'Carregando a IA…',
-  );
-  await yieldToUi();
+  onProgress?.('Enviando para o servidor…');
 
-  let lastUpdate = Date.now();
+  const body = new FormData();
+  body.append('file', input, 'product-image.jpg');
+
+  const controller = new AbortController();
   const startedAt = Date.now();
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    REQUEST_TIMEOUT_MS,
+  );
   const heartbeat = window.setInterval(() => {
-    if (Date.now() - lastUpdate < 2000) return;
     const seconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
     onProgress?.(
       constrained
-        ? `Processando no celular… ${seconds}s. Não feche a tela.`
-        : `Processando… ${seconds}s`,
+        ? `O servidor está removendo o fundo… ${seconds}s`
+        : `Removendo o fundo no servidor… ${seconds}s`,
     );
   }, 1000);
 
   try {
-    const { removeBackground } = await import('@imgly/background-removal');
-    lastUpdate = Date.now();
-
-    const cutout = await removeBackground(input, {
-      model: 'isnet_quint8',
-      device: 'cpu',
-      proxyToWorker: true,
-      output: {
-        format: 'image/png',
-        quality: 0.9,
-      },
-      progress: (key, current, total) => {
-        lastUpdate = Date.now();
-        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
-        const downloading = key.includes('fetch') || key.includes('model');
-        onProgress?.(
-          downloading
-            ? `Baixando o modelo de IA… ${percent}%`
-            : `Removendo o fundo… ${percent}%`,
-        );
-      },
+    const response = await fetch('/api/admin/remove-background', {
+      method: 'POST',
+      body,
+      credentials: 'same-origin',
+      signal: controller.signal,
     });
+
+    const contentType = response.headers.get('content-type') ?? '';
+
+    if (!response.ok) {
+      if (contentType.includes('application/json')) {
+        const payload = await response.json();
+        throw new Error(
+          payload.error?.message ?? 'Não foi possível remover o fundo.',
+        );
+      }
+
+      if (response.status === 401) {
+        throw new Error('Sessão expirada. Entre novamente no admin.');
+      }
+
+      throw new Error('Não foi possível remover o fundo.');
+    }
 
     onProgress?.('Aplicando fundo branco…');
     await yieldToUi();
-    return await flattenImageOnWhite(cutout);
+    return flattenImageOnWhite(await response.blob());
   } catch (error) {
-    throw toFriendlyRemovalError(error);
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(
+        'A remoção de fundo demorou demais. Tente novamente com uma foto mais leve.',
+      );
+    }
+
+    throw error instanceof Error
+      ? error
+      : new Error('Não foi possível remover o fundo. Tente novamente.');
   } finally {
+    window.clearTimeout(timeout);
     window.clearInterval(heartbeat);
   }
 }

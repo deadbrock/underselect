@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     await saveProductUpload(buffer, filename);
 
     return NextResponse.json(
-      toApiResponse({ url: `/uploads/products/${filename}` }),
+      toApiResponse({ url: `/api/media/products/${filename}` }),
       { status: 201 },
     );
   } catch (error) {

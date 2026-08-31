@@ -5,15 +5,18 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   typedRoutes: true,
-  serverExternalPackages: ['onnxruntime-node', 'onnxruntime-web'],
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'onnxruntime-node': false,
-      };
-    }
-    return config;
+  serverExternalPackages: [
+    '@imgly/background-removal-node',
+    'onnxruntime-node',
+    'sharp',
+  ],
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/products/:filename',
+        destination: '/api/media/products/:filename',
+      },
+    ];
   },
 };
 

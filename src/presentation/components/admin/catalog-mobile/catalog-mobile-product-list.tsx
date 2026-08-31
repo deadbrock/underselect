@@ -131,9 +131,10 @@ export const CatalogMobileProductList = memo(
                             fill
                             className="object-cover"
                             sizes="80px"
-                            unoptimized={product.imageUrl.startsWith(
-                              '/uploads/',
-                            )}
+                            unoptimized={
+                              product.imageUrl.startsWith('/uploads/') ||
+                              product.imageUrl.startsWith('/api/media/')
+                            }
                           />
                         ) : null}
                       </div>

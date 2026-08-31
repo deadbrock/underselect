@@ -524,7 +524,7 @@ export const ProductImageEditorDialog = memo(function ProductImageEditorDialog({
           <p className="text-muted-foreground text-xs">
             {backgroundRemoved
               ? 'O fundo original foi removido e o sistema aplicou branco automaticamente.'
-              : 'No celular a foto é reduzida antes da IA para não travar. A primeira vez baixa o modelo e pode levar até 1 minuto — não saia desta tela. O fundo ficará branco.'}
+              : 'A remoção de fundo roda no servidor, então a tela não deve travar. A primeira vez pode demorar enquanto o servidor prepara o modelo. O fundo ficará branco.'}
           </p>
 
           <EditorRange

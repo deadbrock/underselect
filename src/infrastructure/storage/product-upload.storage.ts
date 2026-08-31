@@ -13,11 +13,11 @@ export function getLegacyPublicUploadDir(): string {
 }
 
 function candidateUploadDirs(): string[] {
-  const dirs = [getProductUploadDir()];
+  const dirs = [getProductUploadDir(), getLegacyPublicUploadDir()];
   if (process.platform !== 'win32') {
     dirs.push(path.join('/tmp', 'uploads', 'products'));
   }
-  return dirs;
+  return [...new Set(dirs)];
 }
 
 export function isSafeUploadFilename(filename: string): boolean {
@@ -28,17 +28,20 @@ export async function saveProductUpload(
   buffer: Buffer,
   filename: string,
 ): Promise<void> {
+  let saved = false;
   let lastError: unknown;
 
   for (const dir of candidateUploadDirs()) {
     try {
       await mkdir(dir, { recursive: true });
       await writeFile(path.join(dir, filename), buffer);
-      return;
+      saved = true;
     } catch (error) {
       lastError = error;
     }
   }
+
+  if (saved) return;
 
   throw lastError instanceof Error
     ? lastError
