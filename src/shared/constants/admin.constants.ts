@@ -2,6 +2,8 @@ import type { AdminModuleId } from '@shared/types/admin.types';
 
 export const ADMIN_STORAGE_KEY = 'underselect-admin';
 export const ADMIN_BASE_PATH = '/admin';
+export const ADMIN_CATALOG_GROUP_LABEL = 'Catálogo';
+export const ADMIN_CATALOG_MOBILE_PATH = '/admin/catalogo-mobile';
 
 export const ADMIN_ORDER_STATUS_LABELS: Record<string, string> = {
   pending: 'Pendente',
@@ -116,6 +118,54 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     ],
   },
 ];
+
+export const ADMIN_CATALOG_MOBILE_NAV = [
+  {
+    label: 'Produtos',
+    href: ADMIN_CATALOG_MOBILE_PATH,
+    match: ADMIN_CATALOG_MOBILE_PATH,
+  },
+  {
+    label: 'Categorias',
+    href: `${ADMIN_CATALOG_MOBILE_PATH}/categorias`,
+    match: `${ADMIN_CATALOG_MOBILE_PATH}/categorias`,
+  },
+  {
+    label: 'Coleções',
+    href: `${ADMIN_CATALOG_MOBILE_PATH}/colecoes`,
+    match: `${ADMIN_CATALOG_MOBILE_PATH}/colecoes`,
+  },
+  {
+    label: 'Times',
+    href: `${ADMIN_CATALOG_MOBILE_PATH}/times`,
+    match: `${ADMIN_CATALOG_MOBILE_PATH}/times`,
+  },
+  {
+    label: 'Seleções',
+    href: `${ADMIN_CATALOG_MOBILE_PATH}/selecoes`,
+    match: `${ADMIN_CATALOG_MOBILE_PATH}/selecoes`,
+  },
+] as const;
+
+export function isAdminWebCatalogPath(pathname: string): boolean {
+  const catalogGroup = ADMIN_NAV_GROUPS.find(
+    (group) => group.label === ADMIN_CATALOG_GROUP_LABEL,
+  );
+
+  return (
+    catalogGroup?.children?.some(
+      (child) =>
+        pathname === child.href || pathname.startsWith(`${child.href}/`),
+    ) ?? false
+  );
+}
+
+export function isAdminMobileCatalogPath(pathname: string): boolean {
+  return (
+    pathname === ADMIN_CATALOG_MOBILE_PATH ||
+    pathname.startsWith(`${ADMIN_CATALOG_MOBILE_PATH}/`)
+  );
+}
 
 export const ADMIN_BOTTOM_NAV = [
   { label: 'Início', href: '/admin/dashboard' },

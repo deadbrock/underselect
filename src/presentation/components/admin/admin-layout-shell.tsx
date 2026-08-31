@@ -2,16 +2,20 @@
 
 import { Menu } from 'lucide-react';
 import { BarChart3, LayoutDashboard, Package, Settings } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { Button } from '@presentation/components/ui';
 import { SidebarLayout } from '@presentation/components/layout';
 import { BottomNav } from '@presentation/components/mobile';
 import { MobileSidebar } from '@presentation/components/navigation';
+import { useCatalogVersionStore } from '@presentation/stores/admin/catalog-version.store';
 import {
   ADMIN_BOTTOM_NAV,
+  ADMIN_CATALOG_GROUP_LABEL,
   ADMIN_NAV_GROUPS,
+  isAdminMobileCatalogPath,
+  isAdminWebCatalogPath,
 } from '@shared/constants/admin.constants';
 import { cn } from '@shared/utils/cn';
 
@@ -20,6 +24,7 @@ import { AdminFooter } from './admin-footer';
 import { AdminGlobalLoader } from './admin-global-loader';
 import { AdminHeader } from './admin-header';
 import { AdminSidebar } from './admin-sidebar';
+import { CatalogVersionDialog } from './catalog-version-dialog';
 
 const BOTTOM_ICONS = {
   Início: LayoutDashboard,
@@ -27,13 +32,6 @@ const BOTTOM_ICONS = {
   Produtos: Package,
   Mais: Settings,
 } as const;
-
-const DRAWER_ITEMS = ADMIN_NAV_GROUPS.flatMap((group) => {
-  if (group.href && !group.children) {
-    return [{ label: group.label, href: group.href }];
-  }
-  return group.children?.map((c) => ({ label: c.label, href: c.href })) ?? [];
-});
 
 export interface AdminLayoutShellProps {
   children: React.ReactNode;
@@ -43,6 +41,52 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
   children,
 }: AdminLayoutShellProps) {
   const pathname = usePathname();
+  const openCatalogDialog = useCatalogVersionStore((state) => state.openDialog);
+  const webCatalogExpanded = useCatalogVersionStore(
+    (state) => state.webCatalogExpanded,
+  );
+  const isCatalogMobile = isAdminMobileCatalogPath(pathname);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const drawerItems = useMemo(() => {
+    const showWebCatalogChildren =
+      webCatalogExpanded || isAdminWebCatalogPath(pathname);
+
+    return ADMIN_NAV_GROUPS.flatMap((group) => {
+      if (group.label === ADMIN_CATALOG_GROUP_LABEL) {
+        const catalogItem = {
+          label: group.label,
+          href: '/admin/produtos',
+          onClick: (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            setMobileMenuOpen(false);
+            openCatalogDialog();
+          },
+        };
+
+        if (!showWebCatalogChildren) return [catalogItem];
+
+        return [
+          catalogItem,
+          ...(group.children?.map((child) => ({
+            label: child.label,
+            href: child.href,
+          })) ?? []),
+        ];
+      }
+
+      if (group.href && !group.children) {
+        return [{ label: group.label, href: group.href }];
+      }
+
+      return (
+        group.children?.map((child) => ({
+          label: child.label,
+          href: child.href,
+        })) ?? []
+      );
+    });
+  }, [openCatalogDialog, pathname, webCatalogExpanded]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
@@ -66,9 +110,17 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
   }));
 
   return (
-    <div className="flex min-h-screen flex-col pb-[var(--bottom-nav-height)] md:pb-0">
+    <div
+      className={cn(
+        'flex min-h-screen flex-col',
+        isCatalogMobile
+          ? 'pb-[var(--bottom-nav-height)]'
+          : 'pb-[var(--bottom-nav-height)] md:pb-0',
+      )}
+    >
       <AdminAuthHydrator />
       <AdminGlobalLoader />
+      <CatalogVersionDialog />
 
       <div className="border-border flex items-center gap-3 border-b px-4 py-3 md:hidden">
         <MobileSidebar
@@ -81,8 +133,10 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
               <Menu className="size-5" />
             </Button>
           }
-          items={DRAWER_ITEMS}
+          items={drawerItems}
           title="Admin"
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
         />
         <span className="text-sm font-medium tracking-wide">Admin</span>
       </div>
@@ -92,13 +146,20 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
       <div className="flex flex-1">
         <SidebarLayout sidebar={<AdminSidebar />}>
           <main className={cn('flex min-h-0 flex-1 flex-col')}>
-            <div className="flex-1 p-4 md:p-6 lg:p-8">{children}</div>
-            <AdminFooter />
+            <div
+              className={cn(
+                'flex-1 p-4 md:p-6 lg:p-8',
+                isCatalogMobile && 'p-0 md:p-0 lg:p-0',
+              )}
+            >
+              {children}
+            </div>
+            {!isCatalogMobile && <AdminFooter />}
           </main>
         </SidebarLayout>
       </div>
 
-      <BottomNav items={bottomNavItems} />
+      {!isCatalogMobile && <BottomNav items={bottomNavItems} />}
     </div>
   );
 });

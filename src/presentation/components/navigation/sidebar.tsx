@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 import {
   Drawer,
@@ -45,6 +46,7 @@ const Sidebar = memo(function Sidebar({
           <li key={item.label}>
             <Link
               href={item.href as Route}
+              onClick={item.onClick}
               className={cn(
                 'text-muted-foreground hover:bg-muted hover:text-foreground transition-luxury flex items-center px-3 py-2.5 text-sm',
                 collapsed && 'justify-center px-2',
@@ -68,6 +70,8 @@ const Sidebar = memo(function Sidebar({
 
 export interface MobileSidebarProps extends SidebarProps {
   trigger: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const MobileSidebar = memo(function MobileSidebar({
@@ -75,9 +79,30 @@ const MobileSidebar = memo(function MobileSidebar({
   items,
   title,
   footer,
+  open: openProp,
+  onOpenChange,
 }: MobileSidebarProps) {
+  const pathname = usePathname();
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+
+  useEffect(() => {
+    if (!isControlled) {
+      setUncontrolledOpen(false);
+    }
+    onOpenChange?.(false);
+  }, [pathname, isControlled, onOpenChange]);
+
   return (
-    <Drawer direction="left">
+    <Drawer
+      direction="left"
+      open={open}
+      onOpenChange={(next) => {
+        if (!isControlled) setUncontrolledOpen(next);
+        onOpenChange?.(next);
+      }}
+    >
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent side="left" className="w-[280px]">
         <DrawerHeader>

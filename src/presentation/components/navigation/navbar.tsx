@@ -12,6 +12,7 @@ import { useIsMobile } from '@presentation/hooks';
 export interface NavItem {
   label: string;
   href: string;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export interface NavbarProps {

@@ -4,7 +4,12 @@ import { usePathname } from 'next/navigation';
 import { memo, useMemo } from 'react';
 
 import { Breadcrumb, type BreadcrumbItem } from '@presentation/components/ui';
-import { ADMIN_MODULE_META } from '@shared/constants/admin.constants';
+import {
+  ADMIN_CATALOG_MOBILE_NAV,
+  ADMIN_CATALOG_MOBILE_PATH,
+  ADMIN_MODULE_META,
+  isAdminMobileCatalogPath,
+} from '@shared/constants/admin.constants';
 import { CUSTOMER_NAV_ITEMS } from '@shared/constants/customer-admin.constants';
 import { MARKETING_NAV_ITEMS } from '@shared/constants/marketing-admin.constants';
 import { ORDER_NAV_ITEMS } from '@shared/constants/order-admin.constants';
@@ -26,6 +31,26 @@ export const AdminBreadcrumb = memo(function AdminBreadcrumb({
 
     if (pathname === '/admin/dashboard') {
       crumbs.push({ label: 'Dashboard' });
+      return crumbs;
+    }
+
+    if (isAdminMobileCatalogPath(pathname)) {
+      crumbs.push({
+        label: 'Catálogo mobile',
+        href: ADMIN_CATALOG_MOBILE_PATH,
+      });
+      if (pathname.endsWith('/novo')) {
+        crumbs.push({ label: 'Novo produto' });
+      } else if (pathname.includes('/editar')) {
+        crumbs.push({ label: 'Editar' });
+      } else {
+        const tab = ADMIN_CATALOG_MOBILE_NAV.find(
+          (item) =>
+            item.href !== ADMIN_CATALOG_MOBILE_PATH &&
+            (pathname === item.href || pathname.startsWith(`${item.href}/`)),
+        );
+        if (tab) crumbs.push({ label: tab.label });
+      }
       return crumbs;
     }
 

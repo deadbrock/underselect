@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  ChevronDown,
   LayoutDashboard,
   LogOut,
   Megaphone,
@@ -22,11 +23,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@presentation/components/ui';
-import { cn } from '@shared/utils/cn';
+import { useCatalogVersionStore } from '@presentation/stores/admin/catalog-version.store';
 import {
+  ADMIN_CATALOG_GROUP_LABEL,
   ADMIN_NAV_GROUPS,
+  isAdminMobileCatalogPath,
+  isAdminWebCatalogPath,
   type AdminNavGroup,
 } from '@shared/constants/admin.constants';
+import { cn } from '@shared/utils/cn';
 
 import { useAdminLogout } from './use-admin-logout';
 
@@ -41,6 +46,11 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 
 function isGroupActive(group: AdminNavGroup, pathname: string): boolean {
   if (group.href) return pathname === group.href;
+  if (group.label === ADMIN_CATALOG_GROUP_LABEL) {
+    return (
+      isAdminWebCatalogPath(pathname) || isAdminMobileCatalogPath(pathname)
+    );
+  }
   return (
     group.children?.some(
       (c) => pathname === c.href || pathname.startsWith(c.href + '/'),
@@ -55,10 +65,22 @@ function isChildActive(href: string, pathname: string): boolean {
 export const AdminSidebar = memo(function AdminSidebar() {
   const pathname = usePathname();
   const handleLogout = useAdminLogout();
+  const openCatalogDialog = useCatalogVersionStore((state) => state.openDialog);
+  const webCatalogExpanded = useCatalogVersionStore(
+    (state) => state.webCatalogExpanded,
+  );
 
   const defaultOpen = ADMIN_NAV_GROUPS.filter(
-    (g) => g.children && isGroupActive(g, pathname),
+    (g) =>
+      g.children &&
+      g.label !== ADMIN_CATALOG_GROUP_LABEL &&
+      isGroupActive(g, pathname),
   ).map((g) => g.label);
+
+  const showCatalogChildren =
+    webCatalogExpanded || isAdminWebCatalogPath(pathname);
+  const catalogActive =
+    isAdminWebCatalogPath(pathname) || isAdminMobileCatalogPath(pathname);
 
   return (
     <nav className="flex h-full flex-col py-6" aria-label="Menu administrativo">
@@ -94,6 +116,58 @@ export const AdminSidebar = memo(function AdminSidebar() {
                   <Icon className="size-4 shrink-0" aria-hidden />
                   {group.label}
                 </Link>
+              );
+            }
+
+            if (group.label === ADMIN_CATALOG_GROUP_LABEL) {
+              return (
+                <div key={group.label} className="mb-1">
+                  <button
+                    type="button"
+                    onClick={() => openCatalogDialog()}
+                    className={cn(
+                      'hover:bg-muted/50 flex w-full items-center justify-between rounded-none px-3 py-2.5 text-sm',
+                      catalogActive && 'text-foreground font-medium',
+                      !catalogActive && 'text-muted-foreground',
+                    )}
+                    aria-expanded={showCatalogChildren}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon className="size-4 shrink-0" aria-hidden />
+                      {group.label}
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        'size-4 shrink-0 transition-transform duration-200',
+                        showCatalogChildren && 'rotate-180',
+                      )}
+                      aria-hidden
+                    />
+                  </button>
+                  {showCatalogChildren && (
+                    <ul className="space-y-0.5 pb-1 pl-4">
+                      {group.children?.map((child) => {
+                        const active = isChildActive(child.href, pathname);
+                        return (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href as Route}
+                              className={cn(
+                                'block px-3 py-2 text-sm transition-colors',
+                                active
+                                  ? 'text-brand-bronze font-medium'
+                                  : 'text-muted-foreground hover:text-foreground',
+                              )}
+                              aria-current={active ? 'page' : undefined}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
               );
             }
 

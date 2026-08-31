@@ -16,3 +16,4 @@ export {
   AdminModulePage,
   createAdminModuleMetadata,
 } from './admin-module-page';
+export { CatalogVersionDialog } from './catalog-version-dialog';
