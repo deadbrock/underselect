@@ -19,7 +19,8 @@ const SECRET_PATTERNS = [
   },
   {
     name: 'Supabase service role / anon key JWT',
-    regex: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g,
+    regex:
+      /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g,
     allowIn: [],
   },
   {
@@ -29,7 +30,8 @@ const SECRET_PATTERNS = [
   },
   {
     name: 'Senha de banco em variável',
-    regex: /(POSTGRES_PASSWORD|DATABASE_PASSWORD|DB_PASSWORD)\s*=\s*[^\s#][^\n\r]+/gi,
+    regex:
+      /(POSTGRES_PASSWORD|DATABASE_PASSWORD|DB_PASSWORD)\s*=\s*[^\s#][^\n\r]+/gi,
     allowIn: ['.env.example', 'docker-compose.yml'],
   },
   {

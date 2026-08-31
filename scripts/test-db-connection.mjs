@@ -14,7 +14,8 @@ for (const line of readFileSync(envPath, 'utf8').split('\n')) {
 const prisma = new PrismaClient();
 
 try {
-  const result = await prisma.$queryRaw`SELECT 1 AS ok, current_database() AS database, version() AS version`;
+  const result =
+    await prisma.$queryRaw`SELECT 1 AS ok, current_database() AS database, version() AS version`;
   console.log('Conexão OK');
   console.log(JSON.stringify(result, null, 2));
   process.exit(0);

@@ -16,8 +16,14 @@ async function main() {
   const password = readRequired('CUSTOMER_SEED_PASSWORD');
   const firstName = process.env.CUSTOMER_SEED_FIRST_NAME?.trim() || 'Felipe';
   const lastName = process.env.CUSTOMER_SEED_LAST_NAME?.trim() || 'Guimarães';
-  const cpf = (process.env.CUSTOMER_SEED_CPF || '39053344705').replace(/\D/g, '');
-  const phone = (process.env.CUSTOMER_SEED_PHONE || '11999999999').replace(/\D/g, '');
+  const cpf = (process.env.CUSTOMER_SEED_CPF || '39053344705').replace(
+    /\D/g,
+    '',
+  );
+  const phone = (process.env.CUSTOMER_SEED_PHONE || '11999999999').replace(
+    /\D/g,
+    '',
+  );
 
   const passwordHash = await bcrypt.hash(password, 12);
 

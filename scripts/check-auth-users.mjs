@@ -11,6 +11,9 @@ const customer = await prisma.customer.findUnique({
 });
 
 console.log('ADMINS:', admins);
-console.log('CUSTOMER:', customer ? { ...customer, hasPassword: !!customer.passwordHash } : null);
+console.log(
+  'CUSTOMER:',
+  customer ? { ...customer, hasPassword: !!customer.passwordHash } : null,
+);
 
 await prisma.$disconnect();
