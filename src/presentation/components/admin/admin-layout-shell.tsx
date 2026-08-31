@@ -29,7 +29,7 @@ import { CatalogVersionDialog } from './catalog-version-dialog';
 const BOTTOM_ICONS = {
   Início: LayoutDashboard,
   Pedidos: Package,
-  Produtos: Package,
+  Catálogo: Package,
   Mais: Settings,
 } as const;
 
@@ -92,22 +92,32 @@ export const AdminLayoutShell = memo(function AdminLayoutShell({
     return <>{children}</>;
   }
 
-  const bottomNavItems = ADMIN_BOTTOM_NAV.map((item) => ({
-    label: item.label,
-    href: item.href,
-    icon: (() => {
-      const Icon = BOTTOM_ICONS[item.label as keyof typeof BOTTOM_ICONS];
-      return Icon ? (
-        <Icon className="size-5" />
-      ) : (
-        <BarChart3 className="size-5" />
-      );
-    })(),
-    active:
-      pathname === item.href ||
-      (item.href !== '/admin/dashboard' &&
-        pathname.startsWith(item.href.replace('/admin/', '/admin/'))),
-  }));
+  const bottomNavItems = ADMIN_BOTTOM_NAV.map((item) => {
+    const isCatalogItem = item.label === ADMIN_CATALOG_GROUP_LABEL;
+
+    return {
+      label: item.label,
+      href: item.href,
+      icon: (() => {
+        const Icon = BOTTOM_ICONS[item.label as keyof typeof BOTTOM_ICONS];
+        return Icon ? (
+          <Icon className="size-5" />
+        ) : (
+          <BarChart3 className="size-5" />
+        );
+      })(),
+      active: isCatalogItem
+        ? isAdminWebCatalogPath(pathname) || isAdminMobileCatalogPath(pathname)
+        : pathname === item.href ||
+          (item.href !== '/admin/dashboard' && pathname.startsWith(item.href)),
+      onClick: isCatalogItem
+        ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            openCatalogDialog();
+          }
+        : undefined,
+    };
+  });
 
   return (
     <div

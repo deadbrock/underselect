@@ -170,7 +170,7 @@ export function isAdminMobileCatalogPath(pathname: string): boolean {
 export const ADMIN_BOTTOM_NAV = [
   { label: 'Início', href: '/admin/dashboard' },
   { label: 'Pedidos', href: '/admin/pedidos' },
-  { label: 'Produtos', href: '/admin/produtos' },
+  { label: 'Catálogo', href: '/admin/produtos' },
   { label: 'Mais', href: '/admin/configuracoes' },
 ] as const;
 

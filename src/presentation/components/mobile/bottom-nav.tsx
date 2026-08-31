@@ -11,6 +11,7 @@ export interface BottomNavItem {
   href: string;
   icon: React.ReactNode;
   active?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export interface BottomNavProps {
@@ -33,9 +34,10 @@ const BottomNav = memo(function BottomNav({
     >
       <ul className="flex h-full items-center justify-around">
         {items.map((item) => (
-          <li key={item.href}>
+          <li key={`${item.label}-${item.href}`}>
             <Link
               href={item.href as Route}
+              onClick={item.onClick}
               className={cn(
                 'flex flex-col items-center gap-0.5 px-3 py-1 transition-colors',
                 item.active
