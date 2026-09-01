@@ -13,6 +13,11 @@ export {
   type FormSectionProps,
 } from './form';
 export {
+  CurrencyInput,
+  FormCurrencyInput,
+  type CurrencyInputProps,
+} from './currency-input';
+export {
   SearchInput,
   QuantityStepper,
   type SearchInputProps,

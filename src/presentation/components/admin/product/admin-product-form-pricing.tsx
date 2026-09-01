@@ -3,7 +3,11 @@
 import { memo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { FormInput, FormSection } from '@presentation/components/forms';
+import {
+  FormCurrencyInput,
+  FormInput,
+  FormSection,
+} from '@presentation/components/forms';
 import { Checkbox, Label } from '@presentation/components/ui';
 import type { AdminProductFormSchema } from '@presentation/stores/admin/product';
 
@@ -20,11 +24,9 @@ export const AdminProductFormPricing = memo(function AdminProductFormPricing() {
         description="O preço promocional é o valor exibido na loja. O preço de tabela aparece riscado quando houver promoção."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <FormInput<AdminProductFormSchema>
+          <FormCurrencyInput<AdminProductFormSchema>
             name="listPrice"
             label="Preço de tabela"
-            type="number"
-            inputMode="decimal"
           />
 
           <Controller
@@ -47,19 +49,15 @@ export const AdminProductFormPricing = memo(function AdminProductFormPricing() {
           />
 
           {!noPromotionalPrice && (
-            <FormInput<AdminProductFormSchema>
+            <FormCurrencyInput<AdminProductFormSchema>
               name="promoPrice"
               label="Preço promocional (valor exibido na loja)"
-              type="number"
-              inputMode="decimal"
             />
           )}
 
-          <FormInput<AdminProductFormSchema>
+          <FormCurrencyInput<AdminProductFormSchema>
             name="cost"
             label="Custo"
-            type="number"
-            inputMode="decimal"
           />
           <FormInput<AdminProductFormSchema>
             name="stockQuantity"

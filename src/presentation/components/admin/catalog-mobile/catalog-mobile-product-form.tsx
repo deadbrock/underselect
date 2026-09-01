@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Spinner } from '@presentation/components/feedback';
+import { CurrencyInput } from '@presentation/components/forms';
 import {
   Button,
   Input,
@@ -442,15 +443,10 @@ export const CatalogMobileProductForm = memo(function CatalogMobileProductForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="mobile-product-price">Valor unitário (R$)</Label>
-          <Input
+          <CurrencyInput
             id="mobile-product-price"
-            type="number"
-            min={0}
-            step="0.01"
             value={values.unitPrice}
-            onChange={(event) =>
-              updateField('unitPrice', Number(event.target.value))
-            }
+            onValueChange={(next) => updateField('unitPrice', next)}
             className="h-11"
             required
           />

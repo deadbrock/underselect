@@ -4,7 +4,11 @@ import { Plus, Trash2 } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
-import { FormInput, FormSection } from '@presentation/components/forms';
+import {
+  FormCurrencyInput,
+  FormInput,
+  FormSection,
+} from '@presentation/components/forms';
 import {
   Button,
   Label,
@@ -131,12 +135,9 @@ export const AdminProductFormVariations = memo(
                   </Select>
                 </div>
 
-                <FormInput<AdminProductFormSchema>
+                <FormCurrencyInput<AdminProductFormSchema>
                   name={`variations.${index}.price`}
                   label="Preço"
-                  type="number"
-                  step="0.01"
-                  min={0}
                 />
                 <FormInput<AdminProductFormSchema>
                   name={`variations.${index}.stock`}
