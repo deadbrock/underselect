@@ -18,6 +18,11 @@ export {
   type CurrencyInputProps,
 } from './currency-input';
 export {
+  IntegerInput,
+  FormIntegerInput,
+  type IntegerInputProps,
+} from './integer-input';
+export {
   SearchInput,
   QuantityStepper,
   type SearchInputProps,

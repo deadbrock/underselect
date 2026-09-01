@@ -7,6 +7,7 @@ import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import {
   FormCurrencyInput,
   FormInput,
+  FormIntegerInput,
   FormSection,
 } from '@presentation/components/forms';
 import {
@@ -139,11 +140,9 @@ export const AdminProductFormVariations = memo(
                   name={`variations.${index}.price`}
                   label="Preço"
                 />
-                <FormInput<AdminProductFormSchema>
+                <FormIntegerInput<AdminProductFormSchema>
                   name={`variations.${index}.stock`}
                   label="Estoque"
-                  type="number"
-                  min={0}
                 />
                 <FormInput<AdminProductFormSchema>
                   name={`variations.${index}.sku`}

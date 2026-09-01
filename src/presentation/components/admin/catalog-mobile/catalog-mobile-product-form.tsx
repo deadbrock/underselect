@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Spinner } from '@presentation/components/feedback';
-import { CurrencyInput } from '@presentation/components/forms';
+import { CurrencyInput, IntegerInput } from '@presentation/components/forms';
 import {
   Button,
   Input,
@@ -425,17 +425,11 @@ export const CatalogMobileProductForm = memo(function CatalogMobileProductForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label htmlFor="mobile-product-quantity">Quantidade</Label>
-          <Input
+          <IntegerInput
             id="mobile-product-quantity"
-            type="number"
-            min={0}
-            step={1}
             value={values.quantity}
-            onChange={(event) =>
-              updateField('quantity', Number(event.target.value))
-            }
+            onValueChange={(next) => updateField('quantity', next)}
             className="h-11"
-            required
           />
           <p className="text-muted-foreground text-xs">
             Estoque de cada tamanho

@@ -6,6 +6,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import {
   FormCurrencyInput,
   FormInput,
+  FormIntegerInput,
   FormSection,
 } from '@presentation/components/forms';
 import { Checkbox, Label } from '@presentation/components/ui';
@@ -59,11 +60,9 @@ export const AdminProductFormPricing = memo(function AdminProductFormPricing() {
             name="cost"
             label="Custo"
           />
-          <FormInput<AdminProductFormSchema>
+          <FormIntegerInput<AdminProductFormSchema>
             name="stockQuantity"
             label="Estoque"
-            type="number"
-            inputMode="numeric"
           />
           <FormInput<AdminProductFormSchema>
             name="installmentCount"
