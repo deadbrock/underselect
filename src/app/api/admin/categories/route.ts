@@ -12,15 +12,11 @@ const createCategorySchema = z
   .object({
     label: z.string().trim().min(2),
     description: z.string().trim().optional(),
-    slug: z
-      .string()
-      .trim()
-      .regex(/^[a-z0-9-]+$/, 'Slug inválido')
-      .optional(),
+    slug: z.string().trim().optional(),
   })
   .transform((data) => ({
     ...data,
-    slug: data.slug?.trim() || slugify(data.label),
+    slug: slugify(data.slug?.trim() || data.label),
   }))
   .refine((data) => data.slug.length > 0, {
     message: 'Não foi possível gerar slug a partir do nome da categoria',

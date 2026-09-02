@@ -34,7 +34,14 @@ export const AdminProductFormBasic = memo(function AdminProductFormBasic() {
         onBlur={handleNameBlur}
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormInput<AdminProductFormSchema> name="slug" label="Slug" />
+        <FormInput<AdminProductFormSchema>
+          name="slug"
+          label="Slug"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          valueTransform={(value) => value.toLowerCase()}
+        />
         <FormInput<AdminProductFormSchema> name="sku" label="SKU" />
       </div>
       <FormInput<AdminProductFormSchema>

@@ -136,6 +136,13 @@ export const CheckoutAddressForm = memo(function CheckoutAddressForm({
           label="Estado"
           placeholder="SP"
           maxLength={2}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          className="uppercase"
+          valueTransform={(value) =>
+            value.replace(/[^a-zA-Z]/g, '').toUpperCase()
+          }
         />
         <FormInput<CheckoutFormSchema>
           name="reference"

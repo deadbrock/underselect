@@ -106,6 +106,13 @@ export const AccountAddressForm = memo(function AccountAddressForm() {
         placeholder="SP"
         maxLength={2}
         autoComplete="address-level1"
+        autoCapitalize="characters"
+        autoCorrect="off"
+        spellCheck={false}
+        className="uppercase"
+        valueTransform={(value) =>
+          value.replace(/[^a-zA-Z]/g, '').toUpperCase()
+        }
       />
       <FormInput<AddressFormSchema>
         name="reference"

@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const slugSchema = z
+  .string()
+  .trim()
+  .transform((value) => value.toLowerCase())
+  .pipe(z.string().regex(/^[a-z0-9-]+$/, 'Slug inválido'));
+
 const productTypes = [
   'camisa-clube',
   'camisa-selecao',
@@ -34,10 +40,7 @@ export const productSeoSchema = z.object({
   metaTitle: z.string().trim().min(1, 'Informe o meta title'),
   metaDescription: z.string().trim().min(1, 'Informe a meta description'),
   keywords: z.string().trim(),
-  slug: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9-]+$/, 'Slug inválido'),
+  slug: slugSchema,
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
@@ -45,10 +48,7 @@ export const productSeoSchema = z.object({
 
 const adminProductFormFields = z.object({
   name: z.string().trim().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-  slug: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9-]+$/, 'Slug inválido'),
+  slug: slugSchema,
   sku: z.string().trim().min(1, 'Informe o SKU'),
   shortDescription: z.string().trim().min(10, 'Descrição curta muito curta'),
   fullDescription: z.string().trim().min(20, 'Descrição completa muito curta'),

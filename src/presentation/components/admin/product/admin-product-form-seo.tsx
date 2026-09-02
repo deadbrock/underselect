@@ -23,7 +23,14 @@ export const AdminProductFormSeo = memo(function AdminProductFormSeo() {
         name="seo.keywords"
         label="Palavras-chave"
       />
-      <FormInput<AdminProductFormSchema> name="seo.slug" label="Slug SEO" />
+      <FormInput<AdminProductFormSchema>
+        name="seo.slug"
+        label="Slug SEO"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        valueTransform={(value) => value.toLowerCase()}
+      />
       <FormInput<AdminProductFormSchema>
         name="seo.ogTitle"
         label="Open Graph — Título"

@@ -7,10 +7,10 @@ import { memo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PageHeader } from '@presentation/components/layout';
+import { CurrencyInput, IntegerInput } from '@presentation/components/forms';
 import {
   Button,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +30,8 @@ import type {
   AdminCampaign,
   CampaignFormInput,
 } from '@shared/types/marketing-admin.types';
+
+import { MarketingFormField } from './marketing-form-field';
 
 function toFormValues(c?: AdminCampaign): CampaignFormValues {
   return {
@@ -128,14 +130,21 @@ export const CampaignFormPage = memo(function CampaignFormPage({
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
         title={mode === 'create' ? 'Nova campanha' : 'Editar campanha'}
-        description="Associe influenciador, cupons e metas."
+        description="Associe influenciador, cupons e metas. Em dúvida, toque em Como preencher."
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Nome" error={formState.errors.name?.message}>
+          <MarketingFormField
+            label="Nome"
+            error={formState.errors.name?.message}
+            hint="Nome da campanha para você identificar no painel. Exemplo: Black Friday Douglas."
+          >
             <Input {...register('name')} />
-          </Field>
-          <Field label="Status">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Status"
+            hint="Planejada: ainda não começou. Ativa: em andamento. Pausada: interrompida. Finalizada: encerrada."
+          >
             <Select
               value={watch('status')}
               onValueChange={(v) =>
@@ -153,10 +162,11 @@ export const CampaignFormPage = memo(function CampaignFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
-          <Field
+          </MarketingFormField>
+          <MarketingFormField
             label="Influenciador"
             error={formState.errors.influencerId?.message}
+            hint="Escolha o parceiro desta campanha. Cadastre o influenciador antes, se ainda não existir."
           >
             <Select
               value={watch('influencerId')}
@@ -173,34 +183,70 @@ export const CampaignFormPage = memo(function CampaignFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
-          <Field
+          </MarketingFormField>
+          <MarketingFormField
             label="Data inicial"
             error={formState.errors.startDate?.message}
+            hint="Primeiro dia da campanha. No celular, toque no campo para abrir o calendário."
           >
             <Input type="date" {...register('startDate')} />
-          </Field>
-          <Field label="Data final" error={formState.errors.endDate?.message}>
+          </MarketingFormField>
+          <MarketingFormField
+            label="Data final"
+            error={formState.errors.endDate?.message}
+            hint="Último dia da campanha."
+          >
             <Input type="date" {...register('endDate')} />
-          </Field>
-          <Field label="Meta de vendas (R$)">
-            <Input type="number" {...register('salesGoal')} />
-          </Field>
-          <Field label="Meta de pedidos">
-            <Input type="number" {...register('ordersGoal')} />
-          </Field>
+          </MarketingFormField>
+          <MarketingFormField
+            label="Meta de vendas (R$)"
+            hint="Opcional. Valor em reais que você espera faturar. Toque no campo: o zero some sozinho."
+          >
+            <CurrencyInput
+              value={Number(watch('salesGoal')) || 0}
+              onValueChange={(value) =>
+                setValue('salesGoal', value || undefined, { shouldDirty: true })
+              }
+              placeholder="0,00"
+            />
+          </MarketingFormField>
+          <MarketingFormField
+            label="Meta de pedidos"
+            hint="Opcional. Quantidade de pedidos que você espera nesta campanha."
+          >
+            <IntegerInput
+              value={Number(watch('ordersGoal')) || 0}
+              onValueChange={(value) =>
+                setValue('ordersGoal', value || undefined, {
+                  shouldDirty: true,
+                })
+              }
+              placeholder="0"
+            />
+          </MarketingFormField>
         </div>
-        <Field label="Objetivo">
+        <MarketingFormField
+          label="Objetivo"
+          hint="Opcional. Em uma frase, o que esta campanha deve alcançar."
+        >
           <Input {...register('objective')} />
-        </Field>
-        <Field label="Descrição">
+        </MarketingFormField>
+        <MarketingFormField
+          label="Descrição"
+          hint="Opcional. Detalhes internos da campanha."
+        >
           <Textarea {...register('description')} rows={2} />
-        </Field>
-        <Field label="Observações">
+        </MarketingFormField>
+        <MarketingFormField
+          label="Observações"
+          hint="Opcional. Anotações para a equipe."
+        >
           <Textarea {...register('notes')} rows={2} />
-        </Field>
-        <div className="space-y-2">
-          <Label>Cupons associados</Label>
+        </MarketingFormField>
+        <MarketingFormField
+          label="Cupons associados"
+          hint="Toque nos cupons que fazem parte desta campanha. Você pode escolher mais de um."
+        >
           <div className="flex flex-wrap gap-2">
             {coupons.map((c) => (
               <Button
@@ -214,7 +260,7 @@ export const CampaignFormPage = memo(function CampaignFormPage({
               </Button>
             ))}
           </div>
-        </div>
+        </MarketingFormField>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="submit" className="min-h-11 flex-1">
             {mode === 'create' ? 'Criar campanha' : 'Salvar'}
@@ -227,25 +273,3 @@ export const CampaignFormPage = memo(function CampaignFormPage({
     </div>
   );
 });
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error && (
-        <p className="text-destructive text-xs" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}

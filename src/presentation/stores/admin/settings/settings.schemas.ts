@@ -74,8 +74,8 @@ export const adminStoreSettingsSchema = z.object({
   shippingOriginState: z
     .string()
     .trim()
-    .length(2, 'Informe a UF com 2 letras')
-    .transform((value) => value.toUpperCase()),
+    .transform((value) => value.replace(/[^a-zA-Z]/g, '').toUpperCase())
+    .pipe(z.string().length(2, 'Informe a UF com 2 letras')),
 });
 
 export type AdminStoreSettingsSchema = z.infer<typeof adminStoreSettingsSchema>;

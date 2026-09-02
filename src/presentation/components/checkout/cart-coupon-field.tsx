@@ -38,10 +38,15 @@ const CartCouponField = memo(function CartCouponField({
           id="cart-coupon"
           value={code}
           onChange={(e) => {
-            setCode(e.target.value.toUpperCase());
+            setCode(e.target.value.replace(/\s+/g, '').toUpperCase());
             onClearFeedback?.();
           }}
           placeholder="Digite seu cupom"
+          autoCapitalize="characters"
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck={false}
+          className="uppercase"
           aria-describedby={feedback ? 'coupon-feedback' : undefined}
           disabled={!!appliedCoupon}
         />

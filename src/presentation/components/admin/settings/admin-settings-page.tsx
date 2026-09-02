@@ -270,6 +270,13 @@ export const AdminSettingsPage = memo(function AdminSettingsPage() {
                   label="UF"
                   placeholder="PE"
                   maxLength={2}
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="uppercase"
+                  valueTransform={(value) =>
+                    value.replace(/[^a-zA-Z]/g, '').toUpperCase()
+                  }
                 />
               </div>
             </FormSection>

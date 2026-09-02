@@ -1,5 +1,21 @@
 import { z } from 'zod';
 
+export function normalizeAlphanumericCode(value: string): string {
+  return value.replace(/\s+/g, '').toUpperCase();
+}
+
+function alphanumericCodeSchema(emptyMessage: string) {
+  return z
+    .string()
+    .transform(normalizeAlphanumericCode)
+    .pipe(
+      z
+        .string()
+        .min(2, emptyMessage)
+        .regex(/^[A-Z0-9]+$/, 'Use apenas letras maiúsculas e números'),
+    );
+}
+
 export const influencerFormSchema = z.object({
   name: z.string().min(2, 'Informe o nome'),
   username: z.string().min(2, 'Informe o usuário'),
@@ -8,10 +24,7 @@ export const influencerFormSchema = z.object({
   instagram: z.string().optional(),
   tiktok: z.string().optional(),
   youtube: z.string().optional(),
-  identifierCode: z
-    .string()
-    .min(2, 'Código identificador obrigatório')
-    .regex(/^[A-Z0-9]+$/, 'Use apenas letras maiúsculas e números'),
+  identifierCode: alphanumericCodeSchema('Código identificador obrigatório'),
   status: z.enum(['active', 'inactive']),
   notes: z.string(),
 });
@@ -42,10 +55,7 @@ export const couponRulesSchema = z.object({
 });
 
 export const couponFormSchema = z.object({
-  code: z
-    .string()
-    .min(2, 'Código obrigatório')
-    .regex(/^[A-Z0-9]+$/, 'Use apenas letras maiúsculas e números'),
+  code: alphanumericCodeSchema('Código obrigatório'),
   name: z.string().min(2, 'Informe o nome'),
   description: z.string(),
   discountType: z.enum([

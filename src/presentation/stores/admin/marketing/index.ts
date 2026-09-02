@@ -30,6 +30,7 @@ export {
   campaignFormSchema,
   couponFormSchema,
   couponRulesSchema,
+  normalizeAlphanumericCode,
 } from './marketing.schemas';
 export type {
   InfluencerFormValues,

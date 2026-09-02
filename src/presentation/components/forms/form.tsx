@@ -75,12 +75,16 @@ export interface FormInputProps<T extends FieldValues> extends Omit<
   name: Path<T>;
   label?: string;
   description?: string;
+  valueTransform?: (value: string) => string;
 }
 
 function FormInputInner<T extends FieldValues>({
   name,
   label,
   description,
+  valueTransform,
+  onChange,
+  onBlur,
   ...inputProps
 }: FormInputProps<T>) {
   return (
@@ -94,6 +98,20 @@ function FormInputInner<T extends FieldValues>({
           {...inputProps}
           value={field.value ?? ''}
           error={!!fieldState.error}
+          onChange={(event) => {
+            const next = valueTransform
+              ? valueTransform(event.target.value)
+              : event.target.value;
+            if (valueTransform) {
+              event.target.value = next;
+            }
+            field.onChange(next);
+            onChange?.(event);
+          }}
+          onBlur={(event) => {
+            field.onBlur();
+            onBlur?.(event);
+          }}
         />
       )}
     />

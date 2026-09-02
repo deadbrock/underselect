@@ -62,8 +62,8 @@ export const checkoutAddressSchema = z.object({
   state: z
     .string()
     .trim()
-    .length(2, 'Use a sigla do estado (ex: SP)')
-    .transform((value) => value.toUpperCase()),
+    .transform((value) => value.replace(/[^a-zA-Z]/g, '').toUpperCase())
+    .pipe(z.string().length(2, 'Use a sigla do estado (ex: SP)')),
   reference: z.string().trim().optional(),
 });
 

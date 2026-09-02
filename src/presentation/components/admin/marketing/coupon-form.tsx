@@ -7,10 +7,10 @@ import { memo, useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PageHeader } from '@presentation/components/layout';
+import { CurrencyInput, IntegerInput } from '@presentation/components/forms';
 import {
   Button,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -21,6 +21,7 @@ import {
 import { toast } from '@presentation/hooks';
 import {
   couponFormSchema,
+  normalizeAlphanumericCode,
   useMarketingStore,
   type CouponFormValues,
 } from '@presentation/stores/admin/marketing';
@@ -35,6 +36,7 @@ import type {
 } from '@shared/types/marketing-admin.types';
 
 import { CouponRulesPanel } from './coupon-rules';
+import { MarketingFormField } from './marketing-form-field';
 
 function toFormValues(c?: AdminCoupon): CouponFormValues {
   return {
@@ -122,28 +124,58 @@ export const CouponFormPage = memo(function CouponFormPage({
   }
 
   const { register, handleSubmit, setValue, watch, formState } = form;
+  const codeField = register('code');
+  const discountType = watch('discountType');
+  const isFixedDiscount = discountType === 'fixed';
+  const isFreeShipping = discountType === 'free-shipping';
+  const valueHint = isFreeShipping
+    ? 'Frete grátis não usa valor de desconto. Deixe 0.'
+    : isFixedDiscount
+      ? 'Digite o desconto em reais. Toque no campo: o zero some sozinho para você informar o valor.'
+      : 'Digite só o número da porcentagem. Exemplo: 20 para 20% de desconto. Toque no campo: o zero some sozinho.';
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
         title={mode === 'create' ? 'Novo cupom' : 'Editar cupom'}
-        description="Configure desconto, regras e atribuição."
+        description="Configure desconto, regras e atribuição. Em dúvida em algum campo, toque em Como preencher."
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Código" error={formState.errors.code?.message}>
+          <MarketingFormField
+            label="Código"
+            error={formState.errors.code?.message}
+            hint="Esse é o código que o cliente digita no carrinho. Use só letras e números, sem espaço. Exemplo: DOUGLAS20. No celular, o texto já vira maiúsculo."
+          >
             <Input
-              {...register('code')}
+              {...codeField}
               className="font-mono uppercase"
               placeholder="DOUGLAS20"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(event) => {
+                event.target.value = normalizeAlphanumericCode(
+                  event.target.value,
+                );
+                void codeField.onChange(event);
+              }}
             />
-          </Field>
-          <Field label="Nome" error={formState.errors.name?.message}>
-            <Input {...register('name')} />
-          </Field>
-          <Field label="Tipo">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Nome"
+            error={formState.errors.name?.message}
+            hint="Nome só para você reconhecer o cupom no painel. O cliente não vê esse nome."
+          >
+            <Input {...register('name')} placeholder="Cupom Douglas 20%" />
+          </MarketingFormField>
+          <MarketingFormField
+            label="Tipo"
+            hint="Percentual tira uma % do pedido. Valor fixo tira um valor em reais. Frete grátis zera o frete. Os outros tipos combinam o desconto com regras abaixo."
+          >
             <Select
-              value={watch('discountType')}
+              value={discountType}
               onValueChange={(v) =>
                 setValue('discountType', v as CouponFormValues['discountType'])
               }
@@ -159,23 +191,76 @@ export const CouponFormPage = memo(function CouponFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
-          <Field label="Valor">
-            <Input type="number" {...register('value')} />
-          </Field>
-          <Field label="Início">
+          </MarketingFormField>
+          <MarketingFormField
+            label={isFixedDiscount ? 'Valor (R$)' : 'Valor (%)'}
+            hint={valueHint}
+          >
+            {isFixedDiscount ? (
+              <CurrencyInput
+                value={Number(watch('value')) || 0}
+                onValueChange={(value) =>
+                  setValue('value', value, { shouldDirty: true })
+                }
+                placeholder="0,00"
+              />
+            ) : (
+              <IntegerInput
+                value={Number(watch('value')) || 0}
+                onValueChange={(value) =>
+                  setValue('value', value, { shouldDirty: true })
+                }
+                placeholder={isFreeShipping ? '0' : '20'}
+                disabled={isFreeShipping}
+              />
+            )}
+          </MarketingFormField>
+          <MarketingFormField
+            label="Início"
+            error={formState.errors.startDate?.message}
+            hint="Primeiro dia em que o cupom pode ser usado. No celular, toque no campo para abrir o calendário."
+          >
             <Input type="date" {...register('startDate')} />
-          </Field>
-          <Field label="Fim">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Fim"
+            error={formState.errors.endDate?.message}
+            hint="Último dia em que o cupom vale. Depois dessa data ele deixa de funcionar."
+          >
             <Input type="date" {...register('endDate')} />
-          </Field>
-          <Field label="Limite total">
-            <Input type="number" {...register('usageLimit')} />
-          </Field>
-          <Field label="Limite por cliente">
-            <Input type="number" {...register('usageLimitPerCustomer')} />
-          </Field>
-          <Field label="Status">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Limite total"
+            hint="Quantas vezes o cupom pode ser usado no total, por todos os clientes. Deixe vazio se não houver limite."
+          >
+            <IntegerInput
+              value={Number(watch('usageLimit')) || 0}
+              onValueChange={(value) =>
+                setValue('usageLimit', value || undefined, {
+                  shouldDirty: true,
+                })
+              }
+              placeholder="Ilimitado"
+            />
+          </MarketingFormField>
+          <MarketingFormField
+            label="Limite por cliente"
+            hint="Quantas vezes a mesma pessoa pode usar este cupom. Deixe vazio se cada cliente puder usar várias vezes."
+          >
+            <IntegerInput
+              value={Number(watch('usageLimitPerCustomer')) || 0}
+              onValueChange={(value) =>
+                setValue('usageLimitPerCustomer', value || undefined, {
+                  shouldDirty: true,
+                })
+              }
+              placeholder="Ilimitado"
+            />
+          </MarketingFormField>
+          <MarketingFormField
+            label="Status"
+            hint="Ativo: o cupom já pode ser usado. Agendado: espera a data de início. Pausado: fica bloqueado. Expirado e esgotado são situações finais."
+          >
             <Select
               value={watch('status')}
               onValueChange={(v) =>
@@ -193,8 +278,11 @@ export const CouponFormPage = memo(function CouponFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
-          <Field label="Influenciador">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Influenciador"
+            hint="Opcional. Associe o cupom a um influenciador para acompanhar as vendas dele nos relatórios."
+          >
             <Select
               value={watch('influencerId') || 'none'}
               onValueChange={(v) =>
@@ -213,8 +301,11 @@ export const CouponFormPage = memo(function CouponFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
-          <Field label="Campanha">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Campanha"
+            hint="Opcional. Associe o cupom a uma campanha para organizar as ações de marketing."
+          >
             <Select
               value={watch('campaignId') || 'none'}
               onValueChange={(v) =>
@@ -233,11 +324,14 @@ export const CouponFormPage = memo(function CouponFormPage({
                 ))}
               </SelectContent>
             </Select>
-          </Field>
+          </MarketingFormField>
         </div>
-        <Field label="Descrição">
+        <MarketingFormField
+          label="Descrição"
+          hint="Opcional. Anotação interna para a equipe. O cliente não vê este texto."
+        >
           <Textarea {...register('description')} rows={2} />
-        </Field>
+        </MarketingFormField>
         <CouponRulesPanel rules={rules} onChange={setRules} />
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="submit" className="min-h-11 flex-1">
@@ -251,25 +345,3 @@ export const CouponFormPage = memo(function CouponFormPage({
     </div>
   );
 });
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error && (
-        <p className="text-destructive text-xs" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}

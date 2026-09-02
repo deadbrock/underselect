@@ -10,7 +10,6 @@ import { PageHeader } from '@presentation/components/layout';
 import {
   Button,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -21,11 +20,14 @@ import {
 import { toast } from '@presentation/hooks';
 import {
   influencerFormSchema,
+  normalizeAlphanumericCode,
   useMarketingStore,
   type InfluencerFormValues,
 } from '@presentation/stores/admin/marketing';
 import { ADMIN_INFLUENCER_STATUS_LABELS } from '@shared/constants/marketing-admin.constants';
 import type { AdminInfluencer } from '@shared/types/marketing-admin.types';
+
+import { MarketingFormField } from './marketing-form-field';
 
 function toFormValues(inf?: AdminInfluencer): InfluencerFormValues {
   return {
@@ -104,6 +106,7 @@ export const InfluencerFormPage = memo(function InfluencerFormPage({
   }
 
   const { register, handleSubmit, setValue, watch, formState } = form;
+  const identifierCodeField = register('identifierCode');
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -111,43 +114,82 @@ export const InfluencerFormPage = memo(function InfluencerFormPage({
         title={
           mode === 'create' ? 'Novo influenciador' : 'Editar influenciador'
         }
-        description="Cadastro de parceiro — sem acesso ao painel."
+        description="Cadastro de parceiro — sem acesso ao painel. Em dúvida, toque em Como preencher."
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Nome" error={formState.errors.name?.message}>
+          <MarketingFormField
+            label="Nome"
+            error={formState.errors.name?.message}
+            hint="Nome completo do influenciador, como você o identifica na loja."
+          >
             <Input {...register('name')} aria-required />
-          </Field>
-          <Field label="Usuário" error={formState.errors.username?.message}>
+          </MarketingFormField>
+          <MarketingFormField
+            label="Usuário"
+            error={formState.errors.username?.message}
+            hint="Apelido ou @ do parceiro. Serve para achar o cadastro depois."
+          >
             <Input {...register('username')} placeholder="@usuario" />
-          </Field>
-          <Field label="E-mail" error={formState.errors.email?.message}>
+          </MarketingFormField>
+          <MarketingFormField
+            label="E-mail"
+            error={formState.errors.email?.message}
+            hint="E-mail de contato. Não libera acesso ao painel."
+          >
             <Input type="email" {...register('email')} />
-          </Field>
-          <Field label="Telefone" error={formState.errors.phone?.message}>
-            <Input {...register('phone')} />
-          </Field>
-          <Field label="Instagram">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Telefone"
+            error={formState.errors.phone?.message}
+            hint="DDD + número, com ou sem pontuação. Exemplo: 81999999999."
+          >
+            <Input {...register('phone')} inputMode="tel" />
+          </MarketingFormField>
+          <MarketingFormField
+            label="Instagram"
+            hint="Opcional. Informe o @ do Instagram, se houver."
+          >
             <Input {...register('instagram')} placeholder="@instagram" />
-          </Field>
-          <Field label="TikTok">
+          </MarketingFormField>
+          <MarketingFormField
+            label="TikTok"
+            hint="Opcional. Informe o @ do TikTok, se houver."
+          >
             <Input {...register('tiktok')} placeholder="@tiktok" />
-          </Field>
-          <Field label="YouTube">
+          </MarketingFormField>
+          <MarketingFormField
+            label="YouTube"
+            hint="Opcional. Informe o @ ou o nome do canal, se houver."
+          >
             <Input {...register('youtube')} placeholder="@youtube" />
-          </Field>
-          <Field
+          </MarketingFormField>
+          <MarketingFormField
             label="Código identificador"
             error={formState.errors.identifierCode?.message}
+            hint="Código único do parceiro, só com letras e números. Exemplo: DOUGLAS20. No celular, o texto já vira maiúsculo."
           >
             <Input
-              {...register('identifierCode')}
+              {...identifierCodeField}
               className="uppercase"
               placeholder="DOUGLAS20"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(event) => {
+                event.target.value = normalizeAlphanumericCode(
+                  event.target.value,
+                );
+                void identifierCodeField.onChange(event);
+              }}
             />
-          </Field>
-          <Field label="Status">
+          </MarketingFormField>
+          <MarketingFormField
+            label="Status"
+            hint="Ativo: o influenciador entra nos relatórios. Inativo: o cadastro fica guardado, sem uso."
+          >
             <Select
               value={watch('status')}
               onValueChange={(v) =>
@@ -167,11 +209,14 @@ export const InfluencerFormPage = memo(function InfluencerFormPage({
                 )}
               </SelectContent>
             </Select>
-          </Field>
+          </MarketingFormField>
         </div>
-        <Field label="Observações">
+        <MarketingFormField
+          label="Observações"
+          hint="Opcional. Anotações internas sobre o parceiro. Ele não vê este texto."
+        >
           <Textarea {...register('notes')} rows={3} />
-        </Field>
+        </MarketingFormField>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="submit" className="min-h-11 flex-1">
@@ -185,25 +230,3 @@ export const InfluencerFormPage = memo(function InfluencerFormPage({
     </div>
   );
 });
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error && (
-        <p className="text-destructive text-xs" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}

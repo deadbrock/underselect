@@ -49,7 +49,11 @@ export const addressFormSchema = z.object({
   complement: z.string().trim().optional(),
   neighborhood: z.string().trim().min(2, 'Informe o bairro'),
   city: z.string().trim().min(2, 'Informe a cidade'),
-  state: z.string().trim().length(2, 'Use a sigla do estado'),
+  state: z
+    .string()
+    .trim()
+    .transform((value) => value.replace(/[^a-zA-Z]/g, '').toUpperCase())
+    .pipe(z.string().length(2, 'Use a sigla do estado')),
   reference: z.string().trim().optional(),
   isDefault: z.boolean().optional(),
 });
