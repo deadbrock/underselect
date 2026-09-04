@@ -150,6 +150,13 @@ model ProductGalleryImage {
   sortOrder Int     @default(0)
 }
 
+model ProductUpload {
+  filename  String   @id
+  mimeType  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}
+
 model ProductColor {
   id        String  @id @default(cuid())
   productId String

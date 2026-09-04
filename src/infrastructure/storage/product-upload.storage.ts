@@ -1,5 +1,10 @@
-import { mkdir, readFile, writeFile } from 'fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
+
+import {
+  readProductUploadRecord,
+  saveProductUploadRecord,
+} from '@infrastructure/database/repositories/product-upload.repository';
 
 const SAFE_FILENAME = /^[a-zA-Z0-9._-]+$/;
 
@@ -24,39 +29,23 @@ export function isSafeUploadFilename(filename: string): boolean {
   return SAFE_FILENAME.test(filename);
 }
 
-export async function saveProductUpload(
-  buffer: Buffer,
-  filename: string,
-): Promise<void> {
-  let saved = false;
-  let lastError: unknown;
-
-  for (const dir of candidateUploadDirs()) {
-    try {
-      await mkdir(dir, { recursive: true });
-      await writeFile(path.join(dir, filename), buffer);
-      saved = true;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  if (saved) return;
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error('Não foi possível gravar a imagem.');
+async function writeDiskCache(buffer: Buffer, filename: string) {
+  await Promise.all(
+    candidateUploadDirs().map(async (dir) => {
+      try {
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, filename), buffer);
+      } catch {
+        // Disco é só cache. Railway/Vercel apagam o filesystem no deploy.
+      }
+    }),
+  );
 }
 
-export async function readProductUpload(
-  filename: string,
-): Promise<Buffer | null> {
-  if (!isSafeUploadFilename(filename)) return null;
-
-  const locations = [
-    ...candidateUploadDirs().map((dir) => path.join(dir, filename)),
-    path.join(getLegacyPublicUploadDir(), filename),
-  ];
+async function readDiskCache(filename: string): Promise<Buffer | null> {
+  const locations = candidateUploadDirs().map((dir) =>
+    path.join(dir, filename),
+  );
 
   for (const filePath of locations) {
     try {
@@ -67,6 +56,78 @@ export async function readProductUpload(
   }
 
   return null;
+}
+
+let diskBackfill: Promise<void> | null = null;
+
+async function backfillDiskUploadsToDatabase() {
+  if (!diskBackfill) {
+    diskBackfill = (async () => {
+      for (const dir of candidateUploadDirs()) {
+        try {
+          const files = await readdir(dir);
+          for (const filename of files) {
+            if (!isSafeUploadFilename(filename)) continue;
+            try {
+              const buffer = await readFile(path.join(dir, filename));
+              await saveProductUploadRecord(
+                filename,
+                contentTypeForFilename(filename),
+                buffer,
+              );
+            } catch {
+              continue;
+            }
+          }
+        } catch {
+          continue;
+        }
+      }
+    })().catch(() => undefined);
+  }
+
+  await diskBackfill;
+}
+
+export async function saveProductUpload(
+  buffer: Buffer,
+  filename: string,
+): Promise<void> {
+  if (!isSafeUploadFilename(filename)) {
+    throw new Error('Nome de arquivo inválido.');
+  }
+
+  await saveProductUploadRecord(
+    filename,
+    contentTypeForFilename(filename),
+    buffer,
+  );
+  await writeDiskCache(buffer, filename);
+  void backfillDiskUploadsToDatabase();
+}
+
+export async function readProductUpload(
+  filename: string,
+): Promise<Buffer | null> {
+  if (!isSafeUploadFilename(filename)) return null;
+
+  void backfillDiskUploadsToDatabase();
+
+  const cached = await readDiskCache(filename);
+  if (cached) {
+    void saveProductUploadRecord(
+      filename,
+      contentTypeForFilename(filename),
+      cached,
+    ).catch(() => undefined);
+    return cached;
+  }
+
+  const stored = await readProductUploadRecord(filename);
+  if (!stored) return null;
+
+  void writeDiskCache(stored.data, filename);
+  return stored.data;
 }
 
 export function contentTypeForFilename(filename: string): string {
