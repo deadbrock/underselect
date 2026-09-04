@@ -37,8 +37,8 @@ async function ensureProductUploadTable() {
   const db = getUploadPrisma();
 
   if (!tableReady) {
-    tableReady = db
-      .$executeRaw`
+    tableReady = (async () => {
+      await db.$executeRaw`
         CREATE TABLE IF NOT EXISTS "ProductUpload" (
           "filename" TEXT NOT NULL,
           "mimeType" TEXT NOT NULL,
@@ -46,12 +46,11 @@ async function ensureProductUploadTable() {
           "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           CONSTRAINT "ProductUpload_pkey" PRIMARY KEY ("filename")
         )
-      `
-      .then(() => undefined)
-      .catch((error) => {
-        tableReady = null;
-        throw error;
-      });
+      `;
+    })().catch((error) => {
+      tableReady = null;
+      throw error;
+    });
   }
 
   try {
